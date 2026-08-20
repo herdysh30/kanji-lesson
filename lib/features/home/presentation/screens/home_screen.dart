@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.tonalIcon(
-                    onPressed: () => context.go('/quiz'),
+                    onPressed: () => context.push('/quiz'),
                     icon: const Icon(Icons.quiz_rounded),
                     label: const Text('Take a Quiz'),
                   ),

@@ -69,6 +69,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             return const Center(child: Text('Not enough kanji to generate quiz.'));
           }
 
+          // Initialize session with loaded questions
+          Future.microtask(() {
+            ref.read(quizSessionProvider.notifier).initialize(questions);
+          });
+
           final currentQuestion = sessionState.currentQuestion;
           if (currentQuestion == null) return const SizedBox.shrink();
 

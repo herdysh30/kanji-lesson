@@ -13,6 +13,7 @@ import 'package:kanji_lesson/features/kanji/domain/entities/vocabulary.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
 
 class KanjiDetailScreen extends ConsumerStatefulWidget {
   const KanjiDetailScreen({
@@ -203,6 +204,27 @@ class _KanjiDetailBody extends StatelessWidget {
               '${kanji.strokeCount} strokes',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonalIcon(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  insetPadding: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 500),
+                      child: KanjiDrawingPad(character: kanji.character),
+                    ),
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.draw_rounded),
+            label: const Text('Practice Writing'),
           ),
           const SizedBox(height: 32),
 

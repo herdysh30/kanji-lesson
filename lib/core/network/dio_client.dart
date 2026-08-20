@@ -4,6 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:kanji_lesson/core/constants/api_constants.dart';
 import 'package:kanji_lesson/core/network/app_exception.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final dioProvider = Provider<Dio>((ref) {
+  return DioClient().dio;
+});
 
 /// Dio HTTP client with interceptors for retry, logging, and error handling
 class DioClient {

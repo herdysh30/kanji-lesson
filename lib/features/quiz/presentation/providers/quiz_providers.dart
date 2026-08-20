@@ -131,13 +131,21 @@ class QuizSessionState {
 }
 
 class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
-  QuizSessionNotifier(List<QuizQuestion> questions) 
-      : super(QuizSessionState(
-          questions: questions,
+  QuizSessionNotifier() 
+      : super(const QuizSessionState(
+          questions: [],
           currentIndex: 0,
           answers: [],
-          isFinished: questions.isEmpty,
+          isFinished: false,
         ));
+
+  void initialize(List<QuizQuestion> questions) {
+    if (state.questions.isNotEmpty) return; // already initialized
+    state = state.copyWith(
+      questions: questions,
+      isFinished: questions.isEmpty,
+    );
+  }
 
   void answerCurrent(int selectedIndex) {
     if (state.isFinished || state.currentQuestion == null) return;
@@ -160,6 +168,5 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
 }
 
 final quizSessionProvider = StateNotifierProvider.autoDispose<QuizSessionNotifier, QuizSessionState>((ref) {
-  final questions = ref.read(quizQuestionsProvider).valueOrNull ?? [];
-  return QuizSessionNotifier(questions);
+  return QuizSessionNotifier();
 });
