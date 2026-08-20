@@ -117,14 +117,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               if (currentQuestion.type != QuizType.writing)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
-                  child: Text(
-                    currentQuestion.prompt,
-                    style: currentQuestion.type == QuizType.meaning
-                        ? AppTheme.kanjiLarge(context).copyWith(fontSize: 80)
-                        : Theme.of(context).textTheme.displayMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                    textAlign: TextAlign.center,
+                  child: SizedBox(
+                    height: 120,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        currentQuestion.prompt,
+                        style: AppTheme.kanjiLarge(context).copyWith(
+                          fontSize: 96,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 ),
               if (currentQuestion.type == QuizType.writing)
