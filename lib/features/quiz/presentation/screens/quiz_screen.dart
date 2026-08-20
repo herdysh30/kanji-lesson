@@ -72,7 +72,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       body: questionsAsync.when(
         data: (questions) {
           if (questions.isEmpty) {
-            return const Center(child: Text('Not enough kanji to generate quiz.'));
+            return const Center(child: Text('Not enough data to generate quiz.\nMake sure you have learned some Kanji/Vocab first.', textAlign: TextAlign.center));
           }
 
           // Initialize session with loaded questions
