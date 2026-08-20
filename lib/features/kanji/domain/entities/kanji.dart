@@ -36,10 +36,10 @@ class Kanji extends Equatable {
     return meanings.isNotEmpty ? meanings.first : '';
   }
 
-  /// Primary reading (prefer kun'yomi)
+  /// Primary reading (prefer on'yomi for standalone kanji)
   String get primaryReading {
-    if (kunyomi.isNotEmpty) return kunyomi.first;
     if (onyomi.isNotEmpty) return onyomi.first;
+    if (kunyomi.isNotEmpty) return kunyomi.first;
     return '';
   }
 
