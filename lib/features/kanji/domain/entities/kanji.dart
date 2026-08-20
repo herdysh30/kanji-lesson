@@ -43,11 +43,16 @@ class Kanji extends Equatable {
     });
   }
 
-  /// Primary reading (prefer on'yomi for standalone kanji)
+  /// Primary reading (combines both On'yomi and Kun'yomi if available)
   String get primaryReading {
-    if (onyomi.isNotEmpty) return _toHiragana(onyomi.first);
-    if (kunyomi.isNotEmpty) return kunyomi.first;
-    return '';
+    final List<String> readings = [];
+    if (onyomi.isNotEmpty) {
+      readings.add(_toHiragana(onyomi.first));
+    }
+    if (kunyomi.isNotEmpty) {
+      readings.add(kunyomi.first);
+    }
+    return readings.join(' / ');
   }
 
   /// All readings combined
