@@ -136,9 +136,13 @@ class QuizGenerator {
         )).toList();
         
         // Fallback dummy options if database is too small
+        final dummyMeanings = isId ? ['satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'delapan', 'sembilan', 'sepuluh', 'air', 'api', 'tanah', 'angin', 'langit', 'bulan']
+                                   : ['one', 'two', 'three', 'four', 'five', 'six', 'eight', 'nine', 'ten', 'water', 'fire', 'earth', 'wind', 'sky', 'moon'];
+        dummyMeanings.shuffle(_random);
+        
         while (distractorOptions.length < 3) {
-          final dummy = isId ? 'Salah ${distractorOptions.length + 1}' : 'Wrong ${distractorOptions.length + 1}';
-          if (!distractorOptions.any((o) => o.text == dummy)) {
+          final dummy = dummyMeanings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -180,9 +184,13 @@ class QuizGenerator {
           explanation: v.furigana,
         )).toList();
         
+        final dummyMeanings = isId ? ['kucing', 'anjing', 'burung', 'ikan', 'pohon', 'bunga', 'matahari', 'bintang', 'hujan', 'salju']
+                                   : ['cat', 'dog', 'bird', 'fish', 'tree', 'flower', 'sun', 'star', 'rain', 'snow'];
+        dummyMeanings.shuffle(_random);
+        
         while (distractorOptions.length < 3) {
-          final dummy = isId ? 'Salah ${distractorOptions.length + 1}' : 'Wrong ${distractorOptions.length + 1}';
-          if (!distractorOptions.any((o) => o.text == dummy)) {
+          final dummy = dummyMeanings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -241,9 +249,12 @@ class QuizGenerator {
           explanation: k.primaryMeaning(false),
         )).toList();
         
+        final dummyReadings = ['あか', 'あお', 'しろ', 'くろ', 'きいろ', 'みどり', 'むらさき', 'ちゃいろ', 'ピンク', 'オレンジ'];
+        dummyReadings.shuffle(_random);
+        
         while (distractorOptions.length < 3) {
-          final dummy = 'X ${distractorOptions.length + 1}';
-          if (!distractorOptions.any((o) => o.text == dummy)) {
+          final dummy = dummyReadings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -286,9 +297,12 @@ class QuizGenerator {
           explanation: v.primaryMeaning(false),
         )).toList();
         
+        final dummyReadings = ['ねこ', 'いぬ', 'とり', 'さかな', 'き', 'はな', 'ひ', 'ほし', 'あめ', 'ゆき'];
+        dummyReadings.shuffle(_random);
+        
         while (distractorOptions.length < 3) {
-          final dummy = 'X ${distractorOptions.length + 1}';
-          if (!distractorOptions.any((o) => o.text == dummy)) {
+          final dummy = dummyReadings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
