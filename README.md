@@ -13,25 +13,18 @@ This app seamlessly integrates multiple APIs and SDKs to provide a rich learning
 - **KanjiVG (via SVG)**: Provides beautiful, animated stroke-order guides for Kanji characters to help users learn proper handwriting techniques.
 - **Drift (SQLite)**: Ensures an offline-first architecture by aggressively caching Kanji details, Vocab lists, and user progress.
 
-## ✨ Key Features & Recent Updates
+## ✨ Main Features
 
-### 🧠 Smart Learning & SRS
-- **Spaced Repetition System**: Automatically calculates the next review interval based on your correct/wrong answers (incorporating an "Ease" factor).
-- **Comprehensive Quizzes**: Test your knowledge across 3 dimensions:
-  - **Meaning Quiz**: Guess the meaning of a Kanji/Vocab.
-  - **Reading Quiz**: Guess the pronunciation (On'yomi/Kun'yomi).
-  - **Writing Quiz**: Draw the Kanji on a digital canvas and have it evaluated by AI.
-
-### 🎨 User Experience (UX) Enhancements
-- **Semantic & Phonetic Hints**: Stuck on a quiz? Tap the "Show Hint" bulb icon! Meaning quizzes will hint the Reading, and Reading quizzes will hint the Meaning.
-- **"I don't know / Skip" Option**: Prevents the SRS algorithm from being ruined by lucky guesses. If you don't know, skip it, learn from the revealed answer, and try again later.
-- **Responsive & Unified Typography**: Employs dynamic scaling (`FittedBox`) to ensure long vocabulary words look just as stunning and readable as single Kanji characters.
-
-### ⚙️ Intelligent Logic Under the Hood
-- **Contextual Readings**: Automatically formats On'yomi readings into Hiragana during quizzes to prevent beginner confusion, while combining both On'yomi and Kun'yomi as a unified primary reading reference.
-- **Smart Distractors**: Multiple-choice options are no longer generic "Wrong 1" texts. The app intelligently pulls random distractors from real cached Japanese/Indonesian vocabulary pools.
-- **Robust Quiz Generator**: Dynamically adjusts to your learned pool size. Even if you've only learned 3 Kanji, the quiz generator will gracefully adapt instead of crashing.
-- **Offline-First Resilience**: Smart caching ensures that once you've learned a Kanji, you can review it entirely offline without needing to re-fetch data.
+- **JLPT-Based Curriculum**: Organized progression from JLPT N5 (Beginner) to N1 (Advanced).
+- **Spaced Repetition System (SRS)**: The app remembers what you struggle with and schedules reviews automatically using scientifically proven spaced repetition algorithms.
+- **Interactive Quizzes**:
+  - **Meaning Quiz**: Test your knowledge of what a Kanji or Vocabulary word means.
+  - **Reading Quiz**: Test your pronunciation (On'yomi and Kun'yomi).
+  - **Writing Quiz**: Draw Kanji directly on the screen and have an AI check your stroke accuracy.
+- **Dual Language Support**: Study meanings in both English and Indonesian natively.
+- **Smart Hints & Fallbacks**: Features like semantic hints (revealing readings for meaning quizzes) and skip buttons to keep the learning flow smooth.
+- **Offline-First & Fast**: Everything you learn is cached locally in SQLite. Study anywhere, anytime, without an internet connection.
+- **Detailed Progress Tracking**: Keep an eye on your daily goals, weak Kanji, and overall mastery percentages directly from the home screen.
 
 ---
 
