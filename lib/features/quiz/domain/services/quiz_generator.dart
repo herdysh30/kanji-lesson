@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
-import 'package:kanji_lesson/features/kanji/domain/entities/vocabulary.dart';
+
 import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
 
 enum QuizType {

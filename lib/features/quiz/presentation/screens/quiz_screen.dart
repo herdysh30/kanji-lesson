@@ -267,8 +267,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         return 'How do you read this?';
       case QuizType.writing:
         return 'Draw the Character';
-      default:
-        return 'Choose the correct answer';
     }
   }
 

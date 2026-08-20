@@ -220,29 +220,35 @@ class QuizSetupScreen extends ConsumerWidget {
             if (setup.isCustomCount)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Slider(
-                        value: setup.questionCount.toDouble(),
-                        min: 1,
-                        max: (maxItemsAsync.valueOrNull ?? 100).toDouble().clamp(1, 1000),
-                        divisions: (maxItemsAsync.valueOrNull ?? 100).clamp(1, 1000),
-                        label: setup.questionCount.toString(),
-                        onChanged: (val) {
-                          notifier.setQuestionCount(val.round(), isCustom: true);
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        '${setup.questionCount}',
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+                child: Builder(
+                  builder: (context) {
+                    final maxVal = (maxItemsAsync.valueOrNull ?? 100).toDouble().clamp(1.0, 1000.0);
+                    final currentValue = setup.questionCount.toDouble().clamp(1.0, maxVal);
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: currentValue,
+                            min: 1.0,
+                            max: maxVal,
+                            divisions: maxVal.toInt(),
+                            label: currentValue.toInt().toString(),
+                            onChanged: (val) {
+                              notifier.setQuestionCount(val.round(), isCustom: true);
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 60,
+                          child: Text(
+                            '${currentValue.toInt()}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
                 ),
               ),
             
