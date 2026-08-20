@@ -72,7 +72,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       body: questionsAsync.when(
         data: (questions) {
           if (questions.isEmpty) {
-            return const Center(child: Text('Not enough data to generate quiz.\nMake sure you have learned some Kanji/Vocab first.', textAlign: TextAlign.center));
+            final setup = ref.watch(quizSetupProvider);
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Not enough data to generate quiz.\n\nDebug Info:\n'
+                  'JLPT Level: ${setup.selectedJlptLevel}\n'
+                  'Item Type: ${setup.itemType.name}\n'
+                  'Quiz Types: ${setup.selectedQuizTypes.map((e) => e.name).join(', ')}\n'
+                  'Make sure you have learned some Kanji/Vocab first.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
           }
 
           // Initialize session with loaded questions

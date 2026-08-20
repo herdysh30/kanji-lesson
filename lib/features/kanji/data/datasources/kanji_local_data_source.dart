@@ -93,6 +93,10 @@ class KanjiLocalDataSource {
         ? await _db.getKanjiByJlpt(jlptLevel)
         : await _db.select(_db.kanjiEntries).get();
 
+    if (query.isEmpty) {
+      return allEntries.map(_mapEntryToKanji).toList();
+    }
+
     final lowerQuery = query.toLowerCase();
 
     return allEntries.where((entry) {
