@@ -128,8 +128,8 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
     if (setup.itemType == ReviewItemType.kanji || setup.itemType == ReviewItemType.mixed) {
       final chars = await repo.getKanjiListByJlpt(setup.selectedJlptLevel!);
       final poolSize = (setup.questionCount + 5).clamp(10, chars.length);
-      final selectedChars = (List.of(chars)..shuffle()).take(poolSize).toList();
-      for (final char in selectedChars) {
+      final shuffledChars = List.of(chars)..shuffle();
+      for (final char in shuffledChars) {
         try {
           kanjiPool.add(await repo.getKanjiDetail(char));
         } catch (_) {}
