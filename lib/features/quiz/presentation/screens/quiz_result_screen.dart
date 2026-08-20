@@ -102,7 +102,9 @@ class QuizResultScreen extends ConsumerWidget {
                   // Find the answer they picked
                   final questionIndex = state.questions.indexOf(q);
                   final selectedAnswerIndex = state.answers[questionIndex];
-                  final selectedAnswer = q.options[selectedAnswerIndex];
+                  final selectedAnswer = (selectedAnswerIndex >= 0 && selectedAnswerIndex < q.options.length)
+                      ? q.options[selectedAnswerIndex]
+                      : (q.type == QuizType.writing ? '(Incorrect Drawing)' : 'Unknown');
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),

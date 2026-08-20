@@ -319,8 +319,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     
     // Check if any of the top candidates match the target character exactly
     if (candidates.isNotEmpty) {
-      // Look through top 3 candidates to be generous, or just top 1. Let's do top 2.
-      final topCandidates = candidates.take(2).map((c) => c.text).toList();
+      // Look through top 5 candidates to be more generous
+      final topCandidates = candidates.take(5).map((c) => c.text).toList();
       if (topCandidates.contains(target)) {
         isCorrect = true;
       }
