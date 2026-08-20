@@ -58,4 +58,18 @@ class JlptVocabLocalDataSource {
       level: entry.level,
     );
   }
+
+  Future<List<JlptVocab>> getAllVocab() async {
+    final entries = await _database.select(_database.jlptVocabEntries).get();
+    return entries
+        .map((e) => JlptVocab(
+              word: e.word,
+              meaning: e.meaning,
+              meaningId: e.meaningId,
+              furigana: e.furigana,
+              romaji: e.romaji,
+              level: e.level,
+            ))
+        .toList();
+  }
 }

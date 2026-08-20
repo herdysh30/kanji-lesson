@@ -96,6 +96,8 @@ class QuizGenerator {
   List<QuizQuestion> generateMeaningQuiz(
     List<Kanji> kanjiPool,
     List<JlptVocab> vocabPool, {
+    List<Kanji> kanjiDistractors = const [],
+    List<JlptVocab> vocabDistractors = const [],
     int count = 10,
     bool isId = false,
   }) {
@@ -121,16 +123,25 @@ class QuizGenerator {
           explanation: kanji.primaryReading,
         );
 
-        final distractorKanji = kanjiPool
+        final dKanjiPool = kanjiDistractors.isNotEmpty ? kanjiDistractors : kanjiPool;
+        var distractorKanji = dKanjiPool
             .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
             .where((k) => k.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
-
+            
         final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
           text: k.primaryMeaning(isId),
           kanjiCharacter: k.character,
           explanation: k.primaryReading,
         )).toList();
+        
+        // Fallback dummy options if database is too small
+        while (distractorOptions.length < 3) {
+          final dummy = isId ? 'Salah ${distractorOptions.length + 1}' : 'Wrong ${distractorOptions.length + 1}';
+          if (!distractorOptions.any((o) => o.text == dummy)) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
 
         final options = [correctOption, ...distractorOptions]..shuffle(_random);
         questions.add(QuizQuestion(
@@ -157,16 +168,24 @@ class QuizGenerator {
           explanation: vocab.furigana,
         );
 
-        final distractorVocab = vocabPool
+        final dVocabPool = vocabDistractors.isNotEmpty ? vocabDistractors : vocabPool;
+        var distractorVocab = dVocabPool
             .where((v) => v.word != vocab.word)
             .where((v) => v.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
-
+            
         final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
           text: v.primaryMeaning(isId),
           kanjiCharacter: v.word,
           explanation: v.furigana,
         )).toList();
+        
+        while (distractorOptions.length < 3) {
+          final dummy = isId ? 'Salah ${distractorOptions.length + 1}' : 'Wrong ${distractorOptions.length + 1}';
+          if (!distractorOptions.any((o) => o.text == dummy)) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
 
         final options = [correctOption, ...distractorOptions]..shuffle(_random);
         questions.add(QuizQuestion(
@@ -186,6 +205,8 @@ class QuizGenerator {
   List<QuizQuestion> generateReadingQuiz(
     List<Kanji> kanjiPool,
     List<JlptVocab> vocabPool, {
+    List<Kanji> kanjiDistractors = const [],
+    List<JlptVocab> vocabDistractors = const [],
     int count = 10,
   }) {
     final questions = <QuizQuestion>[];
@@ -208,16 +229,24 @@ class QuizGenerator {
           explanation: kanji.primaryMeaning(false),
         );
 
-        final distractorKanji = kanjiPool
+        final dKanjiPool = kanjiDistractors.isNotEmpty ? kanjiDistractors : kanjiPool;
+        var distractorKanji = dKanjiPool
             .where((k) => k.character != kanji.character && k.allReadings.isNotEmpty)
             .where((k) => k.primaryReading != correctAnswer)
             .toList()..shuffle(_random);
-
+            
         final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
           text: k.primaryReading,
           kanjiCharacter: k.character,
           explanation: k.primaryMeaning(false),
         )).toList();
+        
+        while (distractorOptions.length < 3) {
+          final dummy = 'X ${distractorOptions.length + 1}';
+          if (!distractorOptions.any((o) => o.text == dummy)) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
 
         final options = [correctOption, ...distractorOptions]..shuffle(_random);
         questions.add(QuizQuestion(
@@ -245,16 +274,24 @@ class QuizGenerator {
           explanation: vocab.primaryMeaning(false),
         );
 
-        final distractorVocab = vocabPool
+        final dVocabPool = vocabDistractors.isNotEmpty ? vocabDistractors : vocabPool;
+        var distractorVocab = dVocabPool
             .where((v) => v.word != vocab.word && v.furigana.isNotEmpty)
             .where((v) => v.furigana != correctAnswer)
             .toList()..shuffle(_random);
-
+            
         final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
           text: v.furigana,
           kanjiCharacter: v.word,
           explanation: v.primaryMeaning(false),
         )).toList();
+        
+        while (distractorOptions.length < 3) {
+          final dummy = 'X ${distractorOptions.length + 1}';
+          if (!distractorOptions.any((o) => o.text == dummy)) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
 
         final options = [correctOption, ...distractorOptions]..shuffle(_random);
         questions.add(QuizQuestion(

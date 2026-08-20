@@ -158,13 +158,16 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
     }
   }
 
+  final allKanji = await localDataSource.searchKanji('');
+  final allVocab = await vocabRepo.getAllVocab();
+
   final List<QuizQuestion> allQuestions = [];
   
   if (setup.selectedQuizTypes.contains(QuizType.meaning)) {
-    allQuestions.addAll(generator.generateMeaningQuiz(kanjiPool, vocabPool, count: setup.questionCount, isId: isId));
+    allQuestions.addAll(generator.generateMeaningQuiz(kanjiPool, vocabPool, kanjiDistractors: allKanji, vocabDistractors: allVocab, count: setup.questionCount, isId: isId));
   }
   if (setup.selectedQuizTypes.contains(QuizType.reading)) {
-    allQuestions.addAll(generator.generateReadingQuiz(kanjiPool, vocabPool, count: setup.questionCount));
+    allQuestions.addAll(generator.generateReadingQuiz(kanjiPool, vocabPool, kanjiDistractors: allKanji, vocabDistractors: allVocab, count: setup.questionCount));
   }
   if (setup.selectedQuizTypes.contains(QuizType.writing)) {
     allQuestions.addAll(generator.generateWritingQuiz(kanjiPool, vocabPool, count: setup.questionCount, isId: isId));

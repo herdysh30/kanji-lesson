@@ -150,95 +150,102 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: currentQuestion.type == QuizType.writing
                       ? _buildWritingPad(currentQuestion)
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                              ...List.generate(currentQuestion.options.length, (index) {
-                                final option = currentQuestion.options[index];
-                                final isSelected = _selectedAnswerIndex == index;
-                                final isCorrectOption = index == currentQuestion.correctIndex;
-                                
-                                Color buttonColor = Theme.of(context).colorScheme.surfaceContainer;
-                                Color textColor = Theme.of(context).colorScheme.onSurface;
-                                
-                                if (_isAnswerRevealed) {
-                                  if (isCorrectOption) {
-                                    buttonColor = AppColors.correct;
-                                    textColor = Colors.white;
-                                  } else if (isSelected && !isCorrectOption) {
-                                    buttonColor = AppColors.incorrect;
-                                    textColor = Colors.white;
-                                  } else {
-                                    buttonColor = Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5);
-                                    textColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
-                                  }
-                                }
-                  
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      style: FilledButton.styleFrom(
-                                        backgroundColor: buttonColor,
-                                        foregroundColor: textColor,
-                                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      onPressed: () => _handleOptionSelected(index, currentQuestion),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            option.text,
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
+                      : CustomScrollView(
+                          slivers: [
+                            SliverFillRemaining(
+                              hasScrollBody: false,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ...List.generate(currentQuestion.options.length, (index) {
+                                    final option = currentQuestion.options[index];
+                                    final isSelected = _selectedAnswerIndex == index;
+                                    final isCorrectOption = index == currentQuestion.correctIndex;
+                                    
+                                    Color buttonColor = Theme.of(context).colorScheme.surfaceContainer;
+                                    Color textColor = Theme.of(context).colorScheme.onSurface;
+                                    
+                                    if (_isAnswerRevealed) {
+                                      if (isCorrectOption) {
+                                        buttonColor = AppColors.correct;
+                                        textColor = Colors.white;
+                                      } else if (isSelected && !isCorrectOption) {
+                                        buttonColor = AppColors.incorrect;
+                                        textColor = Colors.white;
+                                      } else {
+                                        buttonColor = Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5);
+                                        textColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
+                                      }
+                                    }
+                      
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 12.0),
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        child: FilledButton(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor: buttonColor,
+                                            foregroundColor: textColor,
+                                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
-                                            textAlign: TextAlign.center,
                                           ),
-                                          // Show explanation after answering
-                                          if (_isAnswerRevealed && option.kanjiCharacter != null)
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 6),
-                                              child: Text(
-                                                _getOptionExplanation(currentQuestion.type, option),
+                                          onPressed: () => _handleOptionSelected(index, currentQuestion),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                option.text,
                                                 style: TextStyle(
-                                                  fontSize: 13,
-                                                  color: textColor.withValues(alpha: 0.85),
-                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 16,
+                                                  fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
-                                            ),
-                                        ],
+                                              // Show explanation after answering
+                                              if (_isAnswerRevealed && option.kanjiCharacter != null)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: 6),
+                                                  child: Text(
+                                                    _getOptionExplanation(currentQuestion.type, option),
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      color: textColor.withValues(alpha: 0.85),
+                                                      fontWeight: FontWeight.w400,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                  // Next button
+                                  if (_isAnswerRevealed)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4, bottom: 16),
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        height: 56,
+                                        child: FilledButton.icon(
+                                          onPressed: _onNextPressed,
+                                          icon: const Icon(Icons.arrow_forward_rounded),
+                                          label: Text(
+                                            sessionState.currentIndex >= sessionState.questions.length - 1
+                                                ? 'See Results'
+                                                : 'Next Question',
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              }),
-                              // Next button
-                              if (_isAnswerRevealed)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4, bottom: 16),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 56,
-                                    child: FilledButton.icon(
-                                      onPressed: _onNextPressed,
-                                      icon: const Icon(Icons.arrow_forward_rounded),
-                                      label: Text(
-                                        sessionState.currentIndex >= sessionState.questions.length - 1
-                                            ? 'See Results'
-                                            : 'Next Question',
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ],

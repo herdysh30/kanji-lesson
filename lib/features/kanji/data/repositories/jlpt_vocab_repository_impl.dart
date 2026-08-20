@@ -68,4 +68,9 @@ class JlptVocabRepositoryImpl implements JlptVocabRepository {
   Future<JlptVocab?> getVocabByWord(String word) async {
     return localDataSource.getVocabByWord(word);
   }
+
+  @override
+  Future<List<JlptVocab>> getAllVocab() async {
+    return localDataSource.getAllVocab();
+  }
 }
