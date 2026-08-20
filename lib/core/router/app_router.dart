@@ -8,6 +8,7 @@ import 'package:kanji_lesson/features/review/presentation/screens/review_screen.
 import 'package:kanji_lesson/features/progress/presentation/screens/progress_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/weak_kanji_screen.dart';
 import 'package:kanji_lesson/features/settings/presentation/screens/settings_screen.dart';
+import 'package:kanji_lesson/features/kanji/presentation/screens/writing_practice_screen.dart';
 import 'package:kanji_lesson/features/review/presentation/screens/review_session_screen.dart';
 import 'package:kanji_lesson/features/review/presentation/screens/review_result_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_setup_screen.dart';
@@ -47,6 +48,14 @@ final appRouter = GoRouter(
                     return KanjiListScreen(jlptLevel: level);
                   },
                   routes: [
+                    GoRoute(
+                      path: 'practice',
+                      parentNavigatorKey: _rootNavigatorKey,
+                      builder: (context, state) {
+                        final level = int.parse(state.pathParameters['level']!);
+                        return WritingPracticeScreen(jlptLevel: level);
+                      },
+                    ),
                     GoRoute(
                       path: ':kanji',
                       parentNavigatorKey: _rootNavigatorKey,

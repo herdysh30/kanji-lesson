@@ -23,6 +23,13 @@ class KanjiListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('N$jlptLevel Kanji'),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          context.push('/learn/$jlptLevel/practice');
+        },
+        icon: const Icon(Icons.draw_rounded),
+        label: const Text('Practice Random'),
+      ),
       body: Column(
         children: [
           // ─── Search Bar ──────────────────────────────────
