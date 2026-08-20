@@ -102,22 +102,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               
               // Prompt Area
               if (currentQuestion.type != QuizType.writing)
-                Expanded(
-                  flex: 4,
-                  child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Text(
-                      currentQuestion.prompt,
-                      style: currentQuestion.type == QuizType.meaning
-                          ? AppTheme.kanjiLarge(context).copyWith(fontSize: 80)
-                          : Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                fontSize: currentQuestion.type == QuizType.writing ? 36 : null,
-                              ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
+                  child: Text(
+                    currentQuestion.prompt,
+                    style: currentQuestion.type == QuizType.meaning
+                        ? AppTheme.kanjiLarge(context).copyWith(fontSize: 80)
+                        : Theme.of(context).textTheme.displayMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               if (currentQuestion.type == QuizType.writing)
@@ -134,7 +128,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
               // Question Instruction
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.only(bottom: 16.0),
                 child: Text(
                   _getInstructionText(currentQuestion.type),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -145,7 +139,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
               // Options or Drawing Pad
               Expanded(
-                flex: currentQuestion.type == QuizType.writing ? 1 : 6,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: currentQuestion.type == QuizType.writing
