@@ -3224,6 +3224,416 @@ class SimilarKanjiEntriesCompanion extends UpdateCompanion<SimilarKanjiEntry> {
   }
 }
 
+class $JlptVocabEntriesTable extends JlptVocabEntries
+    with TableInfo<$JlptVocabEntriesTable, JlptVocabEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $JlptVocabEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _wordMeta = const VerificationMeta('word');
+  @override
+  late final GeneratedColumn<String> word = GeneratedColumn<String>(
+    'word',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _meaningMeta = const VerificationMeta(
+    'meaning',
+  );
+  @override
+  late final GeneratedColumn<String> meaning = GeneratedColumn<String>(
+    'meaning',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _meaningIdMeta = const VerificationMeta(
+    'meaningId',
+  );
+  @override
+  late final GeneratedColumn<String> meaningId = GeneratedColumn<String>(
+    'meaning_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _furiganaMeta = const VerificationMeta(
+    'furigana',
+  );
+  @override
+  late final GeneratedColumn<String> furigana = GeneratedColumn<String>(
+    'furigana',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _romajiMeta = const VerificationMeta('romaji');
+  @override
+  late final GeneratedColumn<String> romaji = GeneratedColumn<String>(
+    'romaji',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<int> level = GeneratedColumn<int>(
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    word,
+    meaning,
+    meaningId,
+    furigana,
+    romaji,
+    level,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'jlpt_vocab_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<JlptVocabEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('word')) {
+      context.handle(
+        _wordMeta,
+        word.isAcceptableOrUnknown(data['word']!, _wordMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_wordMeta);
+    }
+    if (data.containsKey('meaning')) {
+      context.handle(
+        _meaningMeta,
+        meaning.isAcceptableOrUnknown(data['meaning']!, _meaningMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_meaningMeta);
+    }
+    if (data.containsKey('meaning_id')) {
+      context.handle(
+        _meaningIdMeta,
+        meaningId.isAcceptableOrUnknown(data['meaning_id']!, _meaningIdMeta),
+      );
+    }
+    if (data.containsKey('furigana')) {
+      context.handle(
+        _furiganaMeta,
+        furigana.isAcceptableOrUnknown(data['furigana']!, _furiganaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_furiganaMeta);
+    }
+    if (data.containsKey('romaji')) {
+      context.handle(
+        _romajiMeta,
+        romaji.isAcceptableOrUnknown(data['romaji']!, _romajiMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_romajiMeta);
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_levelMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {word};
+  @override
+  JlptVocabEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return JlptVocabEntry(
+      word: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}word'],
+      )!,
+      meaning: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meaning'],
+      )!,
+      meaningId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meaning_id'],
+      ),
+      furigana: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}furigana'],
+      )!,
+      romaji: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}romaji'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}level'],
+      )!,
+    );
+  }
+
+  @override
+  $JlptVocabEntriesTable createAlias(String alias) {
+    return $JlptVocabEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class JlptVocabEntry extends DataClass implements Insertable<JlptVocabEntry> {
+  final String word;
+  final String meaning;
+  final String? meaningId;
+  final String furigana;
+  final String romaji;
+  final int level;
+  const JlptVocabEntry({
+    required this.word,
+    required this.meaning,
+    this.meaningId,
+    required this.furigana,
+    required this.romaji,
+    required this.level,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['word'] = Variable<String>(word);
+    map['meaning'] = Variable<String>(meaning);
+    if (!nullToAbsent || meaningId != null) {
+      map['meaning_id'] = Variable<String>(meaningId);
+    }
+    map['furigana'] = Variable<String>(furigana);
+    map['romaji'] = Variable<String>(romaji);
+    map['level'] = Variable<int>(level);
+    return map;
+  }
+
+  JlptVocabEntriesCompanion toCompanion(bool nullToAbsent) {
+    return JlptVocabEntriesCompanion(
+      word: Value(word),
+      meaning: Value(meaning),
+      meaningId: meaningId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(meaningId),
+      furigana: Value(furigana),
+      romaji: Value(romaji),
+      level: Value(level),
+    );
+  }
+
+  factory JlptVocabEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return JlptVocabEntry(
+      word: serializer.fromJson<String>(json['word']),
+      meaning: serializer.fromJson<String>(json['meaning']),
+      meaningId: serializer.fromJson<String?>(json['meaningId']),
+      furigana: serializer.fromJson<String>(json['furigana']),
+      romaji: serializer.fromJson<String>(json['romaji']),
+      level: serializer.fromJson<int>(json['level']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'word': serializer.toJson<String>(word),
+      'meaning': serializer.toJson<String>(meaning),
+      'meaningId': serializer.toJson<String?>(meaningId),
+      'furigana': serializer.toJson<String>(furigana),
+      'romaji': serializer.toJson<String>(romaji),
+      'level': serializer.toJson<int>(level),
+    };
+  }
+
+  JlptVocabEntry copyWith({
+    String? word,
+    String? meaning,
+    Value<String?> meaningId = const Value.absent(),
+    String? furigana,
+    String? romaji,
+    int? level,
+  }) => JlptVocabEntry(
+    word: word ?? this.word,
+    meaning: meaning ?? this.meaning,
+    meaningId: meaningId.present ? meaningId.value : this.meaningId,
+    furigana: furigana ?? this.furigana,
+    romaji: romaji ?? this.romaji,
+    level: level ?? this.level,
+  );
+  JlptVocabEntry copyWithCompanion(JlptVocabEntriesCompanion data) {
+    return JlptVocabEntry(
+      word: data.word.present ? data.word.value : this.word,
+      meaning: data.meaning.present ? data.meaning.value : this.meaning,
+      meaningId: data.meaningId.present ? data.meaningId.value : this.meaningId,
+      furigana: data.furigana.present ? data.furigana.value : this.furigana,
+      romaji: data.romaji.present ? data.romaji.value : this.romaji,
+      level: data.level.present ? data.level.value : this.level,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JlptVocabEntry(')
+          ..write('word: $word, ')
+          ..write('meaning: $meaning, ')
+          ..write('meaningId: $meaningId, ')
+          ..write('furigana: $furigana, ')
+          ..write('romaji: $romaji, ')
+          ..write('level: $level')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(word, meaning, meaningId, furigana, romaji, level);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is JlptVocabEntry &&
+          other.word == this.word &&
+          other.meaning == this.meaning &&
+          other.meaningId == this.meaningId &&
+          other.furigana == this.furigana &&
+          other.romaji == this.romaji &&
+          other.level == this.level);
+}
+
+class JlptVocabEntriesCompanion extends UpdateCompanion<JlptVocabEntry> {
+  final Value<String> word;
+  final Value<String> meaning;
+  final Value<String?> meaningId;
+  final Value<String> furigana;
+  final Value<String> romaji;
+  final Value<int> level;
+  final Value<int> rowid;
+  const JlptVocabEntriesCompanion({
+    this.word = const Value.absent(),
+    this.meaning = const Value.absent(),
+    this.meaningId = const Value.absent(),
+    this.furigana = const Value.absent(),
+    this.romaji = const Value.absent(),
+    this.level = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  JlptVocabEntriesCompanion.insert({
+    required String word,
+    required String meaning,
+    this.meaningId = const Value.absent(),
+    required String furigana,
+    required String romaji,
+    required int level,
+    this.rowid = const Value.absent(),
+  }) : word = Value(word),
+       meaning = Value(meaning),
+       furigana = Value(furigana),
+       romaji = Value(romaji),
+       level = Value(level);
+  static Insertable<JlptVocabEntry> custom({
+    Expression<String>? word,
+    Expression<String>? meaning,
+    Expression<String>? meaningId,
+    Expression<String>? furigana,
+    Expression<String>? romaji,
+    Expression<int>? level,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (word != null) 'word': word,
+      if (meaning != null) 'meaning': meaning,
+      if (meaningId != null) 'meaning_id': meaningId,
+      if (furigana != null) 'furigana': furigana,
+      if (romaji != null) 'romaji': romaji,
+      if (level != null) 'level': level,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  JlptVocabEntriesCompanion copyWith({
+    Value<String>? word,
+    Value<String>? meaning,
+    Value<String?>? meaningId,
+    Value<String>? furigana,
+    Value<String>? romaji,
+    Value<int>? level,
+    Value<int>? rowid,
+  }) {
+    return JlptVocabEntriesCompanion(
+      word: word ?? this.word,
+      meaning: meaning ?? this.meaning,
+      meaningId: meaningId ?? this.meaningId,
+      furigana: furigana ?? this.furigana,
+      romaji: romaji ?? this.romaji,
+      level: level ?? this.level,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (word.present) {
+      map['word'] = Variable<String>(word.value);
+    }
+    if (meaning.present) {
+      map['meaning'] = Variable<String>(meaning.value);
+    }
+    if (meaningId.present) {
+      map['meaning_id'] = Variable<String>(meaningId.value);
+    }
+    if (furigana.present) {
+      map['furigana'] = Variable<String>(furigana.value);
+    }
+    if (romaji.present) {
+      map['romaji'] = Variable<String>(romaji.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(level.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JlptVocabEntriesCompanion(')
+          ..write('word: $word, ')
+          ..write('meaning: $meaning, ')
+          ..write('meaningId: $meaningId, ')
+          ..write('furigana: $furigana, ')
+          ..write('romaji: $romaji, ')
+          ..write('level: $level, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3238,6 +3648,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $QuizResultEntriesTable(this);
   late final $SimilarKanjiEntriesTable similarKanjiEntries =
       $SimilarKanjiEntriesTable(this);
+  late final $JlptVocabEntriesTable jlptVocabEntries = $JlptVocabEntriesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3249,6 +3662,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     dailyProgressEntries,
     quizResultEntries,
     similarKanjiEntries,
+    jlptVocabEntries,
   ];
 }
 
@@ -4929,6 +5343,231 @@ typedef $$SimilarKanjiEntriesTableProcessedTableManager =
       SimilarKanjiEntry,
       PrefetchHooks Function()
     >;
+typedef $$JlptVocabEntriesTableCreateCompanionBuilder =
+    JlptVocabEntriesCompanion Function({
+      required String word,
+      required String meaning,
+      Value<String?> meaningId,
+      required String furigana,
+      required String romaji,
+      required int level,
+      Value<int> rowid,
+    });
+typedef $$JlptVocabEntriesTableUpdateCompanionBuilder =
+    JlptVocabEntriesCompanion Function({
+      Value<String> word,
+      Value<String> meaning,
+      Value<String?> meaningId,
+      Value<String> furigana,
+      Value<String> romaji,
+      Value<int> level,
+      Value<int> rowid,
+    });
+
+class $$JlptVocabEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $JlptVocabEntriesTable> {
+  $$JlptVocabEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get word => $composableBuilder(
+    column: $table.word,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get meaning => $composableBuilder(
+    column: $table.meaning,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get meaningId => $composableBuilder(
+    column: $table.meaningId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get furigana => $composableBuilder(
+    column: $table.furigana,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get romaji => $composableBuilder(
+    column: $table.romaji,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$JlptVocabEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $JlptVocabEntriesTable> {
+  $$JlptVocabEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get word => $composableBuilder(
+    column: $table.word,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get meaning => $composableBuilder(
+    column: $table.meaning,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get meaningId => $composableBuilder(
+    column: $table.meaningId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get furigana => $composableBuilder(
+    column: $table.furigana,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get romaji => $composableBuilder(
+    column: $table.romaji,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$JlptVocabEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $JlptVocabEntriesTable> {
+  $$JlptVocabEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get word =>
+      $composableBuilder(column: $table.word, builder: (column) => column);
+
+  GeneratedColumn<String> get meaning =>
+      $composableBuilder(column: $table.meaning, builder: (column) => column);
+
+  GeneratedColumn<String> get meaningId =>
+      $composableBuilder(column: $table.meaningId, builder: (column) => column);
+
+  GeneratedColumn<String> get furigana =>
+      $composableBuilder(column: $table.furigana, builder: (column) => column);
+
+  GeneratedColumn<String> get romaji =>
+      $composableBuilder(column: $table.romaji, builder: (column) => column);
+
+  GeneratedColumn<int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+}
+
+class $$JlptVocabEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $JlptVocabEntriesTable,
+          JlptVocabEntry,
+          $$JlptVocabEntriesTableFilterComposer,
+          $$JlptVocabEntriesTableOrderingComposer,
+          $$JlptVocabEntriesTableAnnotationComposer,
+          $$JlptVocabEntriesTableCreateCompanionBuilder,
+          $$JlptVocabEntriesTableUpdateCompanionBuilder,
+          (
+            JlptVocabEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $JlptVocabEntriesTable,
+              JlptVocabEntry
+            >,
+          ),
+          JlptVocabEntry,
+          PrefetchHooks Function()
+        > {
+  $$JlptVocabEntriesTableTableManager(
+    _$AppDatabase db,
+    $JlptVocabEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$JlptVocabEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$JlptVocabEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$JlptVocabEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> word = const Value.absent(),
+                Value<String> meaning = const Value.absent(),
+                Value<String?> meaningId = const Value.absent(),
+                Value<String> furigana = const Value.absent(),
+                Value<String> romaji = const Value.absent(),
+                Value<int> level = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => JlptVocabEntriesCompanion(
+                word: word,
+                meaning: meaning,
+                meaningId: meaningId,
+                furigana: furigana,
+                romaji: romaji,
+                level: level,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String word,
+                required String meaning,
+                Value<String?> meaningId = const Value.absent(),
+                required String furigana,
+                required String romaji,
+                required int level,
+                Value<int> rowid = const Value.absent(),
+              }) => JlptVocabEntriesCompanion.insert(
+                word: word,
+                meaning: meaning,
+                meaningId: meaningId,
+                furigana: furigana,
+                romaji: romaji,
+                level: level,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$JlptVocabEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $JlptVocabEntriesTable,
+      JlptVocabEntry,
+      $$JlptVocabEntriesTableFilterComposer,
+      $$JlptVocabEntriesTableOrderingComposer,
+      $$JlptVocabEntriesTableAnnotationComposer,
+      $$JlptVocabEntriesTableCreateCompanionBuilder,
+      $$JlptVocabEntriesTableUpdateCompanionBuilder,
+      (
+        JlptVocabEntry,
+        BaseReferences<_$AppDatabase, $JlptVocabEntriesTable, JlptVocabEntry>,
+      ),
+      JlptVocabEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4948,4 +5587,6 @@ class $AppDatabaseManager {
       $$QuizResultEntriesTableTableManager(_db, _db.quizResultEntries);
   $$SimilarKanjiEntriesTableTableManager get similarKanjiEntries =>
       $$SimilarKanjiEntriesTableTableManager(_db, _db.similarKanjiEntries);
+  $$JlptVocabEntriesTableTableManager get jlptVocabEntries =>
+      $$JlptVocabEntriesTableTableManager(_db, _db.jlptVocabEntries);
 }

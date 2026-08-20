@@ -452,10 +452,29 @@ class _VocabularyTile extends ConsumerWidget {
             ),
           ],
         ),
-        trailing: vocabulary.isCommon
-            ? Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (vocabulary.jlptLevel != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'N${vocabulary.jlptLevel}',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              if (vocabulary.isCommon) const SizedBox(width: 8),
+            ],
+            if (vocabulary.isCommon)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: AppColors.correct.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
@@ -466,8 +485,9 @@ class _VocabularyTile extends ConsumerWidget {
                         color: AppColors.correct,
                       ),
                 ),
-              )
-            : null,
+              ),
+          ],
+        ),
         isThreeLine: true,
       ),
     );

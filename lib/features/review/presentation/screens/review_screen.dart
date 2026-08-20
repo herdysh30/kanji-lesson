@@ -7,6 +7,7 @@ import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/core/database/app_database.dart';
 
 class ReviewScreen extends ConsumerWidget {
   const ReviewScreen({super.key});
@@ -83,7 +84,7 @@ class ReviewScreen extends ConsumerWidget {
                       onPressed: () => _showLearnNewKanjiDialog(context, ref),
                       icon: const Icon(Icons.add_rounded),
                       label: const Text(
-                        'Learn New Kanji', 
+                        'Learn New Items', 
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -103,19 +104,20 @@ class ReviewScreen extends ConsumerWidget {
   }
 }
 
-Future<void> _showLearnNewKanjiDialog(BuildContext context, WidgetRef ref) async {
+Future<void> _showLearnNewKanjiDialog(BuildContext rootContext, WidgetRef ref) async {
   int? selectedJlpt;
   int selectedAmount = 5;
+  ReviewItemType selectedType = ReviewItemType.kanji;
 
   await showModalBottomSheet(
-    context: context,
+    context: rootContext,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (ctx) {
+    builder: (sheetContext) {
       return StatefulBuilder(
-        builder: (context, setState) {
+        builder: (stateContext, setState) {
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -124,13 +126,43 @@ Future<void> _showLearnNewKanjiDialog(BuildContext context, WidgetRef ref) async
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Learn New Kanji',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    'Learn New Items',
+                    style: Theme.of(stateContext).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('JLPT Level', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Item Type', style: Theme.of(stateContext).textTheme.titleMedium),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Kanji Only'),
+                        selected: selectedType == ReviewItemType.kanji,
+                        onSelected: (val) {
+                          if (val) setState(() => selectedType = ReviewItemType.kanji);
+                        },
+                      ),
+                      ChoiceChip(
+                        label: const Text('Vocab Only'),
+                        selected: selectedType == ReviewItemType.vocab,
+                        onSelected: (val) {
+                          if (val) setState(() => selectedType = ReviewItemType.vocab);
+                        },
+                      ),
+                      ChoiceChip(
+                        label: const Text('Mixed (Kanji & Vocab)'),
+                        selected: selectedType == ReviewItemType.mixed,
+                        onSelected: (val) {
+                          if (val) setState(() => selectedType = ReviewItemType.mixed);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text('JLPT Level', style: Theme.of(stateContext).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -147,7 +179,7 @@ Future<void> _showLearnNewKanjiDialog(BuildContext context, WidgetRef ref) async
                     }).toList(),
                   ),
                   const SizedBox(height: 24),
-                  Text('Amount', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Amount', style: Theme.of(stateContext).textTheme.titleMedium),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -155,7 +187,7 @@ Future<void> _showLearnNewKanjiDialog(BuildContext context, WidgetRef ref) async
                     children: [5, 10, 15, 20].map((amount) {
                       final isSelected = selectedAmount == amount;
                       return ChoiceChip(
-                        label: Text('$amount Kanji'),
+                        label: Text('$amount Items'),
                         selected: isSelected,
                         onSelected: (val) {
                           if (val) setState(() => selectedAmount = amount);
@@ -169,23 +201,23 @@ Future<void> _showLearnNewKanjiDialog(BuildContext context, WidgetRef ref) async
                     height: 56,
                     child: FilledButton(
                       onPressed: () async {
-                        Navigator.pop(ctx);
+                        Navigator.pop(sheetContext);
                         
                         showDialog(
-                          context: context, 
+                          context: rootContext, 
                           barrierDismissible: false,
                           builder: (_) => const Center(child: CircularProgressIndicator()),
                         );
                         
                         final db = ref.read(databaseProvider);
-                        final newItems = await db.startLearningNewKanji(selectedAmount, jlptLevel: selectedJlpt);
+                        final newItems = await db.startLearningNewItems(selectedAmount, jlptLevel: selectedJlpt, type: selectedType);
                         
-                        if (context.mounted) {
-                          Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
+                        if (rootContext.mounted) {
+                          Navigator.of(rootContext, rootNavigator: true).pop(); // dismiss loading
                           
                           if (newItems.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('No new kanji available for this selection.')),
+                            ScaffoldMessenger.of(rootContext).showSnackBar(
+                              const SnackBar(content: Text('No new items available for this selection.')),
                             );
                             return;
                           }
@@ -196,8 +228,8 @@ Future<void> _showLearnNewKanjiDialog(BuildContext context, WidgetRef ref) async
                           // Wait for provider to load the new reviews
                           await ref.read(dueReviewsProvider.future);
                           
-                          if (context.mounted) {
-                            context.push('/review/session');
+                          if (rootContext.mounted) {
+                            rootContext.push('/review/session');
                           }
                         }
                       },

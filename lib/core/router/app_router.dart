@@ -4,6 +4,7 @@ import 'package:kanji_lesson/features/home/presentation/screens/home_screen.dart
 import 'package:kanji_lesson/features/kanji/presentation/screens/jlpt_selection_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/kanji_list_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/kanji_detail_screen.dart';
+import 'package:kanji_lesson/features/kanji/presentation/screens/vocab_detail_screen.dart';
 import 'package:kanji_lesson/features/review/presentation/screens/review_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/progress_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/weak_kanji_screen.dart';
@@ -54,6 +55,15 @@ final appRouter = GoRouter(
                       builder: (context, state) {
                         final level = int.parse(state.pathParameters['level']!);
                         return WritingPracticeScreen(jlptLevel: level);
+                      },
+                    ),
+                    GoRoute(
+                      path: 'vocab/:word',
+                      parentNavigatorKey: _rootNavigatorKey,
+                      builder: (context, state) {
+                        final level = int.parse(state.pathParameters['level']!);
+                        final word = state.pathParameters['word']!;
+                        return VocabDetailScreen(jlptLevel: level, word: word);
                       },
                     ),
                     GoRoute(

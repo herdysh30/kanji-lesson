@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
+import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
@@ -14,6 +15,7 @@ class QuizSetupScreen extends ConsumerWidget {
     final setup = ref.watch(quizSetupProvider);
     final notifier = ref.read(quizSetupProvider.notifier);
     final modelStatus = ref.watch(digitalInkModelStatusProvider);
+    final maxItemsAsync = ref.watch(maxQuizItemsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -59,6 +61,42 @@ class QuizSetupScreen extends ConsumerWidget {
             ),
             
             const SizedBox(height: 32),
+
+            // Item Type Selection
+            Text(
+              'Item Type',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('Mixed (Kanji & Vocab)'),
+                  selected: setup.itemType == ReviewItemType.mixed,
+                  onSelected: (val) {
+                    if (val) notifier.setItemType(ReviewItemType.mixed);
+                  },
+                ),
+                ChoiceChip(
+                  label: const Text('Kanji Only'),
+                  selected: setup.itemType == ReviewItemType.kanji,
+                  onSelected: (val) {
+                    if (val) notifier.setItemType(ReviewItemType.kanji);
+                  },
+                ),
+                ChoiceChip(
+                  label: const Text('Vocabulary Only'),
+                  selected: setup.itemType == ReviewItemType.vocab,
+                  onSelected: (val) {
+                    if (val) notifier.setItemType(ReviewItemType.vocab);
+                  },
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 32),
             
             // Quiz Type Selection
             Text(
@@ -70,39 +108,26 @@ class QuizSetupScreen extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ChoiceChip(
+                FilterChip(
                   label: const Text('Meaning'),
-                  selected: setup.quizType == QuizType.meaning,
-                  onSelected: (val) {
-                    if (val) notifier.setQuizType(QuizType.meaning);
-                  },
+                  selected: setup.selectedQuizTypes.contains(QuizType.meaning),
+                  onSelected: (_) => notifier.toggleQuizType(QuizType.meaning),
                 ),
-                ChoiceChip(
+                FilterChip(
                   label: const Text('Reading'),
-                  selected: setup.quizType == QuizType.reading,
-                  onSelected: (val) {
-                    if (val) notifier.setQuizType(QuizType.reading);
-                  },
+                  selected: setup.selectedQuizTypes.contains(QuizType.reading),
+                  onSelected: (_) => notifier.toggleQuizType(QuizType.reading),
                 ),
-                ChoiceChip(
-                  label: const Text('Mixed (Meaning & Reading)'),
-                  selected: setup.quizType == QuizType.kanjiFromReading, // Using kanjiFromReading as a placeholder for mixed
-                  onSelected: (val) {
-                    if (val) notifier.setQuizType(QuizType.kanjiFromReading);
-                  },
-                ),
-                ChoiceChip(
-                  label: const Text('Writing (Draw Kanji)'),
-                  selected: setup.quizType == QuizType.writing,
-                  onSelected: (val) {
-                    if (val) notifier.setQuizType(QuizType.writing);
-                  },
+                FilterChip(
+                  label: const Text('Writing'),
+                  selected: setup.selectedQuizTypes.contains(QuizType.writing),
+                  onSelected: (_) => notifier.toggleQuizType(QuizType.writing),
                 ),
               ],
             ),
             
             // ML Kit Model Download Indicator
-            if (setup.quizType == QuizType.writing)
+            if (setup.selectedQuizTypes.contains(QuizType.writing))
               Consumer(
                 builder: (context, ref, _) {
                   final statusAsync = ref.watch(digitalInkModelStatusProvider);
@@ -150,24 +175,76 @@ class QuizSetupScreen extends ConsumerWidget {
             const SizedBox(height: 32),
             
             // Amount Selection
-            Text(
-              'Number of Questions',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Number of Questions',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                maxItemsAsync.when(
+                  data: (max) => Text(
+                    'Max: $max items',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: [10, 20, 30].map((count) {
-                return ChoiceChip(
-                  label: Text('$count Questions'),
-                  selected: setup.questionCount == count,
+              children: [
+                ...[10, 20, 30].map((count) {
+                  return ChoiceChip(
+                    label: Text('$count Questions'),
+                    selected: setup.questionCount == count && !setup.isCustomCount,
+                    onSelected: (val) {
+                      if (val) notifier.setQuestionCount(count);
+                    },
+                  );
+                }),
+                ChoiceChip(
+                  label: const Text('Custom'),
+                  selected: setup.isCustomCount,
                   onSelected: (val) {
-                    if (val) notifier.setQuestionCount(count);
+                    if (val) {
+                      notifier.setQuestionCount(setup.questionCount, isCustom: true);
+                    }
                   },
-                );
-              }).toList(),
+                ),
+              ],
             ),
+            if (setup.isCustomCount)
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Slider(
+                        value: setup.questionCount.toDouble(),
+                        min: 1,
+                        max: (maxItemsAsync.valueOrNull ?? 100).toDouble().clamp(1, 1000),
+                        divisions: (maxItemsAsync.valueOrNull ?? 100).clamp(1, 1000),
+                        label: setup.questionCount.toString(),
+                        onChanged: (val) {
+                          notifier.setQuestionCount(val.round(), isCustom: true);
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 60,
+                      child: Text(
+                        '${setup.questionCount}',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             
             const SizedBox(height: 48),
             
@@ -176,7 +253,7 @@ class QuizSetupScreen extends ConsumerWidget {
               height: 56,
               child: FilledButton.icon(
                 onPressed: () async {
-                  if (setup.quizType == QuizType.writing) {
+                  if (setup.selectedQuizTypes.contains(QuizType.writing)) {
                     final isDownloaded = modelStatus.valueOrNull ?? false;
                     if (!isDownloaded) {
                       // Prompt user

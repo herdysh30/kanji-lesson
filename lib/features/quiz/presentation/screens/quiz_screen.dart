@@ -110,7 +110,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     child: Text(
                       currentQuestion.prompt,
                       style: currentQuestion.type == QuizType.meaning
-                          ? AppTheme.kanjiLarge(context).copyWith(fontSize: 120)
+                          ? AppTheme.kanjiLarge(context).copyWith(fontSize: 80)
                           : Theme.of(context).textTheme.displayMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 fontSize: currentQuestion.type == QuizType.writing ? 36 : null,
@@ -150,9 +150,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: currentQuestion.type == QuizType.writing
                       ? _buildWritingPad(currentQuestion)
-                      : SingleChildScrollView(
-                          child: Column(
-                            children: [
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
                               ...List.generate(currentQuestion.options.length, (index) {
                                 final option = currentQuestion.options[index];
                                 final isSelected = _selectedAnswerIndex == index;
@@ -182,9 +182,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       style: FilledButton.styleFrom(
                                         backgroundColor: buttonColor,
                                         foregroundColor: textColor,
-                                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                       ),
                                       onPressed: () => _handleOptionSelected(index, currentQuestion),
@@ -194,7 +194,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                           Text(
                                             option.text,
                                             style: TextStyle(
-                                              fontSize: 18,
+                                              fontSize: 16,
                                               fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
                                             ),
                                             textAlign: TextAlign.center,
@@ -239,7 +239,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 ),
                             ],
                           ),
-                        ),
                 ),
               ),
             ],
@@ -263,15 +262,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   String _getInstructionText(QuizType type) {
     switch (type) {
       case QuizType.meaning:
-        return 'What does this Kanji mean?';
+        return 'What does this mean?';
       case QuizType.reading:
-        return 'How do you read this Kanji?';
-      case QuizType.vocabulary:
-        return 'What is the reading of this word?';
-      case QuizType.kanjiFromReading:
-        return 'Pick the correct answer';
+        return 'How do you read this?';
       case QuizType.writing:
-        return 'Draw the Kanji';
+        return 'Draw the Character';
       default:
         return 'Choose the correct answer';
     }
@@ -283,12 +278,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final explanation = option.explanation ?? '';
     switch (type) {
       case QuizType.meaning:
-        // Meaning quiz: option text is the meaning, show kanji + reading
         return '$kanji — $explanation';
       case QuizType.reading:
-        // Reading quiz: option text is the reading, show kanji + meaning
-        return '$kanji — $explanation';
-      case QuizType.vocabulary:
         return '$kanji — $explanation';
       default:
         return kanji.isNotEmpty ? kanji : '';

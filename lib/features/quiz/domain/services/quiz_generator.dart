@@ -1,17 +1,13 @@
 import 'dart:math';
 
-import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/vocabulary.dart';
+import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
 
-/// Types of quiz questions
 enum QuizType {
-  meaning, // Show kanji → pick meaning
-  reading, // Show word → pick reading
-  kanjiFromReading, // Show hiragana → pick kanji word
-  vocabulary, // Show meaning → pick vocabulary
-  listening, // TTS → pick answer
-  writing, // Show meaning/reading → draw kanji
+  meaning,
+  reading,
+  writing,
 }
 
 /// A single quiz option with metadata for explanations
@@ -54,13 +50,13 @@ class QuizSessionResult {
     required this.questions,
     required this.answers,
     required this.jlptLevel,
-    required this.quizType,
+    required this.selectedQuizTypes,
   });
 
   final List<QuizQuestion> questions;
   final List<int> answers; // Selected option indices
   final int? jlptLevel;
-  final QuizType quizType;
+  final Set<QuizType> selectedQuizTypes;
 
   int get totalQuestions => questions.length;
 
@@ -98,192 +94,230 @@ class QuizGenerator {
   /// Generate meaning quiz questions
   /// "What does X mean?" → pick from 4 meanings
   List<QuizQuestion> generateMeaningQuiz(
-    List<Kanji> kanjiPool, {
+    List<Kanji> kanjiPool,
+    List<JlptVocab> vocabPool, {
     int count = 10,
     bool isId = false,
   }) {
-    if (kanjiPool.isEmpty) return [];
-
     final questions = <QuizQuestion>[];
-    final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
-    final selected = shuffled.take(count).toList();
+    
+    // Mix pools if both have items, otherwise just use one
+    final kanjiQuestionsCount = kanjiPool.isEmpty ? 0 : 
+        (vocabPool.isEmpty ? count : count ~/ 2);
+    final vocabQuestionsCount = vocabPool.isEmpty ? 0 : 
+        (count - kanjiQuestionsCount);
+        
+    // 1. Generate Kanji Questions
+    if (kanjiQuestionsCount > 0) {
+      final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
+      final selected = shuffled.take(kanjiQuestionsCount).toList();
 
-    for (final kanji in selected) {
-      if (kanji.meanings.isEmpty) continue;
+      for (final kanji in selected) {
+        if (kanji.meanings.isEmpty) continue;
+        final correctAnswer = kanji.primaryMeaning(isId);
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: kanji.character,
+          explanation: kanji.primaryReading,
+        );
 
-      final correctAnswer = kanji.primaryMeaning(isId);
-      final correctOption = QuizOption(
-        text: correctAnswer,
-        kanjiCharacter: kanji.character,
-        explanation: kanji.primaryReading,
-      );
+        final distractorKanji = kanjiPool
+            .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
+            .where((k) => k.primaryMeaning(isId) != correctAnswer)
+            .toList()..shuffle(_random);
 
-      // Get distractors from other kanji (with metadata)
-      final distractorKanji = kanjiPool
-          .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
-          .where((k) => k.primaryMeaning(isId) != correctAnswer)
-          .toList()
-        ..shuffle(_random);
+        final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
+          text: k.primaryMeaning(isId),
+          kanjiCharacter: k.character,
+          explanation: k.primaryReading,
+        )).toList();
 
-      final requiredDistractors = min(3, distractorKanji.length);
-      final distractorOptions = distractorKanji.take(requiredDistractors).map((k) => QuizOption(
-        text: k.primaryMeaning(isId),
-        kanjiCharacter: k.character,
-        explanation: k.primaryReading,
-      )).toList();
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        questions.add(QuizQuestion(
+          type: QuizType.meaning,
+          prompt: kanji.character,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: kanji.character,
+        ));
+      }
+    }
+    
+    // 2. Generate Vocab Questions
+    if (vocabQuestionsCount > 0) {
+      final shuffled = List<JlptVocab>.from(vocabPool)..shuffle(_random);
+      final selected = shuffled.take(vocabQuestionsCount).toList();
 
-      final options = [correctOption, ...distractorOptions]..shuffle(_random);
+      for (final vocab in selected) {
+        if (vocab.meaning.isEmpty) continue; // fallback check
+        final correctAnswer = vocab.primaryMeaning(isId);
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: vocab.word,
+          explanation: vocab.furigana,
+        );
 
-      questions.add(QuizQuestion(
-        type: QuizType.meaning,
-        prompt: kanji.character,
-        correctAnswer: correctAnswer,
-        options: options,
-        kanjiCharacter: kanji.character,
-      ));
+        final distractorVocab = vocabPool
+            .where((v) => v.word != vocab.word)
+            .where((v) => v.primaryMeaning(isId) != correctAnswer)
+            .toList()..shuffle(_random);
+
+        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+          text: v.primaryMeaning(isId),
+          kanjiCharacter: v.word,
+          explanation: v.furigana,
+        )).toList();
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        questions.add(QuizQuestion(
+          type: QuizType.meaning,
+          prompt: vocab.word,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: vocab.word,
+        ));
+      }
     }
 
-    return questions.take(count).toList();
+    return (questions..shuffle(_random)).take(count).toList();
   }
 
   /// Generate reading quiz questions
-  /// "How do you read X?" → pick from 4 readings
   List<QuizQuestion> generateReadingQuiz(
-    List<Kanji> kanjiPool, {
+    List<Kanji> kanjiPool,
+    List<JlptVocab> vocabPool, {
     int count = 10,
   }) {
-    if (kanjiPool.isEmpty) return [];
-
     final questions = <QuizQuestion>[];
-    final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
-    final selected =
-        shuffled.where((k) => k.allReadings.isNotEmpty).take(count).toList();
+    
+    final kanjiQuestionsCount = kanjiPool.isEmpty ? 0 : 
+        (vocabPool.isEmpty ? count : count ~/ 2);
+    final vocabQuestionsCount = vocabPool.isEmpty ? 0 : 
+        (count - kanjiQuestionsCount);
+        
+    // 1. Kanji Readings
+    if (kanjiQuestionsCount > 0) {
+      final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
+      final selected = shuffled.where((k) => k.allReadings.isNotEmpty).take(kanjiQuestionsCount).toList();
 
-    for (final kanji in selected) {
-      final correctAnswer = kanji.primaryReading;
-      final correctOption = QuizOption(
-        text: correctAnswer,
-        kanjiCharacter: kanji.character,
-        explanation: kanji.primaryMeaning(false),
-      );
+      for (final kanji in selected) {
+        final correctAnswer = kanji.primaryReading;
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: kanji.character,
+          explanation: kanji.primaryMeaning(false),
+        );
 
-      final distractorKanji = kanjiPool
-          .where((k) => k.character != kanji.character && k.allReadings.isNotEmpty)
-          .where((k) => k.primaryReading != correctAnswer)
-          .toList()
-        ..shuffle(_random);
+        final distractorKanji = kanjiPool
+            .where((k) => k.character != kanji.character && k.allReadings.isNotEmpty)
+            .where((k) => k.primaryReading != correctAnswer)
+            .toList()..shuffle(_random);
 
-      final requiredDistractors = min(3, distractorKanji.length);
-      final distractorOptions = distractorKanji.take(requiredDistractors).map((k) => QuizOption(
-        text: k.primaryReading,
-        kanjiCharacter: k.character,
-        explanation: k.primaryMeaning(false),
-      )).toList();
+        final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
+          text: k.primaryReading,
+          kanjiCharacter: k.character,
+          explanation: k.primaryMeaning(false),
+        )).toList();
 
-      final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        questions.add(QuizQuestion(
+          type: QuizType.reading,
+          prompt: kanji.character,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: kanji.character,
+        ));
+      }
+    }
+    
+    // 2. Vocab Readings
+    if (vocabQuestionsCount > 0) {
+      final shuffled = List<JlptVocab>.from(vocabPool)..shuffle(_random);
+      final selected = shuffled.take(vocabQuestionsCount).toList();
 
-      questions.add(QuizQuestion(
-        type: QuizType.reading,
-        prompt: kanji.character,
-        correctAnswer: correctAnswer,
-        options: options,
-        kanjiCharacter: kanji.character,
-      ));
+      for (final vocab in selected) {
+        final correctAnswer = vocab.furigana;
+        if (correctAnswer.isEmpty) continue;
+        
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: vocab.word,
+          explanation: vocab.primaryMeaning(false),
+        );
+
+        final distractorVocab = vocabPool
+            .where((v) => v.word != vocab.word && v.furigana.isNotEmpty)
+            .where((v) => v.furigana != correctAnswer)
+            .toList()..shuffle(_random);
+
+        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+          text: v.furigana,
+          kanjiCharacter: v.word,
+          explanation: v.primaryMeaning(false),
+        )).toList();
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        questions.add(QuizQuestion(
+          type: QuizType.reading,
+          prompt: vocab.word,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: vocab.word,
+        ));
+      }
     }
 
-    return questions.take(count).toList();
-  }
-
-  /// Generate vocabulary quiz from vocabulary list
-  List<QuizQuestion> generateVocabularyQuiz(
-    List<Vocabulary> vocabPool, {
-    int count = 10,
-    bool isId = false,
-  }) {
-    if (vocabPool.isEmpty) return [];
-
-    final questions = <QuizQuestion>[];
-    final shuffled = List<Vocabulary>.from(vocabPool)..shuffle(_random);
-    final selected = shuffled.take(count).toList();
-
-    for (final vocab in selected) {
-      if (vocab.meanings.isEmpty) continue;
-
-      final correctAnswer = vocab.primaryMeaning(isId);
-      final prompt = vocab.word;
-      final correctOption = QuizOption(
-        text: correctAnswer,
-        kanjiCharacter: vocab.word,
-        explanation: vocab.reading,
-      );
-
-      // Get distractors from other vocabularies
-      final distractorVocabs = vocabPool
-          .where((v) => v.word != vocab.word && v.meanings.isNotEmpty)
-          .toList()
-        ..shuffle(_random);
-
-      final requiredDistractors = min(3, distractorVocabs.length);
-      final distractorOptions = distractorVocabs.take(requiredDistractors).map((v) => QuizOption(
-        text: v.primaryMeaning(isId),
-        kanjiCharacter: v.word,
-        explanation: v.reading,
-      )).toList();
-
-      final options = [correctOption, ...distractorOptions]..shuffle(_random);
-
-      questions.add(QuizQuestion(
-        type: QuizType.vocabulary,
-        prompt: prompt,
-        correctAnswer: correctAnswer,
-        options: options,
-        audioText: vocab.reading,
-      ));
-    }
-
-    return questions.take(count).toList();
-  }
-
-  /// Generate mixed quiz from kanji pool
-  List<QuizQuestion> generateMixedQuiz(
-    List<Kanji> kanjiPool, {
-    int count = 10,
-    bool isId = false,
-  }) {
-    final meaningQuestions = generateMeaningQuiz(kanjiPool, count: count, isId: isId);
-    final readingQuestions = generateReadingQuiz(kanjiPool, count: count);
-
-    final all = [...meaningQuestions, ...readingQuestions]..shuffle(_random);
-    return all.take(count).toList();
+    return (questions..shuffle(_random)).take(count).toList();
   }
 
   /// Generate writing quiz
   List<QuizQuestion> generateWritingQuiz(
-    List<Kanji> kanjiPool, {
+    List<Kanji> kanjiPool,
+    List<JlptVocab> vocabPool, {
     int count = 10,
     bool isId = false,
   }) {
-    if (kanjiPool.isEmpty) return [];
-
     final questions = <QuizQuestion>[];
-    final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
-    final selected = shuffled.take(count).toList();
+    
+    final kanjiQuestionsCount = kanjiPool.isEmpty ? 0 : 
+        (vocabPool.isEmpty ? count : count ~/ 2);
+    final vocabQuestionsCount = vocabPool.isEmpty ? 0 : 
+        (count - kanjiQuestionsCount);
+        
+    // 1. Kanji Writing
+    if (kanjiQuestionsCount > 0) {
+      final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
+      final selected = shuffled.take(kanjiQuestionsCount).toList();
 
-    for (final kanji in selected) {
-      final meanings = isId && kanji.meaningsId.isNotEmpty ? kanji.meaningsId : kanji.meanings;
-      final meaningStr = meanings.isNotEmpty ? meanings.first : kanji.character;
-      final readingStr = kanji.primaryReading.isNotEmpty ? kanji.primaryReading : '';
-      final prompt = readingStr.isNotEmpty ? '$meaningStr ($readingStr)' : meaningStr;
+      for (final kanji in selected) {
+        if (kanji.meanings.isEmpty) continue;
+        questions.add(QuizQuestion(
+          type: QuizType.writing,
+          prompt: kanji.primaryMeaning(isId), // User sees meaning, must draw kanji
+          correctAnswer: kanji.character,
+          options: [], // No options for writing
+          kanjiCharacter: kanji.character,
+        ));
+      }
+    }
+    
+    // 2. Vocab Writing
+    if (vocabQuestionsCount > 0) {
+      final shuffled = List<JlptVocab>.from(vocabPool)..shuffle(_random);
+      final selected = shuffled.take(vocabQuestionsCount).toList();
 
-      questions.add(QuizQuestion(
-        type: QuizType.writing,
-        prompt: prompt,
-        correctAnswer: kanji.character,
-        options: [QuizOption(text: kanji.character, kanjiCharacter: kanji.character, explanation: meaningStr)],
-        kanjiCharacter: kanji.character,
-      ));
+      for (final vocab in selected) {
+        if (vocab.meaning.isEmpty) continue;
+        questions.add(QuizQuestion(
+          type: QuizType.writing,
+          prompt: vocab.primaryMeaning(isId),
+          correctAnswer: vocab.word,
+          options: [],
+          kanjiCharacter: vocab.word,
+        ));
+      }
     }
 
-    return questions.take(count).toList();
+    return (questions..shuffle(_random)).take(count).toList();
   }
 }

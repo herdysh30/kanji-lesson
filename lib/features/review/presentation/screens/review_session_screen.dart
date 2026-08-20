@@ -236,8 +236,8 @@ class _Flashcard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch full kanji details for the back of the card
-    final kanjiAsync = ref.watch(kanjiDetailProvider(entry.kanjiCharacter));
+    // Fetch full details for the back of the card
+    final detailAsync = ref.watch(reviewItemDetailProvider(entry.kanjiCharacter));
     final isId = ref.watch(localeProvider).languageCode == 'id';
 
     return GestureDetector(
@@ -262,46 +262,79 @@ class _Flashcard extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              entry.kanjiCharacter,
-              style: AppTheme.kanjiLarge(context).copyWith(fontSize: 100),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  entry.kanjiCharacter,
+                  style: AppTheme.kanjiLarge(context).copyWith(fontSize: 100),
+                ),
+              ),
             ),
             if (isFlipped) ...[
               const SizedBox(height: 32),
               const Divider(indent: 32, endIndent: 32),
               const SizedBox(height: 24),
-              kanjiAsync.when(
-                data: (kanji) => Column(
+              detailAsync.when(
+                data: (detail) => Column(
                   children: [
-                    if (kanji.primaryReading.isNotEmpty) ...[
+                    if (detail.isVocab) ...[
+                      if (detail.furigana != null && detail.furigana!.isNotEmpty) ...[
+                        Text(
+                          detail.furigana!,
+                          style: AppTheme.japaneseReading(context, fontSize: 28),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      if (detail.romaji != null && detail.romaji!.isNotEmpty) ...[
+                        Text(
+                          detail.romaji!,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                       Text(
-                        kanji.primaryReading,
-                        style: AppTheme.japaneseReading(context, fontSize: 28),
+                        detail.primaryMeaning ?? '',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 8),
+                    ] else ...[
+                      if (detail.primaryReading != null && detail.primaryReading!.isNotEmpty) ...[
+                        Text(
+                          detail.primaryReading!,
+                          style: AppTheme.japaneseReading(context, fontSize: 28),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      Text(
+                        detail.primaryMeaning ?? '',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      if (detail.onyomi != null && detail.onyomi!.isNotEmpty)
+                        Text(
+                          "ON: ${detail.onyomi!.join(', ')}",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      if (detail.kunyomi != null && detail.kunyomi!.isNotEmpty)
+                        Text(
+                          "KUN: ${detail.kunyomi!.join(', ')}",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      const SizedBox(height: 16),
+                      _VocabularySlider(character: entry.kanjiCharacter, isId: isId),
                     ],
-                    Text(
-                      kanji.primaryMeaning(isId),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    if (kanji.onyomi.isNotEmpty)
-                      Text(
-                        "ON: ${kanji.onyomi.join(', ')}",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    if (kanji.kunyomi.isNotEmpty)
-                      Text(
-                        "KUN: ${kanji.kunyomi.join(', ')}",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    const SizedBox(height: 16),
-                    _VocabularySlider(character: entry.kanjiCharacter, isId: isId),
                   ],
                 ),
                 loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const Text('Error loading details'),
+                error: (err, stack) => Text(
+                  'Failed to load details',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
               ),
             ] else ...[
               const SizedBox(height: 64),

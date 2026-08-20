@@ -1,7 +1,12 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:kanji_lesson/core/database/tables/jlpt_vocab_entries.dart';
 
 part 'app_database.g.dart';
+
+// ─── Constants ──────────────────────────────────────────────────
+
+enum ReviewItemType { kanji, vocab, mixed }
 
 // ─── Table Definitions ──────────────────────────────────────────
 
@@ -97,6 +102,7 @@ class SimilarKanjiEntries extends Table {
   DailyProgressEntries,
   QuizResultEntries,
   SimilarKanjiEntries,
+  JlptVocabEntries,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -108,7 +114,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -117,9 +123,15 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from == 1) {
+        if (from < 2) {
           await m.addColumn(kanjiEntries, kanjiEntries.meaningsId);
           await m.addColumn(vocabularyEntries, vocabularyEntries.meaningsId);
+        }
+        if (from < 3) {
+          await m.createTable(jlptVocabEntries);
+        }
+        if (from < 4) {
+          await m.addColumn(jlptVocabEntries, jlptVocabEntries.meaningId);
         }
       },
     );
@@ -232,32 +244,63 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
-  Future<List<UserKanjiProgressEntry>> startLearningNewKanji(int limit, {int? jlptLevel}) async {
-    // 1. Get unseen kanji characters
-    final unseenChars = await (select(kanjiEntries)
-          ..where((k) {
-            final subquery = selectOnly(userKanjiProgressEntries)
-              ..addColumns([userKanjiProgressEntries.kanjiCharacter])
-              ..where(userKanjiProgressEntries.status.isNotIn(['unseen']));
-            
-            var expr = k.character.isNotInQuery(subquery);
-            if (jlptLevel != null) {
-              expr = expr & k.jlptLevel.equals(jlptLevel);
-            }
-            return expr;
-          })
-          ..orderBy([(k) => OrderingTerm.desc(k.jlptLevel)]) // N5 first
-          ..limit(limit))
-        .map((row) => row.character)
-        .get();
+  Future<List<UserKanjiProgressEntry>> startLearningNewItems(int limit, {int? jlptLevel, ReviewItemType type = ReviewItemType.kanji}) async {
+    // 1. Get unseen items
+    final unseenItems = <String>[];
+    
+    if (type == ReviewItemType.kanji || type == ReviewItemType.mixed) {
+      final unseenKanji = await (select(kanjiEntries)
+            ..where((k) {
+              final subquery = selectOnly(userKanjiProgressEntries)
+                ..addColumns([userKanjiProgressEntries.kanjiCharacter])
+                ..where(userKanjiProgressEntries.status.isNotIn(['unseen']));
+              
+              var expr = k.character.isNotInQuery(subquery);
+              if (jlptLevel != null) {
+                expr = expr & k.jlptLevel.equals(jlptLevel);
+              }
+              return expr;
+            })
+            ..orderBy([(k) => OrderingTerm.desc(k.jlptLevel)]) // N5 first
+            ..limit(limit))
+          .map((row) => row.character)
+          .get();
+      unseenItems.addAll(unseenKanji);
+    }
 
-    if (unseenChars.isEmpty) return [];
+    if (type == ReviewItemType.vocab || type == ReviewItemType.mixed) {
+      final unseenVocab = await (select(jlptVocabEntries)
+            ..where((v) {
+              final subquery = selectOnly(userKanjiProgressEntries)
+                ..addColumns([userKanjiProgressEntries.kanjiCharacter])
+                ..where(userKanjiProgressEntries.status.isNotIn(['unseen']));
+              
+              var expr = v.word.isNotInQuery(subquery);
+              if (jlptLevel != null) {
+                expr = expr & v.level.equals(jlptLevel);
+              }
+              return expr;
+            })
+            ..orderBy([(v) => OrderingTerm.desc(v.level)]) // N5 first
+            ..limit(limit))
+          .map((row) => row.word)
+          .get();
+      unseenItems.addAll(unseenVocab);
+    }
+
+    if (unseenItems.isEmpty) return [];
+
+    if (type == ReviewItemType.mixed) {
+      unseenItems.shuffle();
+    }
+    
+    final selectedItems = unseenItems.take(limit).toList();
 
     // 2. Mark them as learning
     final now = DateTime.now();
-    for (final char in unseenChars) {
+    for (final item in selectedItems) {
       await upsertProgress(UserKanjiProgressEntriesCompanion(
-        kanjiCharacter: Value(char),
+        kanjiCharacter: Value(item),
         status: const Value('learning'),
         firstLearnedAt: Value(now),
         nextReviewAt: Value(now),
@@ -267,7 +310,7 @@ class AppDatabase extends _$AppDatabase {
 
     // 3. Return their new progress entries
     return (select(userKanjiProgressEntries)
-          ..where((t) => t.kanjiCharacter.isIn(unseenChars)))
+          ..where((t) => t.kanjiCharacter.isIn(selectedItems)))
         .get();
   }
 
@@ -318,6 +361,49 @@ class AppDatabase extends _$AppDatabase {
       query.where((t) => t.kanjiCharacter.isIn(kanjiChars));
     }
 
+    final results = await query.get();
+    return results.length;
+  }
+
+  Future<int> getVocabLearnedCount({int? jlptLevel}) async {
+    final query = select(userKanjiProgressEntries)
+      ..where((t) => t.status.isNotIn(['unseen']));
+
+    if (jlptLevel != null) {
+      final vocabWords = await (select(jlptVocabEntries)
+            ..where((t) => t.level.equals(jlptLevel)))
+          .map((row) => row.word)
+          .get();
+
+      query.where((t) => t.kanjiCharacter.isIn(vocabWords));
+    }
+
+    final results = await query.get();
+    return results.length;
+  }
+
+  Future<int> getVocabMasteredCount({int? jlptLevel}) async {
+    final query = select(userKanjiProgressEntries)
+      ..where((t) => t.status.equals('mastered'));
+
+    if (jlptLevel != null) {
+      final vocabWords = await (select(jlptVocabEntries)
+            ..where((t) => t.level.equals(jlptLevel)))
+          .map((row) => row.word)
+          .get();
+
+      query.where((t) => t.kanjiCharacter.isIn(vocabWords));
+    }
+
+    final results = await query.get();
+    return results.length;
+  }
+
+  Future<int> getVocabTotalCount({int? jlptLevel}) async {
+    final query = select(jlptVocabEntries);
+    if (jlptLevel != null) {
+      query.where((t) => t.level.equals(jlptLevel));
+    }
     final results = await query.get();
     return results.length;
   }

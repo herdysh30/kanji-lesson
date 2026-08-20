@@ -18,7 +18,7 @@ class QuizResultScreen extends ConsumerWidget {
       questions: state.questions,
       answers: state.answers,
       jlptLevel: setup.selectedJlptLevel,
-      quizType: setup.quizType,
+      selectedQuizTypes: setup.selectedQuizTypes,
     );
 
     final isPerfect = result.incorrectCount == 0;

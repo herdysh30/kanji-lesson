@@ -8,6 +8,7 @@ class Vocabulary extends Equatable {
     required this.meanings,
     this.meaningsId = const [],
     this.priorities = const [],
+    this.jlptLevel,
   });
 
   final String word;
@@ -15,6 +16,7 @@ class Vocabulary extends Equatable {
   final List<String> meanings;
   final List<String> meaningsId;
   final List<String> priorities;
+  final int? jlptLevel;
 
   /// Primary meaning (Indonesian or English fallback)
   String primaryMeaning(bool isId) {
@@ -27,5 +29,5 @@ class Vocabulary extends Equatable {
       priorities.any((p) => p.startsWith('ichi') || p.startsWith('news'));
 
   @override
-  List<Object?> get props => [word, reading];
+  List<Object?> get props => [word, reading, jlptLevel];
 }

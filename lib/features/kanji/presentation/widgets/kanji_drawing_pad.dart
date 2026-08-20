@@ -113,7 +113,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
         Expanded(
           child: Center(
             child: AspectRatio(
-              aspectRatio: 1, // KanjiVG is 109x109 square
+              aspectRatio: widget.character.length > 1 ? widget.character.length.clamp(2.0, 3.5).toDouble() : 1.0, 
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -127,8 +127,8 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                   borderRadius: BorderRadius.circular(14),
                   child: Stack(
                     children: [
-                      // Background SVG
-                      if (widget.showBackground)
+                      // Background SVG (Kanji only)
+                      if (widget.showBackground && widget.character.length == 1)
                         Positioned.fill(
                           child: svgAsync.when(
                             data: (svgString) {

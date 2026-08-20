@@ -10,6 +10,7 @@ import 'package:kanji_lesson/features/kanji/data/repositories/kanji_repository_i
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/vocabulary.dart';
 import 'package:kanji_lesson/features/kanji/domain/repositories/kanji_repository.dart';
+import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ─── Core Providers ─────────────────────────────────────────────
@@ -147,7 +148,26 @@ final kanjiVocabularyProvider = FutureProvider.family<List<Vocabulary>, String>(
       }
     }
 
-    return vocabularies;
+    // Cross-reference with JLPT Vocab
+    final jlptRepo = ref.read(jlptVocabRepositoryProvider);
+    final finalVocabularies = <Vocabulary>[];
+    for (final vocab in vocabularies) {
+      final jlptData = await jlptRepo.getVocabByWord(vocab.word);
+      if (jlptData != null) {
+        finalVocabularies.add(Vocabulary(
+          word: vocab.word,
+          reading: vocab.reading,
+          meanings: vocab.meanings,
+          meaningsId: vocab.meaningsId,
+          priorities: vocab.priorities,
+          jlptLevel: jlptData.level,
+        ));
+      } else {
+        finalVocabularies.add(vocab);
+      }
+    }
+
+    return finalVocabularies;
   },
 );
 
@@ -165,18 +185,115 @@ final kanjiSearchResultsProvider =
 
 // ─── Filter Provider ────────────────────────────────────────────
 
-enum KanjiFilter { all, learning, mastered }
+enum KanjiFilter { all, kanji, vocab, learning, mastered }
 
 final kanjiFilterProvider = StateProvider<KanjiFilter>((ref) => KanjiFilter.all);
+
+// ─── Grid Item Model ────────────────────────────────────────────
+
+class GridItem {
+  const GridItem({
+    required this.text,
+    required this.isVocab,
+    this.meaning,
+    this.reading,
+  });
+
+  final String text;
+  final bool isVocab;
+  final String? meaning; 
+  final String? reading; 
+}
+
+// ─── Filtered Grid List Provider ───────────────────────────────
+
+final filteredGridListProvider = FutureProvider.family<List<GridItem>, int>((ref, jlptLevel) async {
+  final query = ref.watch(kanjiSearchQueryProvider).toLowerCase();
+  final filter = ref.watch(kanjiFilterProvider);
+  
+  final db = ref.watch(databaseProvider);
+  final kanjiRepo = ref.watch(kanjiRepositoryProvider);
+  final vocabRepo = ref.watch(jlptVocabRepositoryProvider);
+
+  final result = <GridItem>[];
+
+  // 1. Fetch source data based on filter
+  final loadKanji = filter != KanjiFilter.vocab;
+  final loadVocab = filter != KanjiFilter.kanji;
+
+  if (loadKanji) {
+    List<Kanji> kanjis = [];
+    if (query.isNotEmpty) {
+      kanjis = await kanjiRepo.searchKanji(query, jlptLevel: jlptLevel);
+    } else {
+      final chars = await kanjiRepo.getKanjiListByJlpt(jlptLevel);
+      // For just characters we don't need full Kanji objects if we don't have search query,
+      // but to keep it simple, we just map characters to GridItems directly.
+      for (final char in chars) {
+        result.add(GridItem(text: char, isVocab: false));
+      }
+    }
+    
+    if (query.isNotEmpty) {
+      for (final k in kanjis) {
+        result.add(GridItem(text: k.character, isVocab: false));
+      }
+    }
+  }
+
+  if (loadVocab) {
+    final vocabs = await vocabRepo.getVocabByLevel(jlptLevel);
+    for (final v in vocabs) {
+      final isId = ref.watch(localeProvider).languageCode == 'id';
+      if (query.isNotEmpty) {
+        if (!v.word.contains(query) &&
+            !v.furigana.contains(query) &&
+            !v.primaryMeaning(isId).toLowerCase().contains(query) &&
+            !v.romaji.toLowerCase().contains(query)) {
+          continue;
+        }
+      }
+      result.add(GridItem(text: v.word, isVocab: true, meaning: v.primaryMeaning(isId), reading: v.furigana));
+    }
+  }
+
+  // 2. Filter by learning/mastered progress if needed
+  if (filter == KanjiFilter.learning || filter == KanjiFilter.mastered) {
+    final filteredByProgress = <GridItem>[];
+    for (final item in result) {
+      final progress = await db.getProgress(item.text);
+      if (filter == KanjiFilter.mastered && progress?.status == 'mastered') {
+        filteredByProgress.add(item);
+      } else if (filter == KanjiFilter.learning && 
+                 (progress?.status == 'learning' || progress?.status == 'reviewing')) {
+        filteredByProgress.add(item);
+      }
+    }
+    return filteredByProgress;
+  }
+  
+  // Sort mixed list alphabetically (optional) or just return as is
+  return result;
+});
 
 // ─── JLPT Stats Provider ───────────────────────────────────────
 
 final jlptStatsProvider = FutureProvider.family<JlptStats, int>(
   (ref, level) async {
     final db = ref.watch(databaseProvider);
-    final total = AppConstants.jlptKanjiCounts[level] ?? 100;
-    final learned = await db.getLearnedCount(jlptLevel: level);
-    final mastered = await db.getMasteredCount(jlptLevel: level);
+    final kanjiTotal = AppConstants.jlptKanjiCounts[level] ?? 100;
+    final vocabTotal = await db.getVocabTotalCount(jlptLevel: level);
+    
+    final total = kanjiTotal + vocabTotal;
+    
+    final kanjiLearned = await db.getLearnedCount(jlptLevel: level);
+    final vocabLearned = await db.getVocabLearnedCount(jlptLevel: level);
+    final learned = kanjiLearned + vocabLearned;
+    
+    final kanjiMastered = await db.getMasteredCount(jlptLevel: level);
+    final vocabMastered = await db.getVocabMasteredCount(jlptLevel: level);
+    final mastered = kanjiMastered + vocabMastered;
+    
     return JlptStats(
       level: level,
       total: total,
