@@ -145,6 +145,32 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   ),
                 ),
 
+              // Hint for Meaning/Reading Quizzes
+              if (currentQuestion.type != QuizType.writing && !_isAnswerRevealed)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    child: _showHint
+                        ? Text(
+                            currentQuestion.options[currentQuestion.correctIndex].explanation ?? '',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            textAlign: TextAlign.center,
+                          )
+                        : TextButton.icon(
+                            onPressed: () => setState(() => _showHint = true),
+                            icon: const Icon(Icons.lightbulb_outline),
+                            label: const Text('Show Hint'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                            ),
+                          ),
+                  ),
+                ),
+
               // Question Instruction
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
