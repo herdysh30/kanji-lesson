@@ -1,0 +1,55 @@
+name: kanji_lesson
+description: JLPT Kanji Learning App - Learn Kanji step by step based on JLPT levels.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Network
+  dio: ^5.7.0
+
+  # Local Database
+  drift: ^2.23.1
+  drift_flutter: ^0.2.4
+  sqlite3_flutter_libs: ^0.5.28
+  path_provider: ^2.1.5
+
+  # Storage
+  shared_preferences: ^2.3.4
+  flutter_secure_storage: ^9.2.4
+
+  # UI
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.17
+  fl_chart: ^0.70.2
+
+  # Utils
+  intl: ^0.19.0
+  equatable: ^2.0.7
+  collection: ^1.19.1
+
+  # TTS
+  flutter_tts: ^4.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.14
+  drift_dev: ^2.23.1
+  riverpod_generator: ^2.6.3
+
+flutter:
+  uses-material-design: true

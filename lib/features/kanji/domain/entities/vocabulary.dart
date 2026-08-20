@@ -1,0 +1,26 @@
+import 'package:equatable/equatable.dart';
+
+/// Domain entity representing a vocabulary word
+class Vocabulary extends Equatable {
+  const Vocabulary({
+    required this.word,
+    required this.reading,
+    required this.meanings,
+    this.priorities = const [],
+  });
+
+  final String word;
+  final String reading;
+  final List<String> meanings;
+  final List<String> priorities;
+
+  /// Primary meaning
+  String get primaryMeaning => meanings.isNotEmpty ? meanings.first : '';
+
+  /// Check if this is a common word
+  bool get isCommon =>
+      priorities.any((p) => p.startsWith('ichi') || p.startsWith('news'));
+
+  @override
+  List<Object?> get props => [word, reading];
+}
