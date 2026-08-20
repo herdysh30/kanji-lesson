@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kanji_lesson/features/settings/data/settings_repository.dart';
-import 'package:kanji_lesson/main.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
