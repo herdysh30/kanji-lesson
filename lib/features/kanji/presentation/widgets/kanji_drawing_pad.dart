@@ -127,42 +127,59 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                   borderRadius: BorderRadius.circular(14),
                   child: Stack(
                     children: [
-                      // Background SVG (Kanji only)
-                      if (widget.showBackground && widget.character.length == 1)
+                      // Background Hint
+                      if (widget.showBackground)
                         Positioned.fill(
-                          child: svgAsync.when(
-                            data: (svgString) {
-                              if (svgString == null) {
-                                return Center(
-                                  child: Text(
-                                    widget.character,
-                                    style: TextStyle(
-                                      fontSize: 120,
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                          child: widget.character.length == 1
+                              ? svgAsync.when(
+                                  data: (svgString) {
+                                    if (svgString == null) {
+                                      return Center(
+                                        child: Text(
+                                          widget.character,
+                                          style: TextStyle(
+                                            fontSize: 120,
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return SvgPicture.string(
+                                      svgString,
+                                      fit: BoxFit.contain,
+                                      colorFilter: ColorFilter.mode(
+                                        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                        BlendMode.srcIn,
+                                      ),
+                                    );
+                                  },
+                                  loading: () => const Center(child: CircularProgressIndicator()),
+                                  error: (_, __) => Center(
+                                    child: Text(
+                                      widget.character,
+                                      style: TextStyle(
+                                        fontSize: 120,
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                      ),
                                     ),
                                   ),
-                                );
-                              }
-                              return SvgPicture.string(
-                                svgString,
-                                fit: BoxFit.contain,
-                                colorFilter: ColorFilter.mode(
-                                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                  BlendMode.srcIn,
+                                )
+                              : Center(
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(32.0),
+                                      child: Text(
+                                        widget.character,
+                                        style: TextStyle(
+                                          fontSize: 120,
+                                          letterSpacing: 24,
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              );
-                            },
-                            loading: () => const Center(child: CircularProgressIndicator()),
-                            error: (_, __) => Center(
-                              child: Text(
-                                widget.character,
-                                style: TextStyle(
-                                  fontSize: 120,
-                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-                                ),
-                              ),
-                            ),
-                          ),
                         ),
                       // Drawing Canvas
                       Positioned.fill(
