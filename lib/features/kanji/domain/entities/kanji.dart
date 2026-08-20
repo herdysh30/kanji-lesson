@@ -36,9 +36,16 @@ class Kanji extends Equatable {
     return meanings.isNotEmpty ? meanings.first : '';
   }
 
+  /// Helper to convert Katakana to Hiragana
+  String _toHiragana(String text) {
+    return text.replaceAllMapped(RegExp(r'[\u30a1-\u30f6]'), (match) {
+      return String.fromCharCode(match.group(0)!.codeUnitAt(0) - 0x60);
+    });
+  }
+
   /// Primary reading (prefer on'yomi for standalone kanji)
   String get primaryReading {
-    if (onyomi.isNotEmpty) return onyomi.first;
+    if (onyomi.isNotEmpty) return _toHiragana(onyomi.first);
     if (kunyomi.isNotEmpty) return kunyomi.first;
     return '';
   }
