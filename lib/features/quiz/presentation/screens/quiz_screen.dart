@@ -35,29 +35,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     final notifier = ref.read(quizSessionProvider.notifier);
     notifier.answerCurrent(index);
+  }
 
-    // Wait a bit to show correct/incorrect state, then proceed
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (!mounted) return;
+  void _onNextPressed() {
+    final state = ref.read(quizSessionProvider);
+    if (state.isFinished) {
+      context.pushReplacement('/quiz/result');
+    } else {
+      setState(() {
+        _selectedAnswerIndex = null;
+        _isAnswerRevealed = false;
+        _currentInk = null;
+        _showHint = false;
+      });
+      ref.read(quizSessionProvider.notifier).nextQuestion();
       
-      final state = ref.read(quizSessionProvider);
-      if (state.isFinished) {
+      if (ref.read(quizSessionProvider).isFinished) {
         context.pushReplacement('/quiz/result');
-      } else {
-        setState(() {
-          _selectedAnswerIndex = null;
-          _isAnswerRevealed = false;
-          _currentInk = null;
-          _showHint = false;
-        });
-        notifier.nextQuestion();
-        
-        // Check again if it just finished (if it was the last question)
-        if (ref.read(quizSessionProvider).isFinished) {
-           context.pushReplacement('/quiz/result');
-        }
       }
-    });
+    }
   }
 
   @override
@@ -105,9 +101,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
               
               // Prompt Area
-              Expanded(
-                flex: 4,
-                child: Center(
+              if (currentQuestion.type != QuizType.writing)
+                Expanded(
+                  flex: 4,
+                  child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Text(
@@ -115,13 +112,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       style: currentQuestion.type == QuizType.meaning
                           ? AppTheme.kanjiLarge(context).copyWith(fontSize: 120)
                           : Theme.of(context).textTheme.displayMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontWeight: FontWeight.bold,
+                                fontSize: currentQuestion.type == QuizType.writing ? 36 : null,
+                              ),
                       textAlign: TextAlign.center,
                     ),
                   ),
+                  ),
                 ),
-              ),
+              if (currentQuestion.type == QuizType.writing)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    currentQuestion.prompt,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
 
               // Question Instruction
               Padding(
@@ -136,58 +145,100 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
               // Options or Drawing Pad
               Expanded(
-                flex: 6,
+                flex: currentQuestion.type == QuizType.writing ? 1 : 6,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: currentQuestion.type == QuizType.writing
                       ? _buildWritingPad(currentQuestion)
-                      : Column(
-                          children: List.generate(currentQuestion.options.length, (index) {
-                            final isSelected = _selectedAnswerIndex == index;
-                            final isCorrectOption = index == currentQuestion.correctIndex;
-                            
-                            Color buttonColor = Theme.of(context).colorScheme.surfaceContainer;
-                            Color textColor = Theme.of(context).colorScheme.onSurface;
-                            
-                            if (_isAnswerRevealed) {
-                              if (isCorrectOption) {
-                                buttonColor = AppColors.correct;
-                                textColor = Colors.white;
-                              } else if (isSelected && !isCorrectOption) {
-                                buttonColor = AppColors.incorrect;
-                                textColor = Colors.white;
-                              } else {
-                                buttonColor = Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5);
-                                textColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
-                              }
-                            }
-      
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: SizedBox(
-                                width: double.infinity,
-                                height: 64,
-                                child: FilledButton(
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: buttonColor,
-                                    foregroundColor: textColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                      : SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              ...List.generate(currentQuestion.options.length, (index) {
+                                final option = currentQuestion.options[index];
+                                final isSelected = _selectedAnswerIndex == index;
+                                final isCorrectOption = index == currentQuestion.correctIndex;
+                                
+                                Color buttonColor = Theme.of(context).colorScheme.surfaceContainer;
+                                Color textColor = Theme.of(context).colorScheme.onSurface;
+                                
+                                if (_isAnswerRevealed) {
+                                  if (isCorrectOption) {
+                                    buttonColor = AppColors.correct;
+                                    textColor = Colors.white;
+                                  } else if (isSelected && !isCorrectOption) {
+                                    buttonColor = AppColors.incorrect;
+                                    textColor = Colors.white;
+                                  } else {
+                                    buttonColor = Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5);
+                                    textColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
+                                  }
+                                }
+                  
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: buttonColor,
+                                        foregroundColor: textColor,
+                                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                      ),
+                                      onPressed: () => _handleOptionSelected(index, currentQuestion),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            option.text,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          // Show explanation after answering
+                                          if (_isAnswerRevealed && option.kanjiCharacter != null)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 6),
+                                              child: Text(
+                                                _getOptionExplanation(currentQuestion.type, option),
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: textColor.withValues(alpha: 0.85),
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  onPressed: () => _handleOptionSelected(index, currentQuestion),
-                                  child: Text(
-                                    currentQuestion.options[index],
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
+                                );
+                              }),
+                              // Next button
+                              if (_isAnswerRevealed)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4, bottom: 16),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    height: 56,
+                                    child: FilledButton.icon(
+                                      onPressed: _onNextPressed,
+                                      icon: const Icon(Icons.arrow_forward_rounded),
+                                      label: Text(
+                                        sessionState.currentIndex >= sessionState.questions.length - 1
+                                            ? 'See Results'
+                                            : 'Next Question',
+                                      ),
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
                                 ),
-                              ),
-                            );
-                          }),
+                            ],
+                          ),
                         ),
                 ),
               ),
@@ -226,6 +277,24 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
   }
 
+  /// Get explanation text for a quiz option based on quiz type
+  String _getOptionExplanation(QuizType type, QuizOption option) {
+    final kanji = option.kanjiCharacter ?? '';
+    final explanation = option.explanation ?? '';
+    switch (type) {
+      case QuizType.meaning:
+        // Meaning quiz: option text is the meaning, show kanji + reading
+        return '$kanji — $explanation';
+      case QuizType.reading:
+        // Reading quiz: option text is the reading, show kanji + meaning
+        return '$kanji — $explanation';
+      case QuizType.vocabulary:
+        return '$kanji — $explanation';
+      default:
+        return kanji.isNotEmpty ? kanji : '';
+    }
+  }
+
   Future<void> _confirmExit(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
@@ -253,22 +322,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   Widget _buildWritingPad(QuizQuestion currentQuestion) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton.icon(
-              onPressed: _isAnswerRevealed ? null : () => setState(() => _showHint = !_showHint),
-              icon: Icon(_showHint ? Icons.visibility_off : Icons.visibility),
-              label: Text(_showHint ? 'Hide Hint' : 'Show Hint'),
-            ),
-          ],
-        ),
         Expanded(
           child: IgnorePointer(
             ignoring: _isAnswerRevealed,
             child: KanjiDrawingPad(
+              key: ValueKey(currentQuestion.kanjiCharacter ?? currentQuestion.correctAnswer),
               character: currentQuestion.kanjiCharacter ?? currentQuestion.correctAnswer,
               showBackground: _showHint || _isAnswerRevealed,
+              topAction: TextButton.icon(
+                onPressed: _isAnswerRevealed ? null : () => setState(() => _showHint = !_showHint),
+                icon: Icon(_showHint ? Icons.visibility_off : Icons.visibility),
+                label: Text(_showHint ? 'Hide Hint' : 'Show Hint'),
+              ),
               onInkChanged: (ink) => setState(() => _currentInk = ink),
             ),
           ),
@@ -278,10 +343,17 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           width: double.infinity,
           height: 56,
           child: _isAnswerRevealed
-              ? FilledButton(
-                  style: FilledButton.styleFrom(backgroundColor: _selectedAnswerIndex == 0 ? AppColors.correct : AppColors.incorrect),
-                  onPressed: () {},
-                  child: Text(_selectedAnswerIndex == 0 ? 'Correct!' : 'Incorrect. The answer is ${currentQuestion.correctAnswer}'),
+              ? FilledButton.icon(
+                  onPressed: _onNextPressed,
+                  icon: Icon(_selectedAnswerIndex == 0 ? Icons.check_circle_rounded : Icons.close_rounded),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: _selectedAnswerIndex == 0 ? AppColors.correct : AppColors.incorrect,
+                  ),
+                  label: Text(
+                    _selectedAnswerIndex == 0
+                        ? 'Correct! → Next'
+                        : 'Wrong (${currentQuestion.correctAnswer}) → Next',
+                  ),
                 )
               : FilledButton.icon(
                   onPressed: _isChecking || _currentInk == null || _currentInk!.strokes.isEmpty
@@ -339,27 +411,5 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     // If it's correct, we pass 0. If wrong, we pass 1 (which is out of bounds, but it evaluates to wrong!)
     
     ref.read(quizSessionProvider.notifier).answerCurrent(isCorrect ? 0 : 1);
-
-    // Wait and proceed
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (!mounted) return;
-      
-      final sessionState = ref.read(quizSessionProvider);
-      if (sessionState.isFinished) {
-        context.pushReplacement('/quiz/result');
-      } else {
-        setState(() {
-          _selectedAnswerIndex = null;
-          _isAnswerRevealed = false;
-          _currentInk = null;
-          _showHint = false;
-        });
-        ref.read(quizSessionProvider.notifier).nextQuestion();
-        
-        if (ref.read(quizSessionProvider).isFinished) {
-           context.pushReplacement('/quiz/result');
-        }
-      }
-    });
   }
 }

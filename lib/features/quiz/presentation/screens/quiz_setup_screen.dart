@@ -13,6 +13,7 @@ class QuizSetupScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final setup = ref.watch(quizSetupProvider);
     final notifier = ref.read(quizSetupProvider.notifier);
+    final modelStatus = ref.watch(digitalInkModelStatusProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -174,7 +175,45 @@ class QuizSetupScreen extends ConsumerWidget {
               width: double.infinity,
               height: 56,
               child: FilledButton.icon(
-                onPressed: () {
+                onPressed: () async {
+                  if (setup.quizType == QuizType.writing) {
+                    final isDownloaded = modelStatus.valueOrNull ?? false;
+                    if (!isDownloaded) {
+                      // Prompt user
+                      final shouldDownload = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Model Required'),
+                          content: const Text('To use the Writing Quiz, you need to download the Japanese Handwriting AI Model (~20MB). Do you want to download it now?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: const Text('Download'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (shouldDownload == true) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Downloading model... (~20MB)')),
+                        );
+                        final success = await ref.read(mlkitDigitalInkServiceProvider).downloadModel();
+                        ref.invalidate(digitalInkModelStatusProvider);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(success ? 'Download complete! You can now start the quiz.' : 'Download failed.')),
+                          );
+                        }
+                      }
+                      return; // Don't start quiz yet
+                    }
+                  }
                   context.push('/quiz/session');
                 },
                 icon: const Icon(Icons.play_arrow_rounded),

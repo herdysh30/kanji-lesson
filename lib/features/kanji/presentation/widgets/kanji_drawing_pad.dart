@@ -9,11 +9,13 @@ class KanjiDrawingPad extends ConsumerStatefulWidget {
     super.key,
     required this.character,
     this.showBackground = true,
+    this.topAction,
     this.onInkChanged,
   });
   
   final String character;
   final bool showBackground;
+  final Widget? topAction;
   final ValueChanged<mlkit.Ink>? onInkChanged;
 
   @override
@@ -89,10 +91,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Trace the Kanji',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
+            if (widget.topAction != null) widget.topAction! else const SizedBox.shrink(),
             Row(
               children: [
                 IconButton(
@@ -101,12 +100,12 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                   onPressed: _paths.isNotEmpty ? _undo : null,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.clear_rounded),
-                  tooltip: 'Clear Pad',
+                  icon: const Icon(Icons.delete_outline_rounded),
+                  tooltip: 'Clear pad',
                   onPressed: _paths.isNotEmpty ? _clearPad : null,
                 ),
               ],
-            )
+            ),
           ],
         ),
         const SizedBox(height: 16),

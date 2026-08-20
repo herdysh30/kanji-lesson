@@ -14,6 +14,19 @@ enum QuizType {
   writing, // Show meaning/reading → draw kanji
 }
 
+/// A single quiz option with metadata for explanations
+class QuizOption {
+  const QuizOption({
+    required this.text,
+    this.kanjiCharacter,
+    this.explanation,
+  });
+
+  final String text;           // The displayed answer text (meaning or reading)
+  final String? kanjiCharacter; // The original kanji for this option
+  final String? explanation;    // Extra info (e.g. meaning for reading quiz, reading for meaning quiz)
+}
+
 /// A single quiz question
 class QuizQuestion {
   const QuizQuestion({
@@ -28,11 +41,11 @@ class QuizQuestion {
   final QuizType type;
   final String prompt;
   final String correctAnswer;
-  final List<String> options; // 4 options including correct
+  final List<QuizOption> options; // 4 options including correct
   final String? kanjiCharacter;
   final String? audioText; // For TTS
 
-  int get correctIndex => options.indexOf(correctAnswer);
+  int get correctIndex => options.indexWhere((o) => o.text == correctAnswer);
 }
 
 /// Quiz session result
@@ -89,7 +102,7 @@ class QuizGenerator {
     int count = 10,
     bool isId = false,
   }) {
-    if (kanjiPool.length < AppConstants.quizOptionsCount) return [];
+    if (kanjiPool.isEmpty) return [];
 
     final questions = <QuizQuestion>[];
     final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
@@ -99,19 +112,27 @@ class QuizGenerator {
       if (kanji.meanings.isEmpty) continue;
 
       final correctAnswer = kanji.primaryMeaning(isId);
+      final correctOption = QuizOption(
+        text: correctAnswer,
+        kanjiCharacter: kanji.character,
+        explanation: kanji.primaryReading,
+      );
 
-      // Get distractors from other kanji
-      final distractors = kanjiPool
+      // Get distractors from other kanji (with metadata)
+      final distractorKanji = kanjiPool
           .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
-          .map((k) => k.primaryMeaning(isId))
-          .where((m) => m != correctAnswer)
-          .toSet()
+          .where((k) => k.primaryMeaning(isId) != correctAnswer)
           .toList()
         ..shuffle(_random);
 
-      if (distractors.length < 3) continue;
+      final requiredDistractors = min(3, distractorKanji.length);
+      final distractorOptions = distractorKanji.take(requiredDistractors).map((k) => QuizOption(
+        text: k.primaryMeaning(isId),
+        kanjiCharacter: k.character,
+        explanation: k.primaryReading,
+      )).toList();
 
-      final options = [correctAnswer, ...distractors.take(3)]..shuffle(_random);
+      final options = [correctOption, ...distractorOptions]..shuffle(_random);
 
       questions.add(QuizQuestion(
         type: QuizType.meaning,
@@ -131,7 +152,7 @@ class QuizGenerator {
     List<Kanji> kanjiPool, {
     int count = 10,
   }) {
-    if (kanjiPool.length < AppConstants.quizOptionsCount) return [];
+    if (kanjiPool.isEmpty) return [];
 
     final questions = <QuizQuestion>[];
     final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
@@ -140,19 +161,26 @@ class QuizGenerator {
 
     for (final kanji in selected) {
       final correctAnswer = kanji.primaryReading;
+      final correctOption = QuizOption(
+        text: correctAnswer,
+        kanjiCharacter: kanji.character,
+        explanation: kanji.primaryMeaning(false),
+      );
 
-      final distractors = kanjiPool
-          .where((k) =>
-              k.character != kanji.character && k.allReadings.isNotEmpty)
-          .map((k) => k.primaryReading)
-          .where((r) => r != correctAnswer)
-          .toSet()
+      final distractorKanji = kanjiPool
+          .where((k) => k.character != kanji.character && k.allReadings.isNotEmpty)
+          .where((k) => k.primaryReading != correctAnswer)
           .toList()
         ..shuffle(_random);
 
-      if (distractors.length < 3) continue;
+      final requiredDistractors = min(3, distractorKanji.length);
+      final distractorOptions = distractorKanji.take(requiredDistractors).map((k) => QuizOption(
+        text: k.primaryReading,
+        kanjiCharacter: k.character,
+        explanation: k.primaryMeaning(false),
+      )).toList();
 
-      final options = [correctAnswer, ...distractors.take(3)]..shuffle(_random);
+      final options = [correctOption, ...distractorOptions]..shuffle(_random);
 
       questions.add(QuizQuestion(
         type: QuizType.reading,
@@ -172,7 +200,7 @@ class QuizGenerator {
     int count = 10,
     bool isId = false,
   }) {
-    if (vocabPool.length < AppConstants.quizOptionsCount) return [];
+    if (vocabPool.isEmpty) return [];
 
     final questions = <QuizQuestion>[];
     final shuffled = List<Vocabulary>.from(vocabPool)..shuffle(_random);
@@ -183,18 +211,26 @@ class QuizGenerator {
 
       final correctAnswer = vocab.primaryMeaning(isId);
       final prompt = vocab.word;
+      final correctOption = QuizOption(
+        text: correctAnswer,
+        kanjiCharacter: vocab.word,
+        explanation: vocab.reading,
+      );
 
       // Get distractors from other vocabularies
-      final distractors = vocabPool
+      final distractorVocabs = vocabPool
           .where((v) => v.word != vocab.word && v.meanings.isNotEmpty)
-          .map((v) => v.primaryMeaning(isId))
-          .toSet()
           .toList()
         ..shuffle(_random);
 
-      if (distractors.length < 3) continue;
-      
-      final options = [correctAnswer, ...distractors.take(3)]..shuffle(_random);
+      final requiredDistractors = min(3, distractorVocabs.length);
+      final distractorOptions = distractorVocabs.take(requiredDistractors).map((v) => QuizOption(
+        text: v.primaryMeaning(isId),
+        kanjiCharacter: v.word,
+        explanation: v.reading,
+      )).toList();
+
+      final options = [correctOption, ...distractorOptions]..shuffle(_random);
 
       questions.add(QuizQuestion(
         type: QuizType.vocabulary,
@@ -243,7 +279,7 @@ class QuizGenerator {
         type: QuizType.writing,
         prompt: prompt,
         correctAnswer: kanji.character,
-        options: [kanji.character], // Not really used for writing quiz but required
+        options: [QuizOption(text: kanji.character, kanjiCharacter: kanji.character, explanation: meaningStr)],
         kanjiCharacter: kanji.character,
       ));
     }

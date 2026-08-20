@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
+import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 
 class QuizSetupState {
@@ -64,10 +65,32 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
   final db = ref.watch(databaseProvider);
   final localDataSource = ref.watch(kanjiLocalDataSourceProvider);
   
+  final repo = ref.watch(kanjiRepositoryProvider);
+  
   if (setup.selectedJlptLevel != null) {
-    final entries = await localDataSource.getCachedKanjiByJlpt(setup.selectedJlptLevel!);
-    if (entries.isEmpty) return [];
+    // Get list of all characters in this JLPT level
+    final chars = await repo.getKanjiListByJlpt(setup.selectedJlptLevel!);
+    if (chars.isEmpty) return [];
     
+    // We only need enough kanji for the questions + a few extra for distractors
+    // This avoids hitting API rate limits or taking too long for 40+ sequential requests
+    final poolSize = (setup.questionCount + 5).clamp(10, chars.length);
+    final selectedChars = (List.of(chars)..shuffle()).take(poolSize).toList();
+    
+    // Fetch full details for the selected characters sequentially to avoid API rate limits (HTTP 429)
+    final entries = <Kanji>[];
+    for (final char in selectedChars) {
+      try {
+        final detail = await repo.getKanjiDetail(char);
+        entries.add(detail);
+      } catch (_) {
+        // Skip on error
+      }
+      // Stop early if we have enough kanji for the quiz
+      if (entries.length >= poolSize) break;
+    }
+    
+    if (entries.isEmpty) return [];
     switch (setup.quizType) {
       case QuizType.meaning:
         return generator.generateMeaningQuiz(entries, count: setup.questionCount, isId: isId);
