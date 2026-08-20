@@ -46,6 +46,17 @@ class $KanjiEntriesTable extends KanjiEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _meaningsIdMeta = const VerificationMeta(
+    'meaningsId',
+  );
+  @override
+  late final GeneratedColumn<String> meaningsId = GeneratedColumn<String>(
+    'meanings_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _onyomiMeta = const VerificationMeta('onyomi');
   @override
   late final GeneratedColumn<String> onyomi = GeneratedColumn<String>(
@@ -150,6 +161,7 @@ class $KanjiEntriesTable extends KanjiEntries
     character,
     jlptLevel,
     meanings,
+    meaningsId,
     onyomi,
     kunyomi,
     nameReadings,
@@ -193,6 +205,12 @@ class $KanjiEntriesTable extends KanjiEntries
       );
     } else if (isInserting) {
       context.missing(_meaningsMeta);
+    }
+    if (data.containsKey('meanings_id')) {
+      context.handle(
+        _meaningsIdMeta,
+        meaningsId.isAcceptableOrUnknown(data['meanings_id']!, _meaningsIdMeta),
+      );
     }
     if (data.containsKey('onyomi')) {
       context.handle(
@@ -282,6 +300,10 @@ class $KanjiEntriesTable extends KanjiEntries
         DriftSqlType.string,
         data['${effectivePrefix}meanings'],
       )!,
+      meaningsId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meanings_id'],
+      ),
       onyomi: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}onyomi'],
@@ -331,6 +353,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
   final String character;
   final int? jlptLevel;
   final String meanings;
+  final String? meaningsId;
   final String onyomi;
   final String kunyomi;
   final String nameReadings;
@@ -344,6 +367,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
     required this.character,
     this.jlptLevel,
     required this.meanings,
+    this.meaningsId,
     required this.onyomi,
     required this.kunyomi,
     required this.nameReadings,
@@ -362,6 +386,9 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
       map['jlpt_level'] = Variable<int>(jlptLevel);
     }
     map['meanings'] = Variable<String>(meanings);
+    if (!nullToAbsent || meaningsId != null) {
+      map['meanings_id'] = Variable<String>(meaningsId);
+    }
     map['onyomi'] = Variable<String>(onyomi);
     map['kunyomi'] = Variable<String>(kunyomi);
     map['name_readings'] = Variable<String>(nameReadings);
@@ -387,6 +414,9 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
           ? const Value.absent()
           : Value(jlptLevel),
       meanings: Value(meanings),
+      meaningsId: meaningsId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(meaningsId),
       onyomi: Value(onyomi),
       kunyomi: Value(kunyomi),
       nameReadings: Value(nameReadings),
@@ -414,6 +444,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
       character: serializer.fromJson<String>(json['character']),
       jlptLevel: serializer.fromJson<int?>(json['jlptLevel']),
       meanings: serializer.fromJson<String>(json['meanings']),
+      meaningsId: serializer.fromJson<String?>(json['meaningsId']),
       onyomi: serializer.fromJson<String>(json['onyomi']),
       kunyomi: serializer.fromJson<String>(json['kunyomi']),
       nameReadings: serializer.fromJson<String>(json['nameReadings']),
@@ -432,6 +463,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
       'character': serializer.toJson<String>(character),
       'jlptLevel': serializer.toJson<int?>(jlptLevel),
       'meanings': serializer.toJson<String>(meanings),
+      'meaningsId': serializer.toJson<String?>(meaningsId),
       'onyomi': serializer.toJson<String>(onyomi),
       'kunyomi': serializer.toJson<String>(kunyomi),
       'nameReadings': serializer.toJson<String>(nameReadings),
@@ -448,6 +480,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
     String? character,
     Value<int?> jlptLevel = const Value.absent(),
     String? meanings,
+    Value<String?> meaningsId = const Value.absent(),
     String? onyomi,
     String? kunyomi,
     String? nameReadings,
@@ -461,6 +494,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
     character: character ?? this.character,
     jlptLevel: jlptLevel.present ? jlptLevel.value : this.jlptLevel,
     meanings: meanings ?? this.meanings,
+    meaningsId: meaningsId.present ? meaningsId.value : this.meaningsId,
     onyomi: onyomi ?? this.onyomi,
     kunyomi: kunyomi ?? this.kunyomi,
     nameReadings: nameReadings ?? this.nameReadings,
@@ -478,6 +512,9 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
       character: data.character.present ? data.character.value : this.character,
       jlptLevel: data.jlptLevel.present ? data.jlptLevel.value : this.jlptLevel,
       meanings: data.meanings.present ? data.meanings.value : this.meanings,
+      meaningsId: data.meaningsId.present
+          ? data.meaningsId.value
+          : this.meaningsId,
       onyomi: data.onyomi.present ? data.onyomi.value : this.onyomi,
       kunyomi: data.kunyomi.present ? data.kunyomi.value : this.kunyomi,
       nameReadings: data.nameReadings.present
@@ -502,6 +539,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
           ..write('character: $character, ')
           ..write('jlptLevel: $jlptLevel, ')
           ..write('meanings: $meanings, ')
+          ..write('meaningsId: $meaningsId, ')
           ..write('onyomi: $onyomi, ')
           ..write('kunyomi: $kunyomi, ')
           ..write('nameReadings: $nameReadings, ')
@@ -520,6 +558,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
     character,
     jlptLevel,
     meanings,
+    meaningsId,
     onyomi,
     kunyomi,
     nameReadings,
@@ -537,6 +576,7 @@ class KanjiEntry extends DataClass implements Insertable<KanjiEntry> {
           other.character == this.character &&
           other.jlptLevel == this.jlptLevel &&
           other.meanings == this.meanings &&
+          other.meaningsId == this.meaningsId &&
           other.onyomi == this.onyomi &&
           other.kunyomi == this.kunyomi &&
           other.nameReadings == this.nameReadings &&
@@ -552,6 +592,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
   final Value<String> character;
   final Value<int?> jlptLevel;
   final Value<String> meanings;
+  final Value<String?> meaningsId;
   final Value<String> onyomi;
   final Value<String> kunyomi;
   final Value<String> nameReadings;
@@ -566,6 +607,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
     this.character = const Value.absent(),
     this.jlptLevel = const Value.absent(),
     this.meanings = const Value.absent(),
+    this.meaningsId = const Value.absent(),
     this.onyomi = const Value.absent(),
     this.kunyomi = const Value.absent(),
     this.nameReadings = const Value.absent(),
@@ -581,6 +623,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
     required String character,
     this.jlptLevel = const Value.absent(),
     required String meanings,
+    this.meaningsId = const Value.absent(),
     required String onyomi,
     required String kunyomi,
     this.nameReadings = const Value.absent(),
@@ -599,6 +642,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
     Expression<String>? character,
     Expression<int>? jlptLevel,
     Expression<String>? meanings,
+    Expression<String>? meaningsId,
     Expression<String>? onyomi,
     Expression<String>? kunyomi,
     Expression<String>? nameReadings,
@@ -614,6 +658,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
       if (character != null) 'character': character,
       if (jlptLevel != null) 'jlpt_level': jlptLevel,
       if (meanings != null) 'meanings': meanings,
+      if (meaningsId != null) 'meanings_id': meaningsId,
       if (onyomi != null) 'onyomi': onyomi,
       if (kunyomi != null) 'kunyomi': kunyomi,
       if (nameReadings != null) 'name_readings': nameReadings,
@@ -631,6 +676,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
     Value<String>? character,
     Value<int?>? jlptLevel,
     Value<String>? meanings,
+    Value<String?>? meaningsId,
     Value<String>? onyomi,
     Value<String>? kunyomi,
     Value<String>? nameReadings,
@@ -646,6 +692,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
       character: character ?? this.character,
       jlptLevel: jlptLevel ?? this.jlptLevel,
       meanings: meanings ?? this.meanings,
+      meaningsId: meaningsId ?? this.meaningsId,
       onyomi: onyomi ?? this.onyomi,
       kunyomi: kunyomi ?? this.kunyomi,
       nameReadings: nameReadings ?? this.nameReadings,
@@ -670,6 +717,9 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
     }
     if (meanings.present) {
       map['meanings'] = Variable<String>(meanings.value);
+    }
+    if (meaningsId.present) {
+      map['meanings_id'] = Variable<String>(meaningsId.value);
     }
     if (onyomi.present) {
       map['onyomi'] = Variable<String>(onyomi.value);
@@ -710,6 +760,7 @@ class KanjiEntriesCompanion extends UpdateCompanion<KanjiEntry> {
           ..write('character: $character, ')
           ..write('jlptLevel: $jlptLevel, ')
           ..write('meanings: $meanings, ')
+          ..write('meaningsId: $meaningsId, ')
           ..write('onyomi: $onyomi, ')
           ..write('kunyomi: $kunyomi, ')
           ..write('nameReadings: $nameReadings, ')
@@ -786,6 +837,17 @@ class $VocabularyEntriesTable extends VocabularyEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _meaningsIdMeta = const VerificationMeta(
+    'meaningsId',
+  );
+  @override
+  late final GeneratedColumn<String> meaningsId = GeneratedColumn<String>(
+    'meanings_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _prioritiesMeta = const VerificationMeta(
     'priorities',
   );
@@ -817,6 +879,7 @@ class $VocabularyEntriesTable extends VocabularyEntries
     word,
     reading,
     meanings,
+    meaningsId,
     priorities,
     cachedAt,
   ];
@@ -870,6 +933,12 @@ class $VocabularyEntriesTable extends VocabularyEntries
     } else if (isInserting) {
       context.missing(_meaningsMeta);
     }
+    if (data.containsKey('meanings_id')) {
+      context.handle(
+        _meaningsIdMeta,
+        meaningsId.isAcceptableOrUnknown(data['meanings_id']!, _meaningsIdMeta),
+      );
+    }
     if (data.containsKey('priorities')) {
       context.handle(
         _prioritiesMeta,
@@ -911,6 +980,10 @@ class $VocabularyEntriesTable extends VocabularyEntries
         DriftSqlType.string,
         data['${effectivePrefix}meanings'],
       )!,
+      meaningsId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meanings_id'],
+      ),
       priorities: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}priorities'],
@@ -934,6 +1007,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
   final String word;
   final String reading;
   final String meanings;
+  final String? meaningsId;
   final String priorities;
   final DateTime cachedAt;
   const VocabularyEntry({
@@ -942,6 +1016,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
     required this.word,
     required this.reading,
     required this.meanings,
+    this.meaningsId,
     required this.priorities,
     required this.cachedAt,
   });
@@ -953,6 +1028,9 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
     map['word'] = Variable<String>(word);
     map['reading'] = Variable<String>(reading);
     map['meanings'] = Variable<String>(meanings);
+    if (!nullToAbsent || meaningsId != null) {
+      map['meanings_id'] = Variable<String>(meaningsId);
+    }
     map['priorities'] = Variable<String>(priorities);
     map['cached_at'] = Variable<DateTime>(cachedAt);
     return map;
@@ -965,6 +1043,9 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
       word: Value(word),
       reading: Value(reading),
       meanings: Value(meanings),
+      meaningsId: meaningsId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(meaningsId),
       priorities: Value(priorities),
       cachedAt: Value(cachedAt),
     );
@@ -981,6 +1062,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
       word: serializer.fromJson<String>(json['word']),
       reading: serializer.fromJson<String>(json['reading']),
       meanings: serializer.fromJson<String>(json['meanings']),
+      meaningsId: serializer.fromJson<String?>(json['meaningsId']),
       priorities: serializer.fromJson<String>(json['priorities']),
       cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
     );
@@ -994,6 +1076,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
       'word': serializer.toJson<String>(word),
       'reading': serializer.toJson<String>(reading),
       'meanings': serializer.toJson<String>(meanings),
+      'meaningsId': serializer.toJson<String?>(meaningsId),
       'priorities': serializer.toJson<String>(priorities),
       'cachedAt': serializer.toJson<DateTime>(cachedAt),
     };
@@ -1005,6 +1088,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
     String? word,
     String? reading,
     String? meanings,
+    Value<String?> meaningsId = const Value.absent(),
     String? priorities,
     DateTime? cachedAt,
   }) => VocabularyEntry(
@@ -1013,6 +1097,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
     word: word ?? this.word,
     reading: reading ?? this.reading,
     meanings: meanings ?? this.meanings,
+    meaningsId: meaningsId.present ? meaningsId.value : this.meaningsId,
     priorities: priorities ?? this.priorities,
     cachedAt: cachedAt ?? this.cachedAt,
   );
@@ -1025,6 +1110,9 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
       word: data.word.present ? data.word.value : this.word,
       reading: data.reading.present ? data.reading.value : this.reading,
       meanings: data.meanings.present ? data.meanings.value : this.meanings,
+      meaningsId: data.meaningsId.present
+          ? data.meaningsId.value
+          : this.meaningsId,
       priorities: data.priorities.present
           ? data.priorities.value
           : this.priorities,
@@ -1040,6 +1128,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
           ..write('word: $word, ')
           ..write('reading: $reading, ')
           ..write('meanings: $meanings, ')
+          ..write('meaningsId: $meaningsId, ')
           ..write('priorities: $priorities, ')
           ..write('cachedAt: $cachedAt')
           ..write(')'))
@@ -1053,6 +1142,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
     word,
     reading,
     meanings,
+    meaningsId,
     priorities,
     cachedAt,
   );
@@ -1065,6 +1155,7 @@ class VocabularyEntry extends DataClass implements Insertable<VocabularyEntry> {
           other.word == this.word &&
           other.reading == this.reading &&
           other.meanings == this.meanings &&
+          other.meaningsId == this.meaningsId &&
           other.priorities == this.priorities &&
           other.cachedAt == this.cachedAt);
 }
@@ -1075,6 +1166,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
   final Value<String> word;
   final Value<String> reading;
   final Value<String> meanings;
+  final Value<String?> meaningsId;
   final Value<String> priorities;
   final Value<DateTime> cachedAt;
   const VocabularyEntriesCompanion({
@@ -1083,6 +1175,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
     this.word = const Value.absent(),
     this.reading = const Value.absent(),
     this.meanings = const Value.absent(),
+    this.meaningsId = const Value.absent(),
     this.priorities = const Value.absent(),
     this.cachedAt = const Value.absent(),
   });
@@ -1092,6 +1185,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
     required String word,
     required String reading,
     required String meanings,
+    this.meaningsId = const Value.absent(),
     this.priorities = const Value.absent(),
     this.cachedAt = const Value.absent(),
   }) : kanjiCharacter = Value(kanjiCharacter),
@@ -1104,6 +1198,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
     Expression<String>? word,
     Expression<String>? reading,
     Expression<String>? meanings,
+    Expression<String>? meaningsId,
     Expression<String>? priorities,
     Expression<DateTime>? cachedAt,
   }) {
@@ -1113,6 +1208,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
       if (word != null) 'word': word,
       if (reading != null) 'reading': reading,
       if (meanings != null) 'meanings': meanings,
+      if (meaningsId != null) 'meanings_id': meaningsId,
       if (priorities != null) 'priorities': priorities,
       if (cachedAt != null) 'cached_at': cachedAt,
     });
@@ -1124,6 +1220,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
     Value<String>? word,
     Value<String>? reading,
     Value<String>? meanings,
+    Value<String?>? meaningsId,
     Value<String>? priorities,
     Value<DateTime>? cachedAt,
   }) {
@@ -1133,6 +1230,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
       word: word ?? this.word,
       reading: reading ?? this.reading,
       meanings: meanings ?? this.meanings,
+      meaningsId: meaningsId ?? this.meaningsId,
       priorities: priorities ?? this.priorities,
       cachedAt: cachedAt ?? this.cachedAt,
     );
@@ -1156,6 +1254,9 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
     if (meanings.present) {
       map['meanings'] = Variable<String>(meanings.value);
     }
+    if (meaningsId.present) {
+      map['meanings_id'] = Variable<String>(meaningsId.value);
+    }
     if (priorities.present) {
       map['priorities'] = Variable<String>(priorities.value);
     }
@@ -1173,6 +1274,7 @@ class VocabularyEntriesCompanion extends UpdateCompanion<VocabularyEntry> {
           ..write('word: $word, ')
           ..write('reading: $reading, ')
           ..write('meanings: $meanings, ')
+          ..write('meaningsId: $meaningsId, ')
           ..write('priorities: $priorities, ')
           ..write('cachedAt: $cachedAt')
           ..write(')'))
@@ -3155,6 +3257,7 @@ typedef $$KanjiEntriesTableCreateCompanionBuilder =
       required String character,
       Value<int?> jlptLevel,
       required String meanings,
+      Value<String?> meaningsId,
       required String onyomi,
       required String kunyomi,
       Value<String> nameReadings,
@@ -3171,6 +3274,7 @@ typedef $$KanjiEntriesTableUpdateCompanionBuilder =
       Value<String> character,
       Value<int?> jlptLevel,
       Value<String> meanings,
+      Value<String?> meaningsId,
       Value<String> onyomi,
       Value<String> kunyomi,
       Value<String> nameReadings,
@@ -3204,6 +3308,11 @@ class $$KanjiEntriesTableFilterComposer
 
   ColumnFilters<String> get meanings => $composableBuilder(
     column: $table.meanings,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get meaningsId => $composableBuilder(
+    column: $table.meaningsId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3277,6 +3386,11 @@ class $$KanjiEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get meaningsId => $composableBuilder(
+    column: $table.meaningsId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get onyomi => $composableBuilder(
     column: $table.onyomi,
     builder: (column) => ColumnOrderings(column),
@@ -3340,6 +3454,11 @@ class $$KanjiEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get meanings =>
       $composableBuilder(column: $table.meanings, builder: (column) => column);
+
+  GeneratedColumn<String> get meaningsId => $composableBuilder(
+    column: $table.meaningsId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get onyomi =>
       $composableBuilder(column: $table.onyomi, builder: (column) => column);
@@ -3409,6 +3528,7 @@ class $$KanjiEntriesTableTableManager
                 Value<String> character = const Value.absent(),
                 Value<int?> jlptLevel = const Value.absent(),
                 Value<String> meanings = const Value.absent(),
+                Value<String?> meaningsId = const Value.absent(),
                 Value<String> onyomi = const Value.absent(),
                 Value<String> kunyomi = const Value.absent(),
                 Value<String> nameReadings = const Value.absent(),
@@ -3423,6 +3543,7 @@ class $$KanjiEntriesTableTableManager
                 character: character,
                 jlptLevel: jlptLevel,
                 meanings: meanings,
+                meaningsId: meaningsId,
                 onyomi: onyomi,
                 kunyomi: kunyomi,
                 nameReadings: nameReadings,
@@ -3439,6 +3560,7 @@ class $$KanjiEntriesTableTableManager
                 required String character,
                 Value<int?> jlptLevel = const Value.absent(),
                 required String meanings,
+                Value<String?> meaningsId = const Value.absent(),
                 required String onyomi,
                 required String kunyomi,
                 Value<String> nameReadings = const Value.absent(),
@@ -3453,6 +3575,7 @@ class $$KanjiEntriesTableTableManager
                 character: character,
                 jlptLevel: jlptLevel,
                 meanings: meanings,
+                meaningsId: meaningsId,
                 onyomi: onyomi,
                 kunyomi: kunyomi,
                 nameReadings: nameReadings,
@@ -3496,6 +3619,7 @@ typedef $$VocabularyEntriesTableCreateCompanionBuilder =
       required String word,
       required String reading,
       required String meanings,
+      Value<String?> meaningsId,
       Value<String> priorities,
       Value<DateTime> cachedAt,
     });
@@ -3506,6 +3630,7 @@ typedef $$VocabularyEntriesTableUpdateCompanionBuilder =
       Value<String> word,
       Value<String> reading,
       Value<String> meanings,
+      Value<String?> meaningsId,
       Value<String> priorities,
       Value<DateTime> cachedAt,
     });
@@ -3541,6 +3666,11 @@ class $$VocabularyEntriesTableFilterComposer
 
   ColumnFilters<String> get meanings => $composableBuilder(
     column: $table.meanings,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get meaningsId => $composableBuilder(
+    column: $table.meaningsId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3589,6 +3719,11 @@ class $$VocabularyEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get meaningsId => $composableBuilder(
+    column: $table.meaningsId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get priorities => $composableBuilder(
     column: $table.priorities,
     builder: (column) => ColumnOrderings(column),
@@ -3625,6 +3760,11 @@ class $$VocabularyEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get meanings =>
       $composableBuilder(column: $table.meanings, builder: (column) => column);
+
+  GeneratedColumn<String> get meaningsId => $composableBuilder(
+    column: $table.meaningsId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get priorities => $composableBuilder(
     column: $table.priorities,
@@ -3680,6 +3820,7 @@ class $$VocabularyEntriesTableTableManager
                 Value<String> word = const Value.absent(),
                 Value<String> reading = const Value.absent(),
                 Value<String> meanings = const Value.absent(),
+                Value<String?> meaningsId = const Value.absent(),
                 Value<String> priorities = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
               }) => VocabularyEntriesCompanion(
@@ -3688,6 +3829,7 @@ class $$VocabularyEntriesTableTableManager
                 word: word,
                 reading: reading,
                 meanings: meanings,
+                meaningsId: meaningsId,
                 priorities: priorities,
                 cachedAt: cachedAt,
               ),
@@ -3698,6 +3840,7 @@ class $$VocabularyEntriesTableTableManager
                 required String word,
                 required String reading,
                 required String meanings,
+                Value<String?> meaningsId = const Value.absent(),
                 Value<String> priorities = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
               }) => VocabularyEntriesCompanion.insert(
@@ -3706,6 +3849,7 @@ class $$VocabularyEntriesTableTableManager
                 word: word,
                 reading: reading,
                 meanings: meanings,
+                meaningsId: meaningsId,
                 priorities: priorities,
                 cachedAt: cachedAt,
               ),

@@ -10,6 +10,7 @@ class KanjiEntries extends Table {
   TextColumn get character => text().withLength(min: 1, max: 4)();
   IntColumn get jlptLevel => integer().nullable()();
   TextColumn get meanings => text()(); // JSON encoded list
+  TextColumn get meaningsId => text().nullable()(); // JSON encoded list of Indonesian meanings
   TextColumn get onyomi => text()(); // JSON encoded list
   TextColumn get kunyomi => text()(); // JSON encoded list
   TextColumn get nameReadings => text().withDefault(const Constant('[]'))();
@@ -31,6 +32,7 @@ class VocabularyEntries extends Table {
   TextColumn get word => text()();
   TextColumn get reading => text()();
   TextColumn get meanings => text()(); // JSON encoded list
+  TextColumn get meaningsId => text().nullable()(); // JSON encoded list
   TextColumn get priorities => text().withDefault(const Constant('[]'))();
   DateTimeColumn get cachedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -106,7 +108,22 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from == 1) {
+          await m.addColumn(kanjiEntries, kanjiEntries.meaningsId);
+          await m.addColumn(vocabularyEntries, vocabularyEntries.meaningsId);
+        }
+      },
+    );
+  }
 
   // ─── Kanji Cache Operations ─────────────────────────────────
 
@@ -165,6 +182,31 @@ class AppDatabase extends _$AppDatabase {
     return into(userKanjiProgressEntries).insertOnConflictUpdate(entry);
   }
 
+  Future<void> updateProgress({
+    required String kanjiCharacter,
+    required String status,
+    required double ease,
+    required int intervalDays,
+    required int repetitions,
+    required DateTime nextReviewAt,
+    required bool isCorrect,
+  }) async {
+    final existing = await getProgress(kanjiCharacter);
+    
+    await upsertProgress(
+      UserKanjiProgressEntriesCompanion(
+        kanjiCharacter: Value(kanjiCharacter),
+        status: Value(status),
+        ease: Value(ease),
+        intervalDays: Value(intervalDays),
+        repetitions: Value(repetitions),
+        nextReviewAt: Value(nextReviewAt),
+        correctCount: Value((existing?.correctCount ?? 0) + (isCorrect ? 1 : 0)),
+        wrongCount: Value((existing?.wrongCount ?? 0) + (isCorrect ? 0 : 1)),
+      ),
+    );
+  }
+
   Future<UserKanjiProgressEntry?> getProgress(String character) {
     return (select(userKanjiProgressEntries)
           ..where((t) => t.kanjiCharacter.equals(character)))
@@ -187,6 +229,45 @@ class AppDatabase extends _$AppDatabase {
               t.nextReviewAt.isSmallerOrEqualValue(now) &
               t.status.isNotIn(['unseen']))
           ..orderBy([(t) => OrderingTerm.asc(t.nextReviewAt)]))
+        .get();
+  }
+
+  Future<List<UserKanjiProgressEntry>> startLearningNewKanji(int limit, {int? jlptLevel}) async {
+    // 1. Get unseen kanji characters
+    final unseenChars = await (select(kanjiEntries)
+          ..where((k) {
+            final subquery = selectOnly(userKanjiProgressEntries)
+              ..addColumns([userKanjiProgressEntries.kanjiCharacter])
+              ..where(userKanjiProgressEntries.status.isNotIn(['unseen']));
+            
+            var expr = k.character.isNotInQuery(subquery);
+            if (jlptLevel != null) {
+              expr = expr & k.jlptLevel.equals(jlptLevel);
+            }
+            return expr;
+          })
+          ..orderBy([(k) => OrderingTerm.desc(k.jlptLevel)]) // N5 first
+          ..limit(limit))
+        .map((row) => row.character)
+        .get();
+
+    if (unseenChars.isEmpty) return [];
+
+    // 2. Mark them as learning
+    final now = DateTime.now();
+    for (final char in unseenChars) {
+      await upsertProgress(UserKanjiProgressEntriesCompanion(
+        kanjiCharacter: Value(char),
+        status: const Value('learning'),
+        firstLearnedAt: Value(now),
+        nextReviewAt: Value(now),
+        updatedAt: Value(now),
+      ));
+    }
+
+    // 3. Return their new progress entries
+    return (select(userKanjiProgressEntries)
+          ..where((t) => t.kanjiCharacter.isIn(unseenChars)))
         .get();
   }
 
@@ -245,6 +326,23 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertDailyProgress(DailyProgressEntriesCompanion entry) {
     return into(dailyProgressEntries).insertOnConflictUpdate(entry);
+  }
+
+  Future<void> incrementDailyReviewed(bool isCorrect) async {
+    final today = DateTime.now();
+    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    
+    final existing = await getDailyProgress(dateStr);
+    
+    await upsertDailyProgress(
+      DailyProgressEntriesCompanion(
+        date: Value(dateStr),
+        reviewedKanjiCount: Value((existing?.reviewedKanjiCount ?? 0) + 1),
+        newKanjiCount: Value(existing?.newKanjiCount ?? 0),
+        correctAnswers: Value((existing?.correctAnswers ?? 0) + (isCorrect ? 1 : 0)),
+        wrongAnswers: Value((existing?.wrongAnswers ?? 0) + (isCorrect ? 0 : 1)),
+      ),
+    );
   }
 
   Future<DailyProgressEntry?> getDailyProgress(String date) {

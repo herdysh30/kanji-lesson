@@ -6,16 +6,21 @@ class Vocabulary extends Equatable {
     required this.word,
     required this.reading,
     required this.meanings,
+    this.meaningsId = const [],
     this.priorities = const [],
   });
 
   final String word;
   final String reading;
   final List<String> meanings;
+  final List<String> meaningsId;
   final List<String> priorities;
 
-  /// Primary meaning
-  String get primaryMeaning => meanings.isNotEmpty ? meanings.first : '';
+  /// Primary meaning (Indonesian or English fallback)
+  String primaryMeaning(bool isId) {
+    if (isId && meaningsId.isNotEmpty) return meaningsId.first;
+    return meanings.isNotEmpty ? meanings.first : '';
+  }
 
   /// Check if this is a common word
   bool get isCommon =>

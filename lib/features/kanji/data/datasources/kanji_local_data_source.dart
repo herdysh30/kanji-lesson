@@ -18,6 +18,7 @@ class KanjiLocalDataSource {
       character: Value(kanji.character),
       jlptLevel: Value(kanji.jlptLevel),
       meanings: Value(StringUtils.encodeJsonList(kanji.meanings)),
+      meaningsId: Value(StringUtils.encodeJsonList(kanji.meaningsId)),
       onyomi: Value(StringUtils.encodeJsonList(kanji.onyomi)),
       kunyomi: Value(StringUtils.encodeJsonList(kanji.kunyomi)),
       nameReadings: Value(StringUtils.encodeJsonList(kanji.nameReadings)),
@@ -36,6 +37,7 @@ class KanjiLocalDataSource {
           character: Value(char),
           jlptLevel: Value(jlptLevel),
           meanings: const Value('[]'),
+          meaningsId: const Value('[]'),
           onyomi: const Value('[]'),
           kunyomi: const Value('[]'),
           cachedAt: Value(DateTime.now()),
@@ -126,6 +128,7 @@ class KanjiLocalDataSource {
               word: Value(v.word),
               reading: Value(v.reading),
               meanings: Value(StringUtils.encodeJsonList(v.meanings)),
+              meaningsId: Value(StringUtils.encodeJsonList(v.meaningsId)),
               priorities: Value(StringUtils.encodeJsonList(v.priorities)),
               cachedAt: Value(DateTime.now()),
             ))
@@ -141,6 +144,7 @@ class KanjiLocalDataSource {
               word: e.word,
               reading: e.reading,
               meanings: StringUtils.decodeJsonList(e.meanings),
+              meaningsId: e.meaningsId != null ? StringUtils.decodeJsonList(e.meaningsId!) : [],
               priorities: StringUtils.decodeJsonList(e.priorities),
             ))
         .toList();
@@ -159,6 +163,7 @@ class KanjiLocalDataSource {
       character: entry.character,
       jlptLevel: entry.jlptLevel,
       meanings: StringUtils.decodeJsonList(entry.meanings),
+      meaningsId: entry.meaningsId != null ? StringUtils.decodeJsonList(entry.meaningsId!) : [],
       onyomi: StringUtils.decodeJsonList(entry.onyomi),
       kunyomi: StringUtils.decodeJsonList(entry.kunyomi),
       nameReadings: StringUtils.decodeJsonList(entry.nameReadings),

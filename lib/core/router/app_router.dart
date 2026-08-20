@@ -8,90 +8,148 @@ import 'package:kanji_lesson/features/review/presentation/screens/review_screen.
 import 'package:kanji_lesson/features/progress/presentation/screens/progress_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/weak_kanji_screen.dart';
 import 'package:kanji_lesson/features/settings/presentation/screens/settings_screen.dart';
+import 'package:kanji_lesson/features/review/presentation/screens/review_session_screen.dart';
+import 'package:kanji_lesson/features/review/presentation/screens/review_result_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_setup_screen.dart';
-
+import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_screen.dart';
+import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_result_screen.dart';
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   routes: [
-    ShellRoute(
-      navigatorKey: _shellNavigatorKey,
-      builder: (context, state, child) {
-        return ScaffoldWithBottomNavBar(child: child);
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
       },
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/learn',
-          builder: (context, state) => const JlptSelectionScreen(),
+      branches: [
+        // Branch 0: Home
+        StatefulShellBranch(
           routes: [
             GoRoute(
-              path: ':level',
-              builder: (context, state) {
-                final level = int.parse(state.pathParameters['level']!);
-                return KanjiListScreen(jlptLevel: level);
-              },
+              path: '/',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        // Branch 1: Learn
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/learn',
+              builder: (context, state) => const JlptSelectionScreen(),
               routes: [
                 GoRoute(
-                  path: ':kanji',
-                  parentNavigatorKey: _rootNavigatorKey,
+                  path: ':level',
                   builder: (context, state) {
                     final level = int.parse(state.pathParameters['level']!);
-                    final kanji = state.pathParameters['kanji']!;
-                    return KanjiDetailScreen(character: kanji, jlptLevel: level);
+                    return KanjiListScreen(jlptLevel: level);
+                  },
+                  routes: [
+                    GoRoute(
+                      path: ':kanji',
+                      parentNavigatorKey: _rootNavigatorKey,
+                      builder: (context, state) {
+                        final level = int.parse(state.pathParameters['level']!);
+                        final kanji = state.pathParameters['kanji']!;
+                        return KanjiDetailScreen(character: kanji, jlptLevel: level);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        // Branch 2: Review
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/review',
+              builder: (context, state) => const ReviewScreen(),
+              routes: [
+                GoRoute(
+                  path: 'session',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const ReviewSessionScreen(),
+                ),
+                GoRoute(
+                  path: 'result',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) {
+                    final extras = state.extra as Map<String, dynamic>? ?? {};
+                    return ReviewResultScreen(
+                      correctCount: extras['correct'] as int? ?? 0,
+                      wrongCount: extras['wrong'] as int? ?? 0,
+                      totalCount: extras['total'] as int? ?? 0,
+                    );
                   },
                 ),
               ],
             ),
           ],
         ),
-        GoRoute(
-          path: '/review',
-          builder: (context, state) => const ReviewScreen(),
-        ),
-        GoRoute(
-          path: '/progress',
-          builder: (context, state) => const ProgressScreen(),
+        // Branch 3: Progress
+        StatefulShellBranch(
           routes: [
             GoRoute(
-              path: 'weak',
-              parentNavigatorKey: _rootNavigatorKey,
-              builder: (context, state) => const WeakKanjiScreen(),
+              path: '/progress',
+              builder: (context, state) => const ProgressScreen(),
+              routes: [
+                GoRoute(
+                  path: 'weak',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const WeakKanjiScreen(),
+                ),
+              ],
             ),
           ],
         ),
-        GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsScreen(),
+        // Branch 4: Settings
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
+            ),
+          ],
         ),
       ],
     ),
+    // Screens without bottom nav bar (Quiz setup)
     GoRoute(
       path: '/quiz',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const QuizSetupScreen(),
+      routes: [
+        GoRoute(
+          path: 'session',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const QuizScreen(),
+        ),
+        GoRoute(
+          path: 'result',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const QuizResultScreen(),
+        ),
+      ],
     ),
   ],
 );
 
 class ScaffoldWithBottomNavBar extends StatelessWidget {
   const ScaffoldWithBottomNavBar({
-    required this.child,
+    required this.navigationShell,
     super.key,
   });
 
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
+      body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -115,38 +173,16 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             label: 'Settings',
           ),
         ],
-        currentIndex: _calculateSelectedIndex(context),
+        currentIndex: navigationShell.currentIndex,
         onTap: (int idx) => _onItemTapped(idx, context),
       ),
     );
   }
 
-  static int _calculateSelectedIndex(BuildContext context) {
-    final String location = GoRouterState.of(context).uri.path;
-    if (location.startsWith('/learn')) return 1;
-    if (location.startsWith('/review')) return 2;
-    if (location.startsWith('/progress')) return 3;
-    if (location.startsWith('/settings')) return 4;
-    return 0; // Default to Home
-  }
-
   void _onItemTapped(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        context.go('/');
-        break;
-      case 1:
-        context.go('/learn');
-        break;
-      case 2:
-        context.go('/review');
-        break;
-      case 3:
-        context.go('/progress');
-        break;
-      case 4:
-        context.go('/settings');
-        break;
-    }
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
   }
 }

@@ -6,6 +6,7 @@ class Kanji extends Equatable {
     required this.character,
     this.jlptLevel,
     required this.meanings,
+    this.meaningsId = const [],
     required this.onyomi,
     required this.kunyomi,
     this.nameReadings = const [],
@@ -19,6 +20,7 @@ class Kanji extends Equatable {
   final String character;
   final int? jlptLevel;
   final List<String> meanings;
+  final List<String> meaningsId;
   final List<String> onyomi;
   final List<String> kunyomi;
   final List<String> nameReadings;
@@ -28,8 +30,11 @@ class Kanji extends Equatable {
   final int? frequency;
   final String unicode;
 
-  /// Primary meaning (first in list)
-  String get primaryMeaning => meanings.isNotEmpty ? meanings.first : '';
+  /// Primary meaning (Indonesian or English fallback)
+  String primaryMeaning(bool isId) {
+    if (isId && meaningsId.isNotEmpty) return meaningsId.first;
+    return meanings.isNotEmpty ? meanings.first : '';
+  }
 
   /// Primary reading (prefer kun'yomi)
   String get primaryReading {

@@ -63,6 +63,17 @@ class HomeScreen extends ConsumerWidget {
                     label: const Text('Continue Learning'),
                   ),
                 ),
+                const SizedBox(height: 12),
+                
+                // ─── Quiz Mode ─────────────────────────────────
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => context.go('/quiz'),
+                    icon: const Icon(Icons.quiz_rounded),
+                    label: const Text('Take a Quiz'),
+                  ),
+                ),
                 const SizedBox(height: 32),
 
                 // ─── JLPT Progress ─────────────────────────────

@@ -86,6 +86,7 @@ class QuizGenerator {
   List<QuizQuestion> generateMeaningQuiz(
     List<Kanji> kanjiPool, {
     int count = 10,
+    bool isId = false,
   }) {
     if (kanjiPool.length < AppConstants.quizOptionsCount) return [];
 
@@ -96,12 +97,12 @@ class QuizGenerator {
     for (final kanji in selected) {
       if (kanji.meanings.isEmpty) continue;
 
-      final correctAnswer = kanji.primaryMeaning;
+      final correctAnswer = kanji.primaryMeaning(isId);
 
       // Get distractors from other kanji
       final distractors = kanjiPool
           .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
-          .map((k) => k.primaryMeaning)
+          .map((k) => k.primaryMeaning(isId))
           .where((m) => m != correctAnswer)
           .toSet()
           .toList()
@@ -168,6 +169,7 @@ class QuizGenerator {
   List<QuizQuestion> generateVocabularyQuiz(
     List<Vocabulary> vocabPool, {
     int count = 10,
+    bool isId = false,
   }) {
     if (vocabPool.length < AppConstants.quizOptionsCount) return [];
 
@@ -176,22 +178,26 @@ class QuizGenerator {
     final selected = shuffled.take(count).toList();
 
     for (final vocab in selected) {
-      final correctAnswer = vocab.word;
+      if (vocab.meanings.isEmpty) continue;
 
+      final correctAnswer = vocab.primaryMeaning(isId);
+      final prompt = vocab.word;
+
+      // Get distractors from other vocabularies
       final distractors = vocabPool
-          .where((v) => v.word != vocab.word)
-          .map((v) => v.word)
+          .where((v) => v.word != vocab.word && v.meanings.isNotEmpty)
+          .map((v) => v.primaryMeaning(isId))
           .toSet()
           .toList()
         ..shuffle(_random);
 
       if (distractors.length < 3) continue;
-
+      
       final options = [correctAnswer, ...distractors.take(3)]..shuffle(_random);
 
       questions.add(QuizQuestion(
         type: QuizType.vocabulary,
-        prompt: vocab.primaryMeaning,
+        prompt: prompt,
         correctAnswer: correctAnswer,
         options: options,
         audioText: vocab.reading,
@@ -205,8 +211,9 @@ class QuizGenerator {
   List<QuizQuestion> generateMixedQuiz(
     List<Kanji> kanjiPool, {
     int count = 10,
+    bool isId = false,
   }) {
-    final meaningQuestions = generateMeaningQuiz(kanjiPool, count: count);
+    final meaningQuestions = generateMeaningQuiz(kanjiPool, count: count, isId: isId);
     final readingQuestions = generateReadingQuiz(kanjiPool, count: count);
 
     final all = [...meaningQuestions, ...readingQuestions]..shuffle(_random);

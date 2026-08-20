@@ -26,6 +26,15 @@ class AppConstants {
     1: 'Advanced',
   };
 
+  /// Pre-defined kanji counts for kanjiapi.dev JLPT lists
+  static const Map<int, int> jlptKanjiCounts = {
+    5: 79,
+    4: 166,
+    3: 367,
+    2: 367,
+    1: 1232,
+  };
+
   /// Daily goal options
   static const List<int> dailyGoalOptions = [5, 10, 20, 30];
   static const int defaultDailyGoal = 10;
