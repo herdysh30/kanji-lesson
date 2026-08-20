@@ -7,7 +7,8 @@ A modern, offline-first Flutter application designed to help users master Japane
 
 ## 🔗 Data Sources & Technologies
 This app seamlessly integrates multiple APIs and SDKs to provide a rich learning experience:
-- **KanjiAPI.dev**: Serves as the core database for Kanji metadata, JLPT character lists, readings (On'yomi & Kun'yomi), and English meanings.
+- **KanjiAPI.dev** ([github.com/onlyskin/kanjiapi.dev](https://github.com/onlyskin/kanjiapi.dev)): Serves as the core database for Kanji metadata, JLPT character lists, readings (On'yomi & Kun'yomi), and English meanings.
+- **JLPT Vocab API** ([github.com/wkei/jlpt-vocab-api](https://github.com/wkei/jlpt-vocab-api)): Provides comprehensive JLPT vocabulary lists along with readings and meanings.
 - **Google Translate API**: Used internally to translate English meanings into Indonesian (Bahasa Indonesia) on-the-fly, allowing dual-language support.
 - **Google ML Kit (Digital Ink Recognition)**: Powers the "Writing Quiz" by accurately recognizing hand-drawn Kanji strokes directly on the device screen.
 - **KanjiVG (via SVG)**: Provides beautiful, animated stroke-order guides for Kanji characters to help users learn proper handwriting techniques.
