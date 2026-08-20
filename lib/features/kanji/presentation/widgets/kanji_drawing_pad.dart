@@ -83,7 +83,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
 
   @override
   Widget build(BuildContext context) {
-    final svgAsync = ref.watch(kanjiSvgProvider(widget.character));
+    final svgAsync = ref.watch(wordSvgProvider(widget.character));
 
     return Column(
       children: [
@@ -130,56 +130,62 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                       // Background Hint
                       if (widget.showBackground)
                         Positioned.fill(
-                          child: widget.character.length == 1
-                              ? svgAsync.when(
-                                  data: (svgString) {
-                                    if (svgString == null) {
-                                      return Center(
-                                        child: Text(
-                                          widget.character,
+                          child: svgAsync.when(
+                            data: (svgStrings) {
+                              return Center(
+                                child: FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: List.generate(widget.character.length, (index) {
+                                      final char = widget.character[index];
+                                      final svgStr = svgStrings[index];
+                                      
+                                      if (svgStr == null) {
+                                        return Text(
+                                          char,
                                           style: TextStyle(
                                             fontSize: 120,
                                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                                           ),
+                                        );
+                                      }
+                                      
+                                      return SizedBox(
+                                        width: 120,
+                                        height: 120,
+                                        child: SvgPicture.string(
+                                          svgStr,
+                                          fit: BoxFit.contain,
+                                          colorFilter: ColorFilter.mode(
+                                            Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                            BlendMode.srcIn,
+                                          ),
                                         ),
                                       );
-                                    }
-                                    return SvgPicture.string(
-                                      svgString,
-                                      fit: BoxFit.contain,
-                                      colorFilter: ColorFilter.mode(
-                                        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                        BlendMode.srcIn,
-                                      ),
-                                    );
-                                  },
-                                  loading: () => const Center(child: CircularProgressIndicator()),
-                                  error: (_, __) => Center(
-                                    child: Text(
-                                      widget.character,
-                                      style: TextStyle(
-                                        fontSize: 120,
-                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                      ),
-                                    ),
+                                    }),
                                   ),
-                                )
-                              : Center(
-                                  child: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(32.0),
-                                      child: Text(
-                                        widget.character,
-                                        style: TextStyle(
-                                          fontSize: 120,
-                                          letterSpacing: 24,
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                        ),
-                                      ),
+                                ),
+                              );
+                            },
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (_, __) => Center(
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(32.0),
+                                  child: Text(
+                                    widget.character,
+                                    style: TextStyle(
+                                      fontSize: 120,
+                                      letterSpacing: 24,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                                     ),
                                   ),
                                 ),
+                              ),
+                            ),
+                          ),
                         ),
                       // Drawing Canvas
                       Positioned.fill(

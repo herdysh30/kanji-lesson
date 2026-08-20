@@ -48,3 +48,8 @@ final kanjiSvgProvider = FutureProvider.family<String?, String>((ref, kanji) asy
   final service = ref.watch(kanjiVgServiceProvider);
   return service.getSvgForKanji(kanji);
 });
+
+final wordSvgProvider = FutureProvider.family<List<String?>, String>((ref, word) async {
+  final service = ref.watch(kanjiVgServiceProvider);
+  return Future.wait(word.split('').map((char) => service.getSvgForKanji(char)));
+});
