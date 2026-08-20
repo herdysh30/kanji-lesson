@@ -216,6 +216,22 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       ),
                                     );
                                   }),
+                                  // Skip / Don't Know button
+                                  if (!_isAnswerRevealed)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8, bottom: 16),
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        height: 56,
+                                        child: TextButton(
+                                          onPressed: () => _handleOptionSelected(-1, currentQuestion),
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
+                                          child: const Text('I don\'t know / Skip'),
+                                        ),
+                                      ),
+                                    ),
                                   // Next button
                                   if (_isAnswerRevealed)
                                     Padding(
@@ -328,6 +344,28 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        if (!_isAnswerRevealed)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isAnswerRevealed = true;
+                    _showHint = true;
+                    _selectedAnswerIndex = 1; // 1 means incorrect
+                  });
+                  ref.read(quizSessionProvider.notifier).answerCurrent(-1);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                child: const Text('I don\'t know / Skip'),
+              ),
+            ),
+          ),
         SizedBox(
           width: double.infinity,
           height: 56,
