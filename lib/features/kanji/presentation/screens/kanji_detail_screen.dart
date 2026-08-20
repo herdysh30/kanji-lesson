@@ -80,7 +80,14 @@ class _KanjiDetailBody extends StatelessWidget {
             kanji.character,
             style: AppTheme.kanjiLarge(context),
           ),
-          const SizedBox(height: 8),
+          if (kanji.primaryReading.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              kanji.primaryReading,
+              style: AppTheme.japaneseReading(context, fontSize: 24),
+            ),
+          ],
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(

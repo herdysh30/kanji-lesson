@@ -1,0 +1,40 @@
+{
+  "@@locale": "en",
+  "appName": "Kanji Lesson",
+  "greeting": "Hello 👋",
+  "readyToLearn": "Ready to learn some Kanji?",
+  "todaysGoal": "Today's Goal",
+  "goalCompleted": "🎉 Goal completed!",
+  "review": "Review",
+  "kanji": "Kanji",
+  "weakKanji": "Weak Kanji",
+  "continueLearning": "Continue Learning",
+  "jlptProgress": "JLPT Progress",
+  "learned": "learned",
+  "all": "All",
+  "learning": "Learning",
+  "mastered": "Mastered",
+  "strokes": "strokes",
+  "meaning": "Meaning",
+  "info": "Info",
+  "vocabulary": "Vocabulary",
+  "addToReview": "Add to Review",
+  "markKnown": "Mark Known",
+  "kanjiAddedToReview": "{kanji} added to review",
+  "@kanjiAddedToReview": {
+    "placeholders": {
+      "kanji": {
+        "type": "String"
+      }
+    }
+  },
+  "kanjiMarkedKnown": "{kanji} marked as known",
+  "@kanjiMarkedKnown": {
+    "placeholders": {
+      "kanji": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Settings"
+}

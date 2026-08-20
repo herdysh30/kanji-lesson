@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # State Management
   flutter_riverpod: ^2.6.1
@@ -36,7 +38,7 @@ dependencies:
   fl_chart: ^0.70.2
 
   # Utils
-  intl: ^0.19.0
+  intl: 0.20.2
   equatable: ^2.0.7
   collection: ^1.19.1
 
@@ -53,3 +55,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
