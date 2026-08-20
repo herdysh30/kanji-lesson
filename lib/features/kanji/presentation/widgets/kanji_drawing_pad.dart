@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart' as mlkit;
 import 'package:kanji_lesson/core/services/kanjivg_service.dart';
 
 class KanjiDrawingPad extends ConsumerStatefulWidget {
-  const KanjiDrawingPad({super.key, required this.character});
+  const KanjiDrawingPad({
+    super.key,
+    required this.character,
+    this.showBackground = true,
+    this.onInkChanged,
+  });
+  
   final String character;
+  final bool showBackground;
+  final ValueChanged<mlkit.Ink>? onInkChanged;
 
   @override
   ConsumerState<KanjiDrawingPad> createState() => _KanjiDrawingPadState();
@@ -13,26 +22,48 @@ class KanjiDrawingPad extends ConsumerStatefulWidget {
 
 class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
   final List<List<Offset>> _paths = [];
+  final mlkit.Ink _ink = mlkit.Ink();
+  
   List<Offset> _currentPath = [];
+  mlkit.Stroke _currentStroke = mlkit.Stroke();
 
   void _onPanStart(DragStartDetails details) {
     setState(() {
       _currentPath = [details.localPosition];
       _paths.add(_currentPath);
+      
+      _currentStroke = mlkit.Stroke();
+      _currentStroke.points.add(mlkit.StrokePoint(
+        x: details.localPosition.dx,
+        y: details.localPosition.dy,
+        t: DateTime.now().millisecondsSinceEpoch,
+      ));
     });
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
     setState(() {
       _currentPath.add(details.localPosition);
+      _currentStroke.points.add(mlkit.StrokePoint(
+        x: details.localPosition.dx,
+        y: details.localPosition.dy,
+        t: DateTime.now().millisecondsSinceEpoch,
+      ));
     });
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    _ink.strokes.add(_currentStroke);
+    widget.onInkChanged?.call(_ink);
   }
 
   void _clearPad() {
     setState(() {
       _paths.clear();
       _currentPath = [];
+      _ink.strokes.clear();
     });
+    widget.onInkChanged?.call(_ink);
   }
 
   void _undo() {
@@ -40,7 +71,11 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
       setState(() {
         _paths.removeLast();
         _currentPath = [];
+        if (_ink.strokes.isNotEmpty) {
+          _ink.strokes.removeLast();
+        }
       });
+      widget.onInkChanged?.call(_ink);
     }
   }
 
@@ -94,47 +129,48 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                   child: Stack(
                     children: [
                       // Background SVG
-                      Positioned.fill(
-                        child: svgAsync.when(
-                          data: (svgString) {
-                            if (svgString == null) {
-                              return Center(
-                                child: Text(
-                                  widget.character,
-                                  style: TextStyle(
-                                    fontSize: 120,
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                      if (widget.showBackground)
+                        Positioned.fill(
+                          child: svgAsync.when(
+                            data: (svgString) {
+                              if (svgString == null) {
+                                return Center(
+                                  child: Text(
+                                    widget.character,
+                                    style: TextStyle(
+                                      fontSize: 120,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                                    ),
                                   ),
+                                );
+                              }
+                              return SvgPicture.string(
+                                svgString,
+                                fit: BoxFit.contain,
+                                colorFilter: ColorFilter.mode(
+                                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                  BlendMode.srcIn,
                                 ),
                               );
-                            }
-                            return SvgPicture.string(
-                              svgString,
-                              fit: BoxFit.contain,
-                              colorFilter: ColorFilter.mode(
-                                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                BlendMode.srcIn,
-                              ),
-                            );
-                          },
-                          loading: () => const Center(child: CircularProgressIndicator()),
-                          error: (_, __) => Center(
-                            child: Text(
-                              widget.character,
-                              style: TextStyle(
-                                fontSize: 120,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                            },
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (_, __) => Center(
+                              child: Text(
+                                widget.character,
+                                style: TextStyle(
+                                  fontSize: 120,
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
                       // Drawing Canvas
                       Positioned.fill(
                         child: GestureDetector(
                           onPanStart: _onPanStart,
                           onPanUpdate: _onPanUpdate,
-                          onPanEnd: (_) {},
+                          onPanEnd: _onPanEnd,
                           child: CustomPaint(
                             painter: _DrawingPainter(
                               paths: _paths,

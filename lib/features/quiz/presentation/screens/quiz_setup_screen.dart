@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
+import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
 
 class QuizSetupScreen extends ConsumerWidget {
   const QuizSetupScreen({super.key});
@@ -89,8 +90,61 @@ class QuizSetupScreen extends ConsumerWidget {
                     if (val) notifier.setQuizType(QuizType.kanjiFromReading);
                   },
                 ),
+                ChoiceChip(
+                  label: const Text('Writing (Draw Kanji)'),
+                  selected: setup.quizType == QuizType.writing,
+                  onSelected: (val) {
+                    if (val) notifier.setQuizType(QuizType.writing);
+                  },
+                ),
               ],
             ),
+            
+            // ML Kit Model Download Indicator
+            if (setup.quizType == QuizType.writing)
+              Consumer(
+                builder: (context, ref, _) {
+                  final statusAsync = ref.watch(digitalInkModelStatusProvider);
+                  return statusAsync.when(
+                    data: (isDownloaded) {
+                      if (isDownloaded) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            '✓ Japanese Handwriting Model Ready',
+                            style: TextStyle(color: Colors.green[700], fontSize: 12),
+                          ),
+                        );
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final service = ref.read(mlkitDigitalInkServiceProvider);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Downloading model... (~20MB)')),
+                            );
+                            final success = await service.downloadModel();
+                            ref.invalidate(digitalInkModelStatusProvider);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(success ? 'Download complete!' : 'Download failed.')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.download_rounded, size: 18),
+                          label: const Text('Download Japanese Handwriting Model'),
+                        ),
+                      );
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                    error: (_, __) => const SizedBox.shrink(),
+                  );
+                },
+              ),
             
             const SizedBox(height: 32),
             

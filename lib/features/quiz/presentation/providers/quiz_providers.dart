@@ -73,6 +73,8 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
         return generator.generateMeaningQuiz(entries, count: setup.questionCount, isId: isId);
       case QuizType.reading:
         return generator.generateReadingQuiz(entries, count: setup.questionCount);
+      case QuizType.writing:
+        return generator.generateWritingQuiz(entries, count: setup.questionCount, isId: isId);
       default:
         return generator.generateMixedQuiz(entries, count: setup.questionCount, isId: isId);
     }
@@ -91,6 +93,8 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
         return generator.generateMeaningQuiz(pool, count: setup.questionCount, isId: isId);
       case QuizType.reading:
         return generator.generateReadingQuiz(pool, count: setup.questionCount);
+      case QuizType.writing:
+        return generator.generateWritingQuiz(pool, count: setup.questionCount, isId: isId);
       default:
         return generator.generateMixedQuiz(pool, count: setup.questionCount, isId: isId);
     }

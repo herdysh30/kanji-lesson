@@ -11,6 +11,7 @@ enum QuizType {
   kanjiFromReading, // Show hiragana → pick kanji word
   vocabulary, // Show meaning → pick vocabulary
   listening, // TTS → pick answer
+  writing, // Show meaning/reading → draw kanji
 }
 
 /// A single quiz question
@@ -218,5 +219,35 @@ class QuizGenerator {
 
     final all = [...meaningQuestions, ...readingQuestions]..shuffle(_random);
     return all.take(count).toList();
+  }
+
+  /// Generate writing quiz
+  List<QuizQuestion> generateWritingQuiz(
+    List<Kanji> kanjiPool, {
+    int count = 10,
+    bool isId = false,
+  }) {
+    if (kanjiPool.isEmpty) return [];
+
+    final questions = <QuizQuestion>[];
+    final shuffled = List<Kanji>.from(kanjiPool)..shuffle(_random);
+    final selected = shuffled.take(count).toList();
+
+    for (final kanji in selected) {
+      final meanings = isId && kanji.meaningsId.isNotEmpty ? kanji.meaningsId : kanji.meanings;
+      final meaningStr = meanings.isNotEmpty ? meanings.first : kanji.character;
+      final readingStr = kanji.primaryReading.isNotEmpty ? kanji.primaryReading : '';
+      final prompt = readingStr.isNotEmpty ? '$meaningStr ($readingStr)' : meaningStr;
+
+      questions.add(QuizQuestion(
+        type: QuizType.writing,
+        prompt: prompt,
+        correctAnswer: kanji.character,
+        options: [kanji.character], // Not really used for writing quiz but required
+        kanjiCharacter: kanji.character,
+      ));
+    }
+
+    return questions.take(count).toList();
   }
 }
