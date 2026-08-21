@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// No description provided for @noItemsFound.
   ///
   /// In en, this message translates to:
-  /// **'No items found'**
+  /// **'No items found.'**
   String get noItemsFound;
 
   /// No description provided for @loading.
@@ -877,6 +877,330 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load vocabulary'**
   String get failedToLoadVocabulary;
+
+  /// No description provided for @weakItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak Items'**
+  String get weakItems;
+
+  /// No description provided for @noWeakItems.
+  ///
+  /// In en, this message translates to:
+  /// **'No Weak Items!'**
+  String get noWeakItems;
+
+  /// No description provided for @weakItemsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'All your kanji and vocab have an accuracy of 60% or higher. Keep it up!'**
+  String get weakItemsDescription;
+
+  /// No description provided for @itemsBelowAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items with accuracy below 60%. Practice these more!'**
+  String itemsBelowAccuracy(Object count);
+
+  /// No description provided for @unableToLoadWeakItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load weak items'**
+  String get unableToLoadWeakItems;
+
+  /// No description provided for @perfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect!'**
+  String get perfect;
+
+  /// No description provided for @goodJob.
+  ///
+  /// In en, this message translates to:
+  /// **'Good Job!'**
+  String get goodJob;
+
+  /// No description provided for @keepPracticing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Practicing!'**
+  String get keepPracticing;
+
+  /// No description provided for @wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong'**
+  String get wrong;
+
+  /// No description provided for @skipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get skipped;
+
+  /// No description provided for @reviewYourAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your answers:'**
+  String get reviewYourAnswers;
+
+  /// No description provided for @youAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'You answered: {answer}'**
+  String youAnswered(Object answer);
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @incorrectDrawing.
+  ///
+  /// In en, this message translates to:
+  /// **'(Incorrect Drawing)'**
+  String get incorrectDrawing;
+
+  /// No description provided for @quizHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz History'**
+  String get quizHistory;
+
+  /// No description provided for @noQuizHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No quiz history yet.'**
+  String get noQuizHistory;
+
+  /// No description provided for @allTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'All Types'**
+  String get allTypes;
+
+  /// No description provided for @noQuizzesMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No quizzes match the filters.'**
+  String get noQuizzesMatchFilters;
+
+  /// No description provided for @quizDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Details'**
+  String get quizDetails;
+
+  /// No description provided for @noDetailedHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No detailed history available for this quiz (Legacy).'**
+  String get noDetailedHistory;
+
+  /// No description provided for @correctAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct Answer: '**
+  String get correctAnswer;
+
+  /// No description provided for @yourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Answer: '**
+  String get yourAnswer;
+
+  /// No description provided for @notAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Answered'**
+  String get notAnswered;
+
+  /// No description provided for @retakeExactQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake Exact Quiz'**
+  String get retakeExactQuiz;
+
+  /// No description provided for @studyStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Streak'**
+  String get studyStreak;
+
+  /// No description provided for @day.
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get day;
+
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get days;
+
+  /// No description provided for @weeklyActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Activity'**
+  String get weeklyActivity;
+
+  /// No description provided for @noActivityYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet'**
+  String get noActivityYet;
+
+  /// No description provided for @noWeakItemsCard.
+  ///
+  /// In en, this message translates to:
+  /// **'No weak items — great job!'**
+  String get noWeakItemsCard;
+
+  /// No description provided for @itemsNeedPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items need more practice'**
+  String itemsNeedPractice(int count);
+
+  /// No description provided for @jlptBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'JLPT Breakdown'**
+  String get jlptBreakdown;
+
+  /// No description provided for @recentQuizResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Quiz Results'**
+  String get recentQuizResults;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See All'**
+  String get seeAll;
+
+  /// No description provided for @noQuizResultsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No quiz results yet'**
+  String get noQuizResultsYet;
+
+  /// No description provided for @takeQuizToSeeHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a quiz to see your history here'**
+  String get takeQuizToSeeHistory;
+
+  /// No description provided for @meaningQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning Quiz'**
+  String get meaningQuiz;
+
+  /// No description provided for @readingQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Quiz'**
+  String get readingQuiz;
+
+  /// No description provided for @writingQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing Quiz'**
+  String get writingQuiz;
+
+  /// No description provided for @unableToLoadProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load progress'**
+  String get unableToLoadProgress;
+
+  /// No description provided for @unableToLoadCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load calendar'**
+  String get unableToLoadCalendar;
+
+  /// No description provided for @unableToLoadActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load activity'**
+  String get unableToLoadActivity;
+
+  /// No description provided for @unableToLoadQuizHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load quiz history'**
+  String get unableToLoadQuizHistory;
+
+  /// No description provided for @learnedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Learned Items'**
+  String get learnedItems;
+
+  /// No description provided for @masteredItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered Items'**
+  String get masteredItems;
+
+  /// No description provided for @reviewingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing Items'**
+  String get reviewingItems;
+
+  /// No description provided for @statusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: {status}'**
+  String statusLabel(String status);
+
+  /// No description provided for @masteredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} mastered'**
+  String masteredLabel(int count);
+
+  /// No description provided for @accuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get accuracy;
+
+  /// No description provided for @reviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed'**
+  String get reviewed;
+
+  /// No description provided for @unableToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'—'**
+  String get unableToLoad;
+
+  /// No description provided for @unableToLoadLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'N{level} — Unable to load'**
+  String unableToLoadLevel(int level);
+
+  /// No description provided for @quizHistorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct}/{total} correct  ·  {time}'**
+  String quizHistorySubtitle(int correct, int total, String time);
 }
 
 class _AppLocalizationsDelegate

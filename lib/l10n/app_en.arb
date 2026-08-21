@@ -196,5 +196,91 @@
   "exampleSentences": "Example Sentences",
   "noExampleSentences": "No example sentences available.",
   "failedToLoadExamples": "Failed to load examples.",
-  "failedToLoadVocabulary": "Failed to load vocabulary"
+  "failedToLoadVocabulary": "Failed to load vocabulary",
+  "weakItems": "Weak Items",
+  "noWeakItems": "No Weak Items!",
+  "weakItemsDescription": "All your kanji and vocab have an accuracy of 60% or higher. Keep it up!",
+  "itemsBelowAccuracy": "{count} items with accuracy below 60%. Practice these more!",
+  "unableToLoadWeakItems": "Unable to load weak items",
+  "quizResult": "Quiz Result",
+  "perfect": "Perfect!",
+  "goodJob": "Good Job!",
+  "keepPracticing": "Keep Practicing!",
+  "score": "Score",
+  "correct": "Correct",
+  "wrong": "Wrong",
+  "skipped": "Skipped",
+  "reviewYourAnswers": "Review your answers:",
+  "youAnswered": "You answered: {answer}",
+  "retry": "Retry",
+  "done": "Done",
+  "incorrectDrawing": "(Incorrect Drawing)",
+  "quizHistory": "Quiz History",
+  "noQuizHistory": "No quiz history yet.",
+  "allLevels": "All Levels",
+  "allTypes": "All Types",
+  "noQuizzesMatchFilters": "No quizzes match the filters.",
+  "quizDetails": "Quiz Details",
+  "noDetailedHistory": "No detailed history available for this quiz (Legacy).",
+  "correctAnswer": "Correct Answer: ",
+  "yourAnswer": "Your Answer: ",
+  "notAnswered": "Not Answered",
+  "retakeExactQuiz": "Retake Exact Quiz",
+  "studyStreak": "Study Streak",
+  "day": "day",
+  "days": "days",
+  "weeklyActivity": "Weekly Activity",
+  "noActivityYet": "No activity yet",
+  "noWeakItemsCard": "No weak items — great job!",
+  "itemsNeedPractice": "{count} items need more practice",
+  "@itemsNeedPractice": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "jlptBreakdown": "JLPT Breakdown",
+  "recentQuizResults": "Recent Quiz Results",
+  "seeAll": "See All",
+  "noQuizResultsYet": "No quiz results yet",
+  "takeQuizToSeeHistory": "Take a quiz to see your history here",
+  "meaningQuiz": "Meaning Quiz",
+  "readingQuiz": "Reading Quiz",
+  "writingQuiz": "Writing Quiz",
+  "unableToLoadProgress": "Unable to load progress",
+  "unableToLoadCalendar": "Unable to load calendar",
+  "unableToLoadActivity": "Unable to load activity",
+  "unableToLoadQuizHistory": "Unable to load quiz history",
+  "learnedItems": "Learned Items",
+  "masteredItems": "Mastered Items",
+  "reviewingItems": "Reviewing Items",
+  "noItemsFound": "No items found.",
+  "statusLabel": "Status: {status}",
+  "@statusLabel": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "masteredLabel": "{count} mastered",
+  "@masteredLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "accuracy": "Accuracy",
+  "reviewed": "Reviewed",
+  "unableToLoad": "—",
+  "unableToLoadLevel": "N{level} — Unable to load",
+  "@unableToLoadLevel": {
+    "placeholders": {
+      "level": { "type": "int" }
+    }
+  },
+  "quizHistorySubtitle": "{correct}/{total} correct  ·  {time}",
+  "@quizHistorySubtitle": {
+    "placeholders": {
+      "correct": { "type": "int" },
+      "total": { "type": "int" },
+      "time": { "type": "String" }
+    }
+  }
 }

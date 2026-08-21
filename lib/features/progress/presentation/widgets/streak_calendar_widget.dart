@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class StreakCalendarWidget extends ConsumerStatefulWidget {
   const StreakCalendarWidget({super.key});
@@ -16,6 +17,7 @@ class _StreakCalendarWidgetState extends ConsumerState<StreakCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final streakDatesAsync = ref.watch(streakDatesProvider);
 
     return Card(
@@ -26,6 +28,7 @@ class _StreakCalendarWidgetState extends ConsumerState<StreakCalendarWidget> {
             final activeDates = dates.map((d) => DateTime(d.year, d.month, d.day)).toSet();
 
             return TableCalendar(
+              locale: Localizations.localeOf(context).languageCode,
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.now().add(const Duration(days: 365)),
               focusedDay: _focusedDay,
@@ -79,7 +82,7 @@ class _StreakCalendarWidgetState extends ConsumerState<StreakCalendarWidget> {
             );
           },
           loading: () => const SizedBox(height: 300, child: Center(child: CircularProgressIndicator())),
-          error: (_, __) => const SizedBox(height: 300, child: Center(child: Text('Unable to load calendar'))),
+          error: (_, __) => SizedBox(height: 300, child: Center(child: Text(l10n.unableToLoadCalendar))),
         ),
       ),
     );

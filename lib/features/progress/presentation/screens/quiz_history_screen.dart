@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 final fullQuizHistoryProvider = FutureProvider<List<QuizResultEntry>>((ref) async {
   final db = ref.watch(databaseProvider);
@@ -24,16 +25,17 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final historyAsync = ref.watch(fullQuizHistoryProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz History'),
+        title: Text(l10n.quizHistory),
       ),
       body: historyAsync.when(
         data: (results) {
           if (results.isEmpty) {
-            return const Center(child: Text('No quiz history yet.'));
+            return Center(child: Text(l10n.noQuizHistory));
           }
 
           final filtered = results.where((r) {
@@ -56,7 +58,7 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
                 child: Row(
                   children: [
                     FilterChip(
-                      label: const Text('All Levels'),
+                      label: Text(l10n.allLevels),
                       selected: _selectedJlptLevel == null,
                       onSelected: (_) => setState(() => _selectedJlptLevel = null),
                     ),
@@ -74,7 +76,7 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
                     }),
                     const SizedBox(width: 8),
                     FilterChip(
-                      label: const Text('All Types'),
+                      label: Text(l10n.allTypes),
                       selected: _selectedQuizType == null,
                       onSelected: (_) => setState(() => _selectedQuizType = null),
                     ),
@@ -94,7 +96,7 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
               // List
               Expanded(
                 child: filtered.isEmpty
-                    ? const Center(child: Text('No quizzes match the filters.'))
+                    ? Center(child: Text(l10n.noQuizzesMatchFilters))
                     : ListView.separated(
                         itemCount: filtered.length,
                         separatorBuilder: (_, __) => const Divider(height: 1),

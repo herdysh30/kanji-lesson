@@ -5,17 +5,19 @@ import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/core/utils/date_utils.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class WeakKanjiScreen extends ConsumerWidget {
   const WeakKanjiScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final weakListAsync = ref.watch(weakKanjiListProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weak Items'),
+        title: Text(l10n.weakItems),
       ),
       body: weakListAsync.when(
         data: (items) {
@@ -33,7 +35,7 @@ class WeakKanjiScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'No Weak Items!',
+                      l10n.noWeakItems,
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -41,7 +43,7 @@ class WeakKanjiScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'All your kanji and vocab have an accuracy of 60% or higher. Keep it up! 🎉',
+                      l10n.weakItemsDescription,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color:
@@ -77,7 +79,7 @@ class WeakKanjiScreen extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                '${items.length} items with accuracy below 60%. Practice these more!',
+                                l10n.itemsBelowAccuracy(items.length),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -101,7 +103,7 @@ class WeakKanjiScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Unable to load weak items')),
+        error: (_, __) => Center(child: Text(l10n.unableToLoadWeakItems)),
       ),
     );
   }
@@ -142,11 +144,12 @@ class _WeakItemTile extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
                   child: Text(
                     item.character,
                     style: AppTheme.kanjiLarge(context).copyWith(
-                      fontSize: item.character.length > 2 ? 20 : 28,
+                      fontSize: 28,
                     ),
                   ),
                 ),

@@ -6,6 +6,7 @@ import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/quiz/domain/models/quiz_attempt.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class QuizHistoryDetailScreen extends ConsumerWidget {
   const QuizHistoryDetailScreen({super.key, required this.entry});
@@ -13,6 +14,7 @@ class QuizHistoryDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     List<QuizAttemptRecord> attempts = [];
     if (entry.questionsJson != null) {
       try {
@@ -25,10 +27,10 @@ class QuizHistoryDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz Details'),
+        title: Text(l10n.quizDetails),
       ),
       body: attempts.isEmpty
-          ? const Center(child: Text('No detailed history available for this quiz (Legacy).'))
+          ? Center(child: Text(l10n.noDetailedHistory))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: attempts.length,
@@ -48,15 +50,15 @@ class QuizHistoryDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            const Text('Correct Answer: '),
+                            Text(l10n.correctAnswer),
                             Text(q.correctAnswer, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.correct)),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Text('Your Answer: '),
-                            Text(attempt.userAnswer.isEmpty ? 'Not Answered' : attempt.userAnswer, 
+                            Text(l10n.yourAnswer),
+                            Text(attempt.userAnswer.isEmpty ? l10n.notAnswered : attempt.userAnswer, 
                                style: TextStyle(fontWeight: FontWeight.bold, color: attempt.isCorrect ? AppColors.correct : Theme.of(context).colorScheme.error)),
                           ],
                         ),
@@ -74,7 +76,7 @@ class QuizHistoryDetailScreen extends ConsumerWidget {
             context.push('/quiz/session');
           },
           icon: const Icon(Icons.refresh),
-          label: const Text('Retake Exact Quiz'),
+          label: Text(l10n.retakeExactQuiz),
         ),
       ),
     );

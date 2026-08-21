@@ -158,7 +158,7 @@ class AppLocalizationsId extends AppLocalizations {
       'Apakah Anda ingin mengatur ulang progres untuk tingkat JLPT tertentu atau semua tingkat? Tindakan ini tidak dapat dibatalkan.';
 
   @override
-  String get allLevels => 'Semua Tingkat';
+  String get allLevels => 'Semua Level';
 
   @override
   String get progressResetSuccess => 'Progres berhasil diatur ulang';
@@ -367,7 +367,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get filterMastered => 'Dikuasai';
 
   @override
-  String get noItemsFound => 'Tidak ada item ditemukan';
+  String get noItemsFound => 'Tidak ada item ditemukan.';
 
   @override
   String get loading => 'Memuat...';
@@ -427,4 +427,183 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get failedToLoadVocabulary => 'Gagal memuat kosakata';
+
+  @override
+  String get weakItems => 'Item Lemah';
+
+  @override
+  String get noWeakItems => 'Tidak Ada Item Lemah!';
+
+  @override
+  String get weakItemsDescription =>
+      'Semua kanji dan kosakatamu memiliki akurasi 60% atau lebih. Pertahankan!';
+
+  @override
+  String itemsBelowAccuracy(Object count) {
+    return '$count item dengan akurasi di bawah 60%. Latih lagi!';
+  }
+
+  @override
+  String get unableToLoadWeakItems => 'Gagal memuat item lemah';
+
+  @override
+  String get perfect => 'Sempurna!';
+
+  @override
+  String get goodJob => 'Bagus!';
+
+  @override
+  String get keepPracticing => 'Terus Berlatih!';
+
+  @override
+  String get wrong => 'Salah';
+
+  @override
+  String get skipped => 'Dilewati';
+
+  @override
+  String get reviewYourAnswers => 'Tinjau jawabanmu:';
+
+  @override
+  String youAnswered(Object answer) {
+    return 'Jawabanmu: $answer';
+  }
+
+  @override
+  String get retry => 'Ulangi';
+
+  @override
+  String get done => 'Selesai';
+
+  @override
+  String get incorrectDrawing => '(Gambar Salah)';
+
+  @override
+  String get quizHistory => 'Riwayat Kuis';
+
+  @override
+  String get noQuizHistory => 'Belum ada riwayat kuis.';
+
+  @override
+  String get allTypes => 'Semua Tipe';
+
+  @override
+  String get noQuizzesMatchFilters =>
+      'Tidak ada kuis yang cocok dengan filter.';
+
+  @override
+  String get quizDetails => 'Detail Kuis';
+
+  @override
+  String get noDetailedHistory =>
+      'Tidak ada riwayat detail untuk kuis ini (Lama).';
+
+  @override
+  String get correctAnswer => 'Jawaban Benar: ';
+
+  @override
+  String get yourAnswer => 'Jawabanmu: ';
+
+  @override
+  String get notAnswered => 'Tidak Dijawab';
+
+  @override
+  String get retakeExactQuiz => 'Ulangi Kuis Persis Sama';
+
+  @override
+  String get studyStreak => 'Streak Belajar';
+
+  @override
+  String get day => 'hari';
+
+  @override
+  String get days => 'hari';
+
+  @override
+  String get weeklyActivity => 'Aktivitas Mingguan';
+
+  @override
+  String get noActivityYet => 'Belum ada aktivitas';
+
+  @override
+  String get noWeakItemsCard => 'Tidak ada item lemah — bagus!';
+
+  @override
+  String itemsNeedPractice(int count) {
+    return '$count item perlu latihan lebih';
+  }
+
+  @override
+  String get jlptBreakdown => 'Rincian JLPT';
+
+  @override
+  String get recentQuizResults => 'Hasil Kuis Terbaru';
+
+  @override
+  String get seeAll => 'Lihat Semua';
+
+  @override
+  String get noQuizResultsYet => 'Belum ada hasil kuis';
+
+  @override
+  String get takeQuizToSeeHistory => 'Ikuti kuis untuk melihat riwayat di sini';
+
+  @override
+  String get meaningQuiz => 'Kuis Arti';
+
+  @override
+  String get readingQuiz => 'Kuis Bacaan';
+
+  @override
+  String get writingQuiz => 'Kuis Menulis';
+
+  @override
+  String get unableToLoadProgress => 'Gagal memuat progres';
+
+  @override
+  String get unableToLoadCalendar => 'Gagal memuat kalender';
+
+  @override
+  String get unableToLoadActivity => 'Gagal memuat aktivitas';
+
+  @override
+  String get unableToLoadQuizHistory => 'Gagal memuat riwayat kuis';
+
+  @override
+  String get learnedItems => 'Item Dipelajari';
+
+  @override
+  String get masteredItems => 'Item Dikuasai';
+
+  @override
+  String get reviewingItems => 'Item Diulas';
+
+  @override
+  String statusLabel(String status) {
+    return 'Status: $status';
+  }
+
+  @override
+  String masteredLabel(int count) {
+    return '$count dikuasai';
+  }
+
+  @override
+  String get accuracy => 'Akurasi';
+
+  @override
+  String get reviewed => 'Diulas';
+
+  @override
+  String get unableToLoad => '—';
+
+  @override
+  String unableToLoadLevel(int level) {
+    return 'N$level — Gagal memuat';
+  }
+
+  @override
+  String quizHistorySubtitle(int correct, int total, String time) {
+    return '$correct/$total benar  ·  $time';
+  }
 }

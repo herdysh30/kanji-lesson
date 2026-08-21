@@ -8,15 +8,17 @@ import 'package:kanji_lesson/core/utils/date_utils.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/widgets/streak_calendar_widget.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Progress'),
+        title: Text(l10n.progress),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -44,7 +46,7 @@ class ProgressScreen extends ConsumerWidget {
 
               // ─── Weekly Activity ──────────────────────────
               Text(
-                'Weekly Activity',
+                l10n.weeklyActivity,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -57,7 +59,7 @@ class ProgressScreen extends ConsumerWidget {
 
               // ─── JLPT Breakdown ───────────────────────────
               Text(
-                'JLPT Breakdown',
+                l10n.jlptBreakdown,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -71,12 +73,12 @@ class ProgressScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Recent Quiz Results',
+                    l10n.recentQuizResults,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   TextButton(
                     onPressed: () => context.push('/progress/quiz-history'),
-                    child: const Text('See All'),
+                    child: Text(l10n.seeAll),
                   ),
                 ],
               ),
@@ -98,6 +100,7 @@ class _OverallStatsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final overallAsync = ref.watch(overallProgressProvider);
 
     return overallAsync.when(
@@ -110,14 +113,14 @@ class _OverallStatsSection extends ConsumerWidget {
                   child: _StatCard(
                     icon: Icons.school_rounded,
                     iconColor: AppColors.primary,
-                    label: 'Learned',
+                    label: l10n.learned,
                     value: '${overall.totalLearned}',
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (_) => const _ProgressListBottomSheet(title: 'Learned Items', statusFilter: 'learned'),
+                        builder: (_) => _ProgressListBottomSheet(title: l10n.learnedItems, statusFilter: 'learned'),
                       );
                     },
                   ),
@@ -127,14 +130,14 @@ class _OverallStatsSection extends ConsumerWidget {
                   child: _StatCard(
                     icon: Icons.star_rounded,
                     iconColor: AppColors.gold,
-                    label: 'Mastered',
+                    label: l10n.mastered,
                     value: '${overall.mastered}',
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (_) => const _ProgressListBottomSheet(title: 'Mastered Items', statusFilter: 'mastered'),
+                        builder: (_) => _ProgressListBottomSheet(title: l10n.masteredItems, statusFilter: 'mastered'),
                       );
                     },
                   ),
@@ -148,14 +151,14 @@ class _OverallStatsSection extends ConsumerWidget {
                   child: _StatCard(
                     icon: Icons.replay_rounded,
                     iconColor: AppColors.primary,
-                    label: 'Reviewing',
+                    label: l10n.learning,
                     value: '${overall.reviewing}',
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (_) => const _ProgressListBottomSheet(title: 'Reviewing Items', statusFilter: 'reviewing'),
+                        builder: (_) => _ProgressListBottomSheet(title: l10n.reviewingItems, statusFilter: 'reviewing'),
                       );
                     },
                   ),
@@ -165,7 +168,7 @@ class _OverallStatsSection extends ConsumerWidget {
                   child: _StatCard(
                     icon: Icons.percent_rounded,
                     iconColor: AppColors.correct,
-                    label: 'Accuracy',
+                    label: l10n.accuracy,
                     value: '${(overall.accuracy * 100).round()}%',
                   ),
                 ),
@@ -178,7 +181,7 @@ class _OverallStatsSection extends ConsumerWidget {
         height: 120,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const Text('Unable to load progress'),
+      error: (_, __) => Text(l10n.unableToLoadProgress),
     );
   }
 }
@@ -260,6 +263,7 @@ class _StudyStreakCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final streakAsync = ref.watch(studyStreakProvider);
 
     return Card(
@@ -287,14 +291,14 @@ class _StudyStreakCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Study Streak',
+                    l10n.studyStreak,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
                   streakAsync.when(
                     data: (streak) => Text(
-                      '$streak ${streak == 1 ? 'day' : 'days'}',
+                      '$streak ${streak == 1 ? l10n.day : l10n.days}',
                       style:
                           Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
@@ -303,8 +307,8 @@ class _StudyStreakCard extends ConsumerWidget {
                                     : Theme.of(context).colorScheme.onSurface,
                               ),
                     ),
-                    loading: () => const Text('...'),
-                    error: (_, __) => const Text('—'),
+                    loading: () => Text(l10n.loading),
+                    error: (_, __) => Text(l10n.unableToLoad),
                   ),
                 ],
               ),
@@ -323,6 +327,7 @@ class _WeeklyActivityChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final weeklyAsync = ref.watch(weeklyActivityProvider);
 
     return Card(
@@ -331,9 +336,9 @@ class _WeeklyActivityChart extends ConsumerWidget {
         child: weeklyAsync.when(
           data: (days) {
             if (days.isEmpty) {
-              return const SizedBox(
+              return SizedBox(
                 height: 120,
-                child: Center(child: Text('No activity yet')),
+                child: Center(child: Text(l10n.noActivityYet)),
               );
             }
 
@@ -366,7 +371,7 @@ class _WeeklyActivityChart extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Tooltip(
-                          message: '${DateFormat('MMM d, yyyy').format(day.date)}\nReviewed: ${day.reviewed}\nAccuracy: ${(day.accuracy * 100).round()}%',
+                          message: '${DateFormat('MMM d, yyyy').format(day.date)}\n${l10n.reviewed}: ${day.reviewed}\n${l10n.accuracy}: ${(day.accuracy * 100).round()}%',
                           child: Container(
                             width: 28,
                             height: barHeight.clamp(4.0, 100.0),
@@ -413,9 +418,9 @@ class _WeeklyActivityChart extends ConsumerWidget {
             height: 180,
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const SizedBox(
+          error: (_, __) => SizedBox(
             height: 180,
-            child: Center(child: Text('Unable to load activity')),
+            child: Center(child: Text(l10n.unableToLoadActivity)),
           ),
         ),
       ),
@@ -430,6 +435,7 @@ class _WeakItemsCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final weakCount = ref.watch(weakKanjiCountProvider);
 
     return GestureDetector(
@@ -456,7 +462,7 @@ class _WeakItemsCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Weak Items',
+                      l10n.weakItems,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -465,12 +471,12 @@ class _WeakItemsCard extends ConsumerWidget {
                     weakCount.when(
                       data: (count) => Text(
                         count > 0
-                            ? '$count items need more practice'
-                            : 'No weak items — great job!',
+                            ? l10n.itemsNeedPractice(count)
+                            : l10n.noWeakItemsCard,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      loading: () => const Text('Checking...'),
-                      error: (_, __) => const Text('—'),
+                      loading: () => Text(l10n.loading),
+                      error: (_, __) => Text(l10n.unableToLoad),
                     ),
                   ],
                 ),
@@ -492,6 +498,7 @@ class _JlptDetailTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final stats = ref.watch(jlptStatsProvider(level));
 
     return Padding(
@@ -545,7 +552,7 @@ class _JlptDetailTile extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${data.mastered} mastered',
+                      l10n.masteredLabel(data.mastered),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: AppColors.correct,
                           ),
@@ -561,7 +568,7 @@ class _JlptDetailTile extends ConsumerWidget {
               ],
             ),
             loading: () => const SizedBox(height: 60),
-            error: (_, __) => Text('N$level — Unable to load'),
+            error: (_, __) => Text(l10n.unableToLoadLevel(level)),
           ),
         ),
       ),
@@ -576,6 +583,7 @@ class _QuizHistorySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final historyAsync = ref.watch(quizHistoryProvider);
 
     return historyAsync.when(
@@ -592,7 +600,7 @@ class _QuizHistorySection extends ConsumerWidget {
                         color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(height: 8),
                     Text(
-                      'No quiz results yet',
+                      l10n.noQuizResultsYet,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -600,7 +608,7 @@ class _QuizHistorySection extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Take a quiz to see your history here',
+                      l10n.takeQuizToSeeHistory,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -643,11 +651,11 @@ class _QuizHistorySection extends ConsumerWidget {
                       ),
                     ),
                     title: Text(
-                      _formatQuizType(result.quizType),
+                      _formatQuizType(l10n, result.quizType),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      '${result.correctAnswers}/${result.totalQuestions} correct  ·  ${AppDateUtils.relativeTime(result.date)}',
+                      l10n.quizHistorySubtitle(result.correctAnswers, result.totalQuestions, AppDateUtils.relativeTime(result.date)),
                     ),
                     trailing: result.jlptLevel != null
                         ? Container(
@@ -680,18 +688,18 @@ class _QuizHistorySection extends ConsumerWidget {
         height: 100,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const Text('Unable to load quiz history'),
+      error: (_, __) => Text(l10n.unableToLoadQuizHistory),
     );
   }
 
-  String _formatQuizType(String type) {
+  String _formatQuizType(AppLocalizations l10n, String type) {
     switch (type) {
       case 'meaning':
-        return 'Meaning Quiz';
+        return l10n.meaningQuiz;
       case 'reading':
-        return 'Reading Quiz';
+        return l10n.readingQuiz;
       case 'writing':
-        return 'Writing Quiz';
+        return l10n.writingQuiz;
       default:
         return type[0].toUpperCase() + type.substring(1);
     }
@@ -712,6 +720,7 @@ class _ProgressListBottomSheet extends ConsumerStatefulWidget {
 class _ProgressListBottomSheetState extends ConsumerState<_ProgressListBottomSheet> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final listAsync = ref.watch(progressListProvider(widget.statusFilter));
 
     return DraggableScrollableSheet(
@@ -740,7 +749,7 @@ class _ProgressListBottomSheetState extends ConsumerState<_ProgressListBottomShe
                 child: listAsync.when(
                   data: (items) {
                     if (items.isEmpty) {
-                      return const Center(child: Text('No items found.'));
+                      return Center(child: Text(l10n.noItemsFound));
                     }
                     return ListView.builder(
                       controller: scrollController,
@@ -751,7 +760,7 @@ class _ProgressListBottomSheetState extends ConsumerState<_ProgressListBottomShe
                         final accuracy = total > 0 ? item.correctCount / total : 0.0;
                         return ListTile(
                           title: Text(item.kanjiCharacter, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                          subtitle: Text('Status: ${item.status[0].toUpperCase()}${item.status.substring(1)}'),
+                          subtitle: Text(l10n.statusLabel(item.status)),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,

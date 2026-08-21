@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class QuizResultScreen extends ConsumerWidget {
   const QuizResultScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(quizSessionProvider);
     final setup = ref.watch(quizSetupProvider);
 
@@ -26,7 +28,7 @@ class QuizResultScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz Result'),
+        title: Text(l10n.quizResult),
         automaticallyImplyLeading: false, // Prevent going back to quiz
       ),
       body: SingleChildScrollView(
@@ -44,7 +46,7 @@ class QuizResultScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              isPerfect ? 'Perfect!' : (isGood ? 'Good Job!' : 'Keep Practicing!'),
+              isPerfect ? l10n.perfect : (isGood ? l10n.goodJob : l10n.keepPracticing),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: isPerfect ? Colors.amber.shade800 : (isGood ? AppColors.primary : null),
@@ -65,26 +67,26 @@ class QuizResultScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _ScoreItem(
-                      label: 'Score',
+                      label: l10n.score,
                       value: result.accuracyPercent,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 24),
                     _ScoreItem(
-                      label: 'Correct',
+                      label: l10n.correct,
                       value: '${result.correctCount}',
                       color: AppColors.correct,
                     ),
                     const SizedBox(width: 24),
                     _ScoreItem(
-                      label: 'Wrong',
+                      label: l10n.wrong,
                       value: '${result.incorrectCount}',
                       color: AppColors.incorrect,
                     ),
                     if (result.skippedCount > 0) ...[
                       const SizedBox(width: 24),
                       _ScoreItem(
-                        label: 'Skipped',
+                        label: l10n.skipped,
                         value: '${result.skippedCount}',
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -231,7 +233,7 @@ class QuizResultScreen extends ConsumerWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text('Retry', style: TextStyle(fontSize: 16)),
+                    child: Text(l10n.retry, style: const TextStyle(fontSize: 16)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -243,7 +245,7 @@ class QuizResultScreen extends ConsumerWidget {
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text('Done', style: TextStyle(fontSize: 16)),
+                    child: Text(l10n.done, style: const TextStyle(fontSize: 16)),
                   ),
                 ),
               ],
