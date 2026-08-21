@@ -153,41 +153,44 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                   final cellWidth = constraints.maxWidth / columns;
                                   final cellHeight = constraints.maxHeight / rows;
                                   
-                                  return Wrap(
-                                    alignment: WrapAlignment.center,
-                                    children: List.generate(widget.character.length, (index) {
-                                      final char = widget.character[index];
-                                      final svgStr = svgStrings[index];
-                                      
-                                      if (svgStr == null) {
+                                  return Center(
+                                    child: Wrap(
+                                      alignment: WrapAlignment.center,
+                                      runAlignment: WrapAlignment.center,
+                                      children: List.generate(widget.character.length, (index) {
+                                        final char = widget.character[index];
+                                        final svgStr = svgStrings[index];
+                                        
+                                        if (svgStr == null) {
+                                          return SizedBox(
+                                            width: cellWidth,
+                                            height: cellHeight,
+                                            child: Center(
+                                              child: Text(
+                                                char,
+                                                style: TextStyle(
+                                                  fontSize: cellHeight * 0.8,
+                                                  color: hintColor,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                        
                                         return SizedBox(
                                           width: cellWidth,
                                           height: cellHeight,
-                                          child: Center(
-                                            child: Text(
-                                              char,
-                                              style: TextStyle(
-                                                fontSize: cellHeight * 0.8,
-                                                color: hintColor,
-                                              ),
+                                          child: SvgPicture.string(
+                                            svgStr,
+                                            fit: BoxFit.contain,
+                                            colorFilter: ColorFilter.mode(
+                                              hintColor,
+                                              BlendMode.srcIn,
                                             ),
                                           ),
                                         );
-                                      }
-                                      
-                                      return SizedBox(
-                                        width: cellWidth,
-                                        height: cellHeight,
-                                        child: SvgPicture.string(
-                                          svgStr,
-                                          fit: BoxFit.contain,
-                                          colorFilter: ColorFilter.mode(
-                                            hintColor,
-                                            BlendMode.srcIn,
-                                          ),
-                                        ),
-                                      );
-                                    }),
+                                      }),
+                                    ),
                                   );
                                 },
                               );
@@ -200,23 +203,26 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                 final cellWidth = constraints.maxWidth / columns;
                                 final cellHeight = constraints.maxHeight / rows;
                                 
-                                return Wrap(
-                                  alignment: WrapAlignment.center,
-                                  children: List.generate(widget.character.length, (index) {
-                                    return SizedBox(
-                                      width: cellWidth,
-                                      height: cellHeight,
-                                      child: Center(
-                                        child: Text(
-                                          widget.character[index],
-                                          style: TextStyle(
-                                            fontSize: cellHeight * 0.8,
-                                            color: hintColor,
+                                return Center(
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    runAlignment: WrapAlignment.center,
+                                    children: List.generate(widget.character.length, (index) {
+                                      return SizedBox(
+                                        width: cellWidth,
+                                        height: cellHeight,
+                                        child: Center(
+                                          child: Text(
+                                            widget.character[index],
+                                            style: TextStyle(
+                                              fontSize: cellHeight * 0.8,
+                                              color: hintColor,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  }),
+                                      );
+                                    }),
+                                  ),
                                 );
                               },
                             ),
