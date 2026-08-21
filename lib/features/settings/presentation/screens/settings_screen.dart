@@ -201,6 +201,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showAccentPicker(BuildContext context, WidgetRef ref, int currentColor) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -247,6 +248,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showDailyGoalPicker(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final currentGoal = ref.read(dailyGoalProvider);
     final options = [5, 10, 15, 20, 30, 50];
 
@@ -288,6 +290,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _showResetDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     int? selectedLevel;
 
     await showDialog(
@@ -364,6 +367,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _showDangerousResetDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     bool confirm = false;
 
     await showDialog(

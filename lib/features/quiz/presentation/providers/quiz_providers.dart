@@ -172,8 +172,11 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
       final total = p.correctCount + p.wrongCount;
       if (total > 0) {
         final wrongRatio = p.wrongCount / total;
-        if (wrongRatio > 0.5) score += 60.0; // Weak
-        else if (wrongRatio > 0.3) score += 30.0;
+        if (wrongRatio > 0.5) {
+          score += 60.0; // Weak
+        } else if (wrongRatio > 0.3) {
+          score += 30.0;
+        }
       }
       if (p.status == 'learning') score += 40.0;
       if (p.nextReviewAt != null && p.nextReviewAt!.isBefore(DateTime.now())) score += 20.0;
