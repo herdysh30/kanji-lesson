@@ -84,6 +84,10 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
   @override
   Widget build(BuildContext context) {
     final svgAsync = ref.watch(wordSvgProvider(widget.character));
+    final len = widget.character.length;
+    final columns = len > 2 ? 2 : (len == 0 ? 1 : len);
+    final rows = (len / columns).ceil();
+    final padAspectRatio = columns / rows;
 
     return Column(
       children: [
@@ -113,7 +117,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
         Expanded(
           child: Center(
             child: AspectRatio(
-              aspectRatio: widget.character.length > 1 ? widget.character.length.clamp(2.0, 3.5).toDouble() : 1.0, 
+              aspectRatio: padAspectRatio,
               child: Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -135,21 +139,29 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                               return Center(
                                 child: FittedBox(
                                   fit: BoxFit.contain,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: List.generate(widget.character.length, (index) {
-                                      final char = widget.character[index];
-                                      final svgStr = svgStrings[index];
-                                      
-                                      if (svgStr == null) {
-                                        return Text(
-                                          char,
-                                          style: TextStyle(
-                                            fontSize: 120,
-                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                          ),
-                                        );
-                                      }
+                                  child: SizedBox(
+                                    width: columns * 120.0,
+                                    child: Wrap(
+                                      alignment: WrapAlignment.center,
+                                      children: List.generate(widget.character.length, (index) {
+                                        final char = widget.character[index];
+                                        final svgStr = svgStrings[index];
+                                        
+                                        if (svgStr == null) {
+                                          return SizedBox(
+                                            width: 120,
+                                            height: 120,
+                                            child: Center(
+                                              child: Text(
+                                                char,
+                                                style: TextStyle(
+                                                  fontSize: 100,
+                                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
                                       
                                       return SizedBox(
                                         width: 120,
@@ -166,21 +178,32 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                     }),
                                   ),
                                 ),
-                              );
-                            },
+                              ),
+                            );
+                          },
                             loading: () => const Center(child: CircularProgressIndicator()),
                             error: (_, __) => Center(
                               child: FittedBox(
                                 fit: BoxFit.contain,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(32.0),
-                                  child: Text(
-                                    widget.character,
-                                    style: TextStyle(
-                                      fontSize: 120,
-                                      letterSpacing: 24,
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                    ),
+                                child: SizedBox(
+                                  width: columns * 120.0,
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    children: List.generate(widget.character.length, (index) {
+                                      return SizedBox(
+                                        width: 120,
+                                        height: 120,
+                                        child: Center(
+                                          child: Text(
+                                            widget.character[index],
+                                            style: TextStyle(
+                                              fontSize: 100,
+                                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
                                   ),
                                 ),
                               ),
