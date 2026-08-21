@@ -23,7 +23,7 @@ class QuizSetupScreen extends ConsumerWidget {
         title: const Text('Quiz Setup'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -33,19 +33,12 @@ class QuizSetupScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Choose where the Kanji should be picked from:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 ChoiceChip(
-                  label: const Text('My Learned Kanji'),
+                  label: const Text('My Learned'),
                   selected: setup.selectedJlptLevel == null,
                   onSelected: (val) {
                     if (val) notifier.setJlptLevel(null);
@@ -63,14 +56,14 @@ class QuizSetupScreen extends ConsumerWidget {
               ],
             ),
             
-            const SizedBox(height: 32),
+            const SizedBox(height: 18),
 
             // Item Type Selection
             Text(
               'Item Type',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -99,14 +92,14 @@ class QuizSetupScreen extends ConsumerWidget {
               ],
             ),
             
-            const SizedBox(height: 32),
+            const SizedBox(height: 18),
             
             // Quiz Type Selection
             Text(
               'Quiz Type',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -137,16 +130,16 @@ class QuizSetupScreen extends ConsumerWidget {
                   return statusAsync.when(
                     data: (isDownloaded) {
                       if (isDownloaded) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 6.0),
                           child: Text(
                             '✓ Japanese Handwriting Model Ready',
-                            style: const TextStyle(color: AppColors.correct, fontSize: 12),
+                            style: TextStyle(color: AppColors.correct, fontSize: 12),
                           ),
                         );
                       }
                       return Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: 6.0),
                         child: OutlinedButton.icon(
                           onPressed: () async {
                             final service = ref.read(mlkitDigitalInkServiceProvider);
@@ -161,21 +154,21 @@ class QuizSetupScreen extends ConsumerWidget {
                               );
                             }
                           },
-                          icon: const Icon(Icons.download_rounded, size: 18),
-                          label: const Text('Download Japanese Handwriting Model'),
+                          icon: const Icon(Icons.download_rounded, size: 16),
+                          label: const Text('Download Handwriting Model'),
                         ),
                       );
                     },
                     loading: () => const Padding(
-                      padding: EdgeInsets.only(top: 8.0),
-                      child: CircularProgressIndicator(),
+                      padding: EdgeInsets.only(top: 6.0),
+                      child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                     ),
                     error: (_, __) => const SizedBox.shrink(),
                   );
                 },
               ),
             
-            const SizedBox(height: 32),
+            const SizedBox(height: 18),
             
             // Amount Selection
             Row(
@@ -197,7 +190,7 @@ class QuizSetupScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -224,7 +217,7 @@ class QuizSetupScreen extends ConsumerWidget {
             ),
             if (setup.isCustomCount)
               Padding(
-                padding: const EdgeInsets.only(top: 16.0),
+                padding: const EdgeInsets.only(top: 8.0),
                 child: Builder(
                   builder: (context) {
                     final maxVal = (maxItemsAsync.valueOrNull ?? 100).toDouble().clamp(1.0, 1000.0);
@@ -244,7 +237,7 @@ class QuizSetupScreen extends ConsumerWidget {
                           ),
                         ),
                         SizedBox(
-                          width: 60,
+                          width: 48,
                           child: Text(
                             '${currentValue.toInt()}',
                             style: Theme.of(context).textTheme.titleMedium,
@@ -257,11 +250,11 @@ class QuizSetupScreen extends ConsumerWidget {
                 ),
               ),
             
-            const SizedBox(height: 48),
+            const SizedBox(height: 24),
             
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 52,
               child: FilledButton.icon(
                 onPressed: () async {
                   if (setup.selectedQuizTypes.contains(QuizType.writing)) {
@@ -307,7 +300,7 @@ class QuizSetupScreen extends ConsumerWidget {
                 icon: const Icon(Icons.play_arrow_rounded),
                 label: const Text(
                   'Start Quiz', 
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
