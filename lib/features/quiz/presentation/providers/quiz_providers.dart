@@ -527,6 +527,9 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
       accuracy: accuracy,
       questionsJson: drift.Value(questionsJsonStr),
     ));
+    
+    // Add Daily Progress
+    _ref.read(dailyProgressProvider.notifier).addProgress(correctCount);
   }
 }
 

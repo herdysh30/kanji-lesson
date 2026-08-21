@@ -58,6 +58,54 @@ class DailyGoalNotifier extends StateNotifier<int> {
   }
 }
 
+// ─── Daily Progress & Streak ────────────────────────────────
+
+class DailyProgressState {
+  const DailyProgressState({
+    required this.todayCount,
+    required this.currentStreak,
+    required this.bestStreak,
+  });
+
+  final int todayCount;
+  final int currentStreak;
+  final int bestStreak;
+}
+
+final dailyProgressProvider = StateNotifierProvider<DailyProgressNotifier, DailyProgressState>((ref) {
+  final repo = ref.watch(settingsRepositoryProvider);
+  return DailyProgressNotifier(repo);
+});
+
+class DailyProgressNotifier extends StateNotifier<DailyProgressState> {
+  DailyProgressNotifier(this._repository)
+      : super(DailyProgressState(
+          todayCount: _getTodayCount(_repository),
+          currentStreak: _repository.currentStreak,
+          bestStreak: _repository.bestStreak,
+        ));
+
+  final SettingsRepository _repository;
+
+  static int _getTodayCount(SettingsRepository repo) {
+    final todayStr = DateTime.now().toIso8601String().split('T').first;
+    if (repo.todayProgressDate == todayStr) {
+      return repo.todayProgressCount;
+    }
+    return 0; // reset visually for a new day
+  }
+
+  Future<void> addProgress(int correctAnswersCount) async {
+    await _repository.addDailyProgress(correctAnswersCount);
+    // Reload state after repository updates it
+    state = DailyProgressState(
+      todayCount: _getTodayCount(_repository),
+      currentStreak: _repository.currentStreak,
+      bestStreak: _repository.bestStreak,
+    );
+  }
+}
+
 // ─── Accent Color ───────────────────────────────────────────
 
 final accentColorProvider = StateNotifierProvider<AccentColorNotifier, int>((ref) {

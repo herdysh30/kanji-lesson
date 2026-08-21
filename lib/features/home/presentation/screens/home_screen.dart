@@ -7,6 +7,7 @@ import 'package:kanji_lesson/core/theme/app_spacing.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
+import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -32,14 +33,52 @@ class HomeScreen extends ConsumerWidget {
               children: [
                 // ─── Greeting ──────────────────────────────────
                 const SizedBox(height: 8),
-                Text(
-                  'こんにちは',
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "What shall we learn today?",
-                  style: Theme.of(context).textTheme.bodyMedium,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'こんにちは',
+                          style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "What shall we learn today?",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final progress = ref.watch(dailyProgressProvider);
+                        if (progress.currentStreak == 0) return const SizedBox.shrink();
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text('🔥', style: TextStyle(fontSize: 20)),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${progress.currentStreak}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.xl),
 
@@ -106,7 +145,12 @@ class HomeScreen extends ConsumerWidget {
 class _DailyGoalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(dailyStatsProvider);
+    final progressState = ref.watch(dailyProgressProvider);
+    final goal = ref.watch(dailyGoalProvider);
+    
+    final done = progressState.todayCount;
+    final progress = goal > 0 ? (done / goal).clamp(0.0, 1.0) : 0.0;
+    final completed = done >= goal;
 
     return Container(
       width: double.infinity,
@@ -115,67 +159,47 @@ class _DailyGoalCard extends ConsumerWidget {
         color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
-      child: stats.when(
-        data: (data) {
-          final goal = data?.dailyGoal ?? AppConstants.defaultDailyGoal;
-          final done = (data?.newKanjiCount ?? 0) +
-              (data?.reviewedKanjiCount ?? 0);
-          final progress = goal > 0 ? (done / goal).clamp(0.0, 1.0) : 0.0;
-          final completed = data?.goalCompleted == true || done >= goal;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                completed ? 'Today\'s Goal — Complete ✓' : 'Today\'s Goal',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '$done / $goal',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-              if (!completed) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '${goal - done} more to complete today\'s goal',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          );
-        },
-        loading: () => const SizedBox(
-          height: 80,
-          child: Center(
-            child: CircularProgressIndicator(color: Colors.white),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            completed ? 'Today\'s Goal — Complete ✓' : 'Today\'s Goal',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        error: (_, __) => const Text(
-          'Unable to load',
-          style: TextStyle(color: Colors.white),
-        ),
+          const SizedBox(height: 16),
+          Text(
+            '$done / $goal',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+          if (!completed) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${goal - done} more to complete today\'s goal',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
