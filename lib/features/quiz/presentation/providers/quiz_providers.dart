@@ -4,6 +4,7 @@ import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
@@ -158,11 +159,34 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
   List<JlptVocab> vocabPool = [];
 
   if (setup.selectedJlptLevel != null) {
+    final allProgress = await db.getAllProgress();
+    final progressMap = {for (var p in allProgress) p.kanjiCharacter: p};
+    final rnd = math.Random();
+    
+    double getPriorityScore(String char) {
+      final p = progressMap[char];
+      if (p == null) return 80.0 + (rnd.nextDouble() * 20); // New (unseen)
+      if (p.status == 'mastered') return 0.0 + (rnd.nextDouble() * 10);
+      
+      double score = 20.0;
+      final total = p.correctCount + p.wrongCount;
+      if (total > 0) {
+        final wrongRatio = p.wrongCount / total;
+        if (wrongRatio > 0.5) score += 60.0; // Weak
+        else if (wrongRatio > 0.3) score += 30.0;
+      }
+      if (p.status == 'learning') score += 40.0;
+      if (p.nextReviewAt != null && p.nextReviewAt!.isBefore(DateTime.now())) score += 20.0;
+      return score + (rnd.nextDouble() * 10); // Random noise
+    }
+
     if (setup.selectedItemTypes.contains(QuizItemType.kanji) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final chars = await repo.getKanjiListByJlpt(setup.selectedJlptLevel!);
       final poolSize = (setup.questionCount + 5).clamp(10, chars.length);
-      final shuffledChars = List.of(chars)..shuffle();
-      for (final char in shuffledChars) {
+      
+      final sortedChars = List.of(chars)..sort((a, b) => getPriorityScore(b).compareTo(getPriorityScore(a)));
+      
+      for (final char in sortedChars) {
         try {
           kanjiPool.add(await repo.getKanjiDetail(char));
         } catch (_) {}
@@ -170,7 +194,8 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
       }
     }
     if (setup.selectedItemTypes.contains(QuizItemType.vocab) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
-      vocabPool = await vocabRepo.getVocabByLevel(setup.selectedJlptLevel!);
+      final vocabs = await vocabRepo.getVocabByLevel(setup.selectedJlptLevel!);
+      vocabPool = List.of(vocabs)..sort((a, b) => getPriorityScore(b.word).compareTo(getPriorityScore(a.word)));
     }
   } else {
     final learned = await db.getAllProgress();
