@@ -54,23 +54,28 @@ class HomeScreen extends ConsumerWidget {
                     Consumer(
                       builder: (context, ref, child) {
                         final progress = ref.watch(dailyProgressProvider);
-                        if (progress.currentStreak == 0) return const SizedBox.shrink();
+                        final hasStreak = progress.currentStreak > 0;
+                        
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.15),
+                            color: hasStreak 
+                                ? Colors.orange.withValues(alpha: 0.15)
+                                : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
                             children: [
-                              const Text('🔥', style: TextStyle(fontSize: 20)),
+                              Text(hasStreak ? '🔥' : '📓', style: const TextStyle(fontSize: 20)),
                               const SizedBox(width: 6),
                               Text(
                                 '${progress.currentStreak}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.orange,
+                                  color: hasStreak 
+                                      ? Colors.orange 
+                                      : Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
