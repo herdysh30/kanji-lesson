@@ -109,17 +109,22 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Branch 3: Progress
+        // Branch 3: Quiz
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/progress',
-              builder: (context, state) => const ProgressScreen(),
+              path: '/quiz',
+              builder: (context, state) => const QuizSetupScreen(),
               routes: [
                 GoRoute(
-                  path: 'weak',
+                  path: 'session',
                   parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => const WeakKanjiScreen(),
+                  builder: (context, state) => const QuizScreen(),
+                ),
+                GoRoute(
+                  path: 'result',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const QuizResultScreen(),
                 ),
               ],
             ),
@@ -136,21 +141,16 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    // Screens without bottom nav bar (Quiz setup)
+    // Standalone progress / weak kanji routes
     GoRoute(
-      path: '/quiz',
+      path: '/progress',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const QuizSetupScreen(),
+      builder: (context, state) => const ProgressScreen(),
       routes: [
         GoRoute(
-          path: 'session',
+          path: 'weak',
           parentNavigatorKey: _rootNavigatorKey,
-          builder: (context, state) => const QuizScreen(),
-        ),
-        GoRoute(
-          path: 'result',
-          parentNavigatorKey: _rootNavigatorKey,
-          builder: (context, state) => const QuizResultScreen(),
+          builder: (context, state) => const WeakKanjiScreen(),
         ),
       ],
     ),
@@ -184,8 +184,8 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             label: 'Review',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_rounded),
-            label: 'Progress',
+            icon: Icon(Icons.quiz_rounded),
+            label: 'Quiz',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_rounded),

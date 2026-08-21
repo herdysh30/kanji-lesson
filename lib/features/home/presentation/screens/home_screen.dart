@@ -63,17 +63,6 @@ class HomeScreen extends ConsumerWidget {
                     label: const Text('Continue Learning'),
                   ),
                 ),
-                const SizedBox(height: 12),
-                
-                // ─── Quiz Mode ─────────────────────────────────
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.tonalIcon(
-                    onPressed: () => context.push('/quiz'),
-                    icon: const Icon(Icons.quiz_rounded),
-                    label: const Text('Take a Quiz'),
-                  ),
-                ),
                 const SizedBox(height: 32),
 
                 // ─── JLPT Progress ─────────────────────────────
@@ -216,7 +205,7 @@ class _WeakKanjiCard extends ConsumerWidget {
     final weak = ref.watch(weakKanjiCountProvider);
 
     return GestureDetector(
-      onTap: () => context.go('/progress/weak'),
+      onTap: () => context.push('/progress/weak'),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
