@@ -121,7 +121,7 @@ class _DailyGoalCard extends ConsumerWidget {
           final done = (data?.newKanjiCount ?? 0) +
               (data?.reviewedKanjiCount ?? 0);
           final progress = goal > 0 ? (done / goal).clamp(0.0, 1.0) : 0.0;
-          final completed = data?.goalCompleted == true;
+          final completed = data?.goalCompleted == true || done >= goal;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

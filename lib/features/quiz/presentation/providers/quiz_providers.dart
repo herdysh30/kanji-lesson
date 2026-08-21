@@ -7,45 +7,60 @@ import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:equatable/equatable.dart';
 
-class QuizSetupState {
+enum QuizItemType {
+  kanji,
+  vocab,
+  sentence,
+}
+
+class QuizSetupState extends Equatable {
   const QuizSetupState({
-    this.selectedJlptLevel, // null = all learned kanji
-    this.selectedQuizTypes = const {QuizType.meaning, QuizType.reading},
-    this.itemType = ReviewItemType.mixed,
+    this.selectedJlptLevel,
     this.questionCount = 10,
     this.isCustomCount = false,
+    this.selectedQuizTypes = const {QuizType.meaning, QuizType.reading},
+    this.selectedItemTypes = const {QuizItemType.kanji, QuizItemType.vocab},
   });
 
   final int? selectedJlptLevel;
-  final Set<QuizType> selectedQuizTypes;
-  final ReviewItemType itemType;
   final int questionCount;
   final bool isCustomCount;
+  final Set<QuizType> selectedQuizTypes;
+  final Set<QuizItemType> selectedItemTypes;
 
   QuizSetupState copyWith({
     int? selectedJlptLevel,
-    bool clearJlptLevel = false,
-    Set<QuizType>? selectedQuizTypes,
-    ReviewItemType? itemType,
     int? questionCount,
     bool? isCustomCount,
+    Set<QuizType>? selectedQuizTypes,
+    Set<QuizItemType>? selectedItemTypes,
   }) {
     return QuizSetupState(
-      selectedJlptLevel: clearJlptLevel ? null : (selectedJlptLevel ?? this.selectedJlptLevel),
-      selectedQuizTypes: selectedQuizTypes ?? this.selectedQuizTypes,
-      itemType: itemType ?? this.itemType,
+      selectedJlptLevel: selectedJlptLevel ?? this.selectedJlptLevel,
       questionCount: questionCount ?? this.questionCount,
       isCustomCount: isCustomCount ?? this.isCustomCount,
+      selectedQuizTypes: selectedQuizTypes ?? this.selectedQuizTypes,
+      selectedItemTypes: selectedItemTypes ?? this.selectedItemTypes,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        selectedJlptLevel,
+        questionCount,
+        isCustomCount,
+        selectedQuizTypes,
+        selectedItemTypes,
+      ];
 }
 
 class QuizSetupNotifier extends StateNotifier<QuizSetupState> {
   QuizSetupNotifier() : super(const QuizSetupState());
 
   void setJlptLevel(int? level) {
-    state = state.copyWith(selectedJlptLevel: level, clearJlptLevel: level == null);
+    state = state.copyWith(selectedJlptLevel: level);
   }
 
   void toggleQuizType(QuizType type) {
@@ -58,8 +73,8 @@ class QuizSetupNotifier extends StateNotifier<QuizSetupState> {
     state = state.copyWith(selectedQuizTypes: types);
   }
 
-  void setItemType(ReviewItemType type) {
-    state = state.copyWith(itemType: type);
+  void setItemTypes(Set<QuizItemType> types) {
+    state = state.copyWith(selectedItemTypes: types);
   }
 
   void setQuestionCount(int count, {bool isCustom = false}) {
@@ -81,11 +96,11 @@ final maxQuizItemsProvider = FutureProvider.autoDispose<int>((ref) async {
   int maxCount = 0;
 
   if (setup.selectedJlptLevel != null) {
-    if (setup.itemType == ReviewItemType.kanji || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.kanji) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final chars = await kanjiRepo.getKanjiListByJlpt(setup.selectedJlptLevel!);
       maxCount += chars.length;
     }
-    if (setup.itemType == ReviewItemType.vocab || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.vocab) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final vocabs = await vocabRepo.getVocabByLevel(setup.selectedJlptLevel!);
       maxCount += vocabs.length;
     }
@@ -94,15 +109,15 @@ final maxQuizItemsProvider = FutureProvider.autoDispose<int>((ref) async {
     final learnedKanji = learned.where((e) => e.kanjiCharacter.length == 1).toList();
     final learnedVocab = learned.where((e) => e.kanjiCharacter.length > 1).toList();
 
-    if (setup.itemType == ReviewItemType.kanji || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.kanji) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       maxCount += learnedKanji.length;
     }
-    if (setup.itemType == ReviewItemType.vocab || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.vocab) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       maxCount += learnedVocab.length;
     }
   }
 
-  return maxCount == 0 ? 10 : maxCount; // Fallback so it doesn't break UI
+  return maxCount == 0 ? 10 : maxCount;
 });
 
 // ─── Generator & Question Provider ─────────────────────────────────
@@ -111,10 +126,25 @@ final quizGeneratorProvider = Provider<QuizGenerator>((ref) {
   return QuizGenerator();
 });
 
-/// A future provider that actually fetches/generates the quiz questions based on the setup
-final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((ref) async {
+
+
+class QuizSessionInitData {
+  QuizSessionInitData({
+    required this.tasks,
+    required this.kanjiDistractors,
+    required this.vocabDistractors,
+    required this.isId,
+  });
+
+  final List<QuizTask> tasks;
+  final List<Kanji> kanjiDistractors;
+  final List<JlptVocab> vocabDistractors;
+  final bool isId;
+}
+
+/// A future provider that fetches the pools and creates QuizTasks (very fast)
+final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((ref) async {
   final setup = ref.watch(quizSetupProvider);
-  final generator = ref.watch(quizGeneratorProvider);
   final isId = ref.watch(localeProvider).languageCode == 'id';
 
   final db = ref.watch(databaseProvider);
@@ -126,7 +156,7 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
   List<JlptVocab> vocabPool = [];
 
   if (setup.selectedJlptLevel != null) {
-    if (setup.itemType == ReviewItemType.kanji || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.kanji) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final chars = await repo.getKanjiListByJlpt(setup.selectedJlptLevel!);
       final poolSize = (setup.questionCount + 5).clamp(10, chars.length);
       final shuffledChars = List.of(chars)..shuffle();
@@ -137,20 +167,20 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
         if (kanjiPool.length >= poolSize) break;
       }
     }
-    if (setup.itemType == ReviewItemType.vocab || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.vocab) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       vocabPool = await vocabRepo.getVocabByLevel(setup.selectedJlptLevel!);
     }
   } else {
     final learned = await db.getAllProgress();
     final learnedChars = learned.map((e) => e.kanjiCharacter).toList();
     
-    if (setup.itemType == ReviewItemType.kanji || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.kanji) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final kanjiOnly = learnedChars.where((c) => c.length == 1).toList();
       final allKanji = await localDataSource.searchKanji('');
       kanjiPool = allKanji.where((k) => kanjiOnly.contains(k.character) && k.meanings.isNotEmpty).toList();
     }
     
-    if (setup.itemType == ReviewItemType.vocab || setup.itemType == ReviewItemType.mixed) {
+    if (setup.selectedItemTypes.contains(QuizItemType.vocab) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final vocabOnly = learnedChars.where((c) => c.length > 1).toList();
       for (var word in vocabOnly) {
         final v = await vocabRepo.getVocabByWord(word);
@@ -162,72 +192,194 @@ final quizQuestionsProvider = FutureProvider.autoDispose<List<QuizQuestion>>((re
   final allKanji = await localDataSource.searchKanji('');
   final allVocab = await vocabRepo.getAllVocab();
 
-  final List<QuizQuestion> allQuestions = [];
+  final List<QuizTask> allTasks = [];
+
+  void addTasksForType(QuizType type) {
+    final kanjiCount = setup.selectedItemTypes.contains(QuizItemType.kanji) ? kanjiPool.length : 0;
+    final vocabCount = setup.selectedItemTypes.contains(QuizItemType.vocab) ? vocabPool.length : 0;
+    
+    int qKanji = 0;
+    int qVocab = 0;
+    if (kanjiCount > 0 && vocabCount > 0) {
+      qKanji = setup.questionCount ~/ 2;
+      qVocab = setup.questionCount - qKanji;
+    } else if (kanjiCount > 0) {
+      qKanji = setup.questionCount;
+    } else if (vocabCount > 0) {
+      qVocab = setup.questionCount;
+    }
+
+    if (qKanji > 0) {
+      List<Kanji> validKanji = List.of(kanjiPool);
+      if (type == QuizType.meaning || type == QuizType.writing) {
+        validKanji.retainWhere((k) => k.meanings.isNotEmpty);
+      } else if (type == QuizType.reading) {
+        validKanji.retainWhere((k) => k.allReadings.isNotEmpty);
+      }
+      validKanji.shuffle();
+      allTasks.addAll(validKanji.take(qKanji).map((k) => QuizTask(type: type, kanji: k)));
+    }
+
+    if (qVocab > 0) {
+      List<JlptVocab> validVocab = List.of(vocabPool);
+      if (type == QuizType.meaning || type == QuizType.writing) {
+        validVocab.retainWhere((v) => v.meaning.isNotEmpty);
+      } else if (type == QuizType.reading) {
+        validVocab.retainWhere((v) => v.furigana.isNotEmpty);
+      }
+      validVocab.shuffle();
+      allTasks.addAll(validVocab.take(qVocab).map((v) => QuizTask(type: type, vocab: v)));
+    }
+  }
   
-  if (setup.selectedQuizTypes.contains(QuizType.meaning)) {
-    allQuestions.addAll(generator.generateMeaningQuiz(kanjiPool, vocabPool, kanjiDistractors: allKanji, vocabDistractors: allVocab, count: setup.questionCount, isId: isId));
-  }
-  if (setup.selectedQuizTypes.contains(QuizType.reading)) {
-    allQuestions.addAll(generator.generateReadingQuiz(kanjiPool, vocabPool, kanjiDistractors: allKanji, vocabDistractors: allVocab, count: setup.questionCount));
-  }
-  if (setup.selectedQuizTypes.contains(QuizType.writing)) {
-    allQuestions.addAll(generator.generateWritingQuiz(kanjiPool, vocabPool, count: setup.questionCount, isId: isId));
+  if (setup.selectedQuizTypes.contains(QuizType.meaning)) addTasksForType(QuizType.meaning);
+  if (setup.selectedQuizTypes.contains(QuizType.reading)) addTasksForType(QuizType.reading);
+  if (setup.selectedQuizTypes.contains(QuizType.writing)) addTasksForType(QuizType.writing);
+  
+  if (setup.selectedItemTypes.contains(QuizItemType.sentence)) {
+    final validVocab = List.of(vocabPool)..shuffle();
+    List<QuizType> sentenceQuizTypes = [];
+    if (setup.selectedQuizTypes.contains(QuizType.meaning)) sentenceQuizTypes.add(QuizType.meaning);
+    if (setup.selectedQuizTypes.contains(QuizType.reading)) sentenceQuizTypes.add(QuizType.reading);
+    if (sentenceQuizTypes.isEmpty) sentenceQuizTypes.add(QuizType.meaning);
+
+    for (int i = 0; i < setup.questionCount; i++) {
+       if (i >= validVocab.length) break;
+       final qt = sentenceQuizTypes[i % sentenceQuizTypes.length];
+       allTasks.add(QuizTask(type: qt, vocab: validVocab[i], isSentence: true));
+    }
   }
 
-  allQuestions.shuffle();
-  return allQuestions.take(setup.questionCount).toList();
+  allTasks.shuffle();
+  final finalTasks = allTasks.take(setup.questionCount).toList();
+
+  return QuizSessionInitData(
+    tasks: finalTasks,
+    kanjiDistractors: allKanji,
+    vocabDistractors: allVocab,
+    isId: isId,
+  );
 });
 
 // ─── Active Quiz Session ──────────────────────────────────────────
 
 class QuizSessionState {
   const QuizSessionState({
-    required this.questions,
+    required this.tasks,
+    required this.resolvedQuestions,
     required this.currentIndex,
     required this.answers,
     required this.isFinished,
+    required this.isGeneratingNext,
+    this.hintedQuestionIndices = const {},
   });
 
-  final List<QuizQuestion> questions;
+  final List<QuizTask> tasks;
+  final List<QuizQuestion> resolvedQuestions;
   final int currentIndex;
-  final List<int> answers; // Stores the selected option index for each question
+  final List<int> answers;
   final bool isFinished;
+  final bool isGeneratingNext;
+  final Set<int> hintedQuestionIndices;
 
   QuizQuestion? get currentQuestion => 
-      currentIndex < questions.length ? questions[currentIndex] : null;
+      currentIndex < resolvedQuestions.length ? resolvedQuestions[currentIndex] : null;
 
   QuizSessionState copyWith({
-    List<QuizQuestion>? questions,
+    List<QuizTask>? tasks,
+    List<QuizQuestion>? resolvedQuestions,
     int? currentIndex,
     List<int>? answers,
     bool? isFinished,
+    bool? isGeneratingNext,
+    Set<int>? hintedQuestionIndices,
   }) {
     return QuizSessionState(
-      questions: questions ?? this.questions,
+      tasks: tasks ?? this.tasks,
+      resolvedQuestions: resolvedQuestions ?? this.resolvedQuestions,
       currentIndex: currentIndex ?? this.currentIndex,
       answers: answers ?? this.answers,
       isFinished: isFinished ?? this.isFinished,
+      isGeneratingNext: isGeneratingNext ?? this.isGeneratingNext,
+      hintedQuestionIndices: hintedQuestionIndices ?? this.hintedQuestionIndices,
     );
   }
 }
 
 class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
-  QuizSessionNotifier(this._db) 
+  QuizSessionNotifier(this._db, this._generator, this._ref) 
       : super(const QuizSessionState(
-          questions: [],
+          tasks: [],
+          resolvedQuestions: [],
           currentIndex: 0,
           answers: [],
           isFinished: false,
+          isGeneratingNext: false,
         ));
 
   final AppDatabase _db;
+  final QuizGenerator _generator;
+  final Ref _ref;
+  
+  QuizSessionInitData? _initData;
 
-  void initialize(List<QuizQuestion> questions) {
-    if (state.questions.isNotEmpty) return; // already initialized
+  void initialize(QuizSessionInitData initData) {
+    if (state.tasks.isNotEmpty) return; // already initialized
+    _initData = initData;
     state = state.copyWith(
-      questions: questions,
-      isFinished: questions.isEmpty,
+      tasks: initData.tasks,
+      isFinished: initData.tasks.isEmpty,
     );
+    if (initData.tasks.isNotEmpty) {
+      _generateNext();
+    }
+  }
+
+  Future<void> _generateNext() async {
+    if (state.isGeneratingNext || _initData == null) return;
+    if (state.resolvedQuestions.length >= state.tasks.length) return;
+
+    state = state.copyWith(isGeneratingNext: true);
+
+    try {
+      final taskIndex = state.resolvedQuestions.length;
+      final nextTask = state.tasks[taskIndex];
+      
+      final question = await _generator.generateSingleQuestion(
+        nextTask,
+        kanjiDistractors: _initData!.kanjiDistractors,
+        vocabDistractors: _initData!.vocabDistractors,
+        isSentence: nextTask.isSentence,
+        fetchSentences: (query) => _ref.read(kanjiSentencesProvider(query).future),
+        isId: _initData!.isId,
+      );
+
+      if (question != null) {
+        state = state.copyWith(
+          resolvedQuestions: [...state.resolvedQuestions, question],
+          isGeneratingNext: false,
+        );
+      } else {
+        // Fallback: task failed. Remove it and try the next one.
+        final newTasks = List<QuizTask>.from(state.tasks)..removeAt(taskIndex);
+        state = state.copyWith(
+          tasks: newTasks,
+          isFinished: newTasks.isEmpty || (state.currentIndex >= newTasks.length),
+          isGeneratingNext: false,
+        );
+        if (!state.isFinished) {
+          _generateNext();
+        }
+      }
+    } catch (e) {
+      state = state.copyWith(isGeneratingNext: false);
+    }
+  }
+  
+  void markHintUsed() {
+    if (state.isFinished || state.currentQuestion == null) return;
+    final newHints = Set<int>.from(state.hintedQuestionIndices)..add(state.currentIndex);
+    state = state.copyWith(hintedQuestionIndices: newHints);
   }
 
   void answerCurrent(int selectedIndex) {
@@ -245,26 +397,30 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     // Wait, let's just check if selectedIndex == correctIndex.
     final item = question.kanjiCharacter ?? question.correctAnswer;
     
-    // Use the existing SRS method to update correct/wrong count
-    // Quiz might not change interval/ease, but it should at least increment correct/wrong count.
-    _updateProgress(item, isCorrect);
+    final isHintUsed = state.hintedQuestionIndices.contains(state.currentIndex);
+    _updateProgress(item, isCorrect, isHintUsed: isHintUsed);
+
+    // Prefetch next question while user views explanation
+    _generateNext();
   }
   
-  Future<void> _updateProgress(String item, bool isCorrect) async {
+  Future<void> _updateProgress(String item, bool isCorrect, {bool isHintUsed = false}) async {
+    final effectiveCorrect = isCorrect && !isHintUsed;
+    
     final progress = await _db.getProgress(item);
     if (progress == null) {
       final now = DateTime.now();
       await _db.upsertProgress(UserKanjiProgressEntriesCompanion.insert(
         kanjiCharacter: item,
         status: const drift.Value('learning'),
-        correctCount: drift.Value(isCorrect ? 1 : 0),
-        wrongCount: drift.Value(isCorrect ? 0 : 1),
+        correctCount: drift.Value(effectiveCorrect ? 1 : 0),
+        wrongCount: drift.Value(effectiveCorrect ? 0 : 1),
         firstLearnedAt: drift.Value(now),
         nextReviewAt: drift.Value(now),
       ));
     } else {
       final total = progress.correctCount + progress.wrongCount + 1;
-      final correct = progress.correctCount + (isCorrect ? 1 : 0);
+      final correct = progress.correctCount + (effectiveCorrect ? 1 : 0);
       final accuracy = correct / total;
       
       String newStatus = progress.status;
@@ -277,8 +433,8 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
       await _db.upsertProgress(UserKanjiProgressEntriesCompanion(
         kanjiCharacter: drift.Value(progress.kanjiCharacter),
         status: drift.Value(newStatus),
-        correctCount: drift.Value(progress.correctCount + (isCorrect ? 1 : 0)),
-        wrongCount: drift.Value(progress.wrongCount + (isCorrect ? 0 : 1)),
+        correctCount: drift.Value(progress.correctCount + (effectiveCorrect ? 1 : 0)),
+        wrongCount: drift.Value(progress.wrongCount + (effectiveCorrect ? 0 : 1)),
         updatedAt: drift.Value(DateTime.now()),
       ));
     }
@@ -288,7 +444,7 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     if (state.isFinished) return;
     
     final nextIndex = state.currentIndex + 1;
-    if (nextIndex >= state.questions.length) {
+    if (nextIndex >= state.tasks.length) {
       state = state.copyWith(isFinished: true);
       _saveQuizResult();
     } else {
@@ -298,16 +454,16 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
 
   Future<void> _saveQuizResult() async {
     int correctCount = 0;
-    for (int i = 0; i < state.questions.length; i++) {
-      if (i < state.answers.length && state.answers[i] == state.questions[i].correctIndex) {
+    for (int i = 0; i < state.resolvedQuestions.length; i++) {
+      if (i < state.answers.length && state.answers[i] == state.resolvedQuestions[i].correctIndex) {
         correctCount++;
       }
     }
-    final accuracy = state.questions.isEmpty ? 0.0 : correctCount / state.questions.length;
+    final accuracy = state.resolvedQuestions.isEmpty ? 0.0 : correctCount / state.resolvedQuestions.length;
     
     await _db.insertQuizResult(QuizResultEntriesCompanion.insert(
-      quizType: 'mixed', // Simplified, could get from setup
-      totalQuestions: state.questions.length,
+      quizType: 'mixed',
+      totalQuestions: state.resolvedQuestions.length,
       correctAnswers: correctCount,
       accuracy: accuracy,
     ));
@@ -316,5 +472,6 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
 
 final quizSessionProvider = StateNotifierProvider.autoDispose<QuizSessionNotifier, QuizSessionState>((ref) {
   final db = ref.watch(databaseProvider);
-  return QuizSessionNotifier(db);
+  final generator = ref.watch(quizGeneratorProvider);
+  return QuizSessionNotifier(db, generator, ref);
 });

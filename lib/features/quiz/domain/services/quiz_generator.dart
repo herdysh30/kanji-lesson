@@ -1,13 +1,32 @@
 import 'dart:math';
 
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
-
 import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
+import 'package:kanji_lesson/features/kanji/domain/entities/sentence.dart';
+
+import 'package:equatable/equatable.dart';
 
 enum QuizType {
   meaning,
   reading,
   writing,
+}
+
+class QuizTask extends Equatable {
+  const QuizTask({
+    required this.type,
+    this.kanji,
+    this.vocab,
+    this.isSentence = false,
+  });
+
+  final QuizType type;
+  final Kanji? kanji;
+  final JlptVocab? vocab;
+  final bool isSentence;
+
+  @override
+  List<Object?> get props => [type, kanji, vocab, isSentence];
 }
 
 /// A single quiz option with metadata for explanations
@@ -32,6 +51,7 @@ class QuizQuestion {
     required this.options,
     this.kanjiCharacter,
     this.audioText,
+    this.sentenceObj,
   });
 
   final QuizType type;
@@ -40,6 +60,7 @@ class QuizQuestion {
   final List<QuizOption> options; // 4 options including correct
   final String? kanjiCharacter;
   final String? audioText; // For TTS
+  final Sentence? sentenceObj;
 
   int get correctIndex {
     if (type == QuizType.writing) return 0;
@@ -101,6 +122,269 @@ class QuizGenerator {
   QuizGenerator({Random? random}) : _random = random ?? Random();
 
   final Random _random;
+
+  /// Lazily generate a single question from a QuizTask
+  Future<QuizQuestion?> generateSingleQuestion(
+    QuizTask task, {
+    List<Kanji> kanjiDistractors = const [],
+    List<JlptVocab> vocabDistractors = const [],
+    bool isSentence = false,
+    Future<List<Sentence>> Function(String)? fetchSentences,
+    bool isId = false,
+  }) async {
+    final type = task.type;
+    final kanji = task.kanji;
+    final vocab = task.vocab;
+
+    if (isSentence && vocab != null && fetchSentences != null) {
+      try {
+        final sentences = await fetchSentences(vocab.word);
+        if (sentences.isEmpty) return null;
+
+        final validSentences = sentences.where((s) => s.japanese.contains(vocab.word)).toList();
+        if (validSentences.isEmpty) return null;
+
+        validSentences.shuffle(_random);
+        final sentence = validSentences.first;
+
+        final prompt = sentence.japanese;
+        final correctAnswer = type == QuizType.meaning ? vocab.primaryMeaning(isId) : vocab.furigana;
+        if (correctAnswer.trim().isEmpty) return null;
+
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: vocab.word,
+          explanation: type == QuizType.meaning ? vocab.furigana : vocab.primaryMeaning(isId),
+        );
+
+        var distractorVocab = vocabDistractors
+            .where((v) => v.word != vocab.word)
+            .where((v) => (type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana).isNotEmpty)
+            .where((v) => (type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana) != correctAnswer)
+            .toList()..shuffle(_random);
+            
+        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+          text: type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana,
+          kanjiCharacter: v.word,
+          explanation: type == QuizType.meaning ? v.furigana : v.primaryMeaning(isId),
+        )).toList();
+        
+        final dummyOptions = type == QuizType.meaning 
+            ? (isId ? ['air', 'api', 'tanah', 'angin', 'langit', 'bulan', 'matahari', 'bintang'] : ['water', 'fire', 'earth', 'wind', 'sky', 'moon', 'sun', 'star'])
+            : ['あか', 'あお', 'しろ', 'くろ', 'きいろ', 'みどり', 'むらさき', 'ちゃいろ', 'ピンク', 'オレンジ'];
+        
+        List<String> dummies = List.from(dummyOptions)..shuffle(_random);
+
+        while (distractorOptions.length < 3 && dummies.isNotEmpty) {
+          final dummy = dummies.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        
+        return QuizQuestion(
+          type: type,
+          prompt: prompt,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: vocab.word,
+          sentenceObj: sentence,
+        );
+      } catch (_) {
+        return null;
+      }
+    }
+
+    if (type == QuizType.meaning) {
+      if (kanji != null) {
+        if (kanji.meanings.isEmpty) return null;
+        final correctAnswer = kanji.primaryMeaning(isId);
+        if (correctAnswer.trim().isEmpty) return null;
+        
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: kanji.character,
+          explanation: kanji.primaryReading,
+        );
+
+        var distractorKanji = kanjiDistractors
+            .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
+            .where((k) => k.primaryMeaning(isId) != correctAnswer)
+            .toList()..shuffle(_random);
+            
+        final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
+          text: k.primaryMeaning(isId),
+          kanjiCharacter: k.character,
+          explanation: k.primaryReading,
+        )).toList();
+        
+        final dummyMeanings = isId ? ['satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'delapan', 'sembilan', 'sepuluh', 'air', 'api', 'tanah', 'angin', 'langit', 'bulan']
+                                   : ['one', 'two', 'three', 'four', 'five', 'six', 'eight', 'nine', 'ten', 'water', 'fire', 'earth', 'wind', 'sky', 'moon'];
+        dummyMeanings.shuffle(_random);
+        
+        while (distractorOptions.length < 3) {
+          final dummy = dummyMeanings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        return QuizQuestion(
+          type: QuizType.meaning,
+          prompt: kanji.character,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: kanji.character,
+        );
+      } else if (vocab != null) {
+        if (vocab.meaning.isEmpty) return null;
+        final correctAnswer = vocab.primaryMeaning(isId);
+        if (correctAnswer.trim().isEmpty) return null;
+        
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: vocab.word,
+          explanation: vocab.furigana,
+        );
+
+        var distractorVocab = vocabDistractors
+            .where((v) => v.word != vocab.word)
+            .where((v) => v.primaryMeaning(isId) != correctAnswer)
+            .toList()..shuffle(_random);
+            
+        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+          text: v.primaryMeaning(isId),
+          kanjiCharacter: v.word,
+          explanation: v.furigana,
+        )).toList();
+        
+        final dummyMeanings = isId ? ['kucing', 'anjing', 'burung', 'ikan', 'pohon', 'bunga', 'matahari', 'bintang', 'hujan', 'salju']
+                                   : ['cat', 'dog', 'bird', 'fish', 'tree', 'flower', 'sun', 'star', 'rain', 'snow'];
+        dummyMeanings.shuffle(_random);
+        
+        while (distractorOptions.length < 3) {
+          final dummy = dummyMeanings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        return QuizQuestion(
+          type: QuizType.meaning,
+          prompt: vocab.word,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: vocab.word,
+        );
+      }
+    } else if (type == QuizType.reading) {
+      if (kanji != null) {
+        if (kanji.allReadings.isEmpty) return null;
+        final correctAnswer = kanji.primaryReading;
+        if (correctAnswer.trim().isEmpty) return null;
+        
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: kanji.character,
+          explanation: kanji.primaryMeaning(false),
+        );
+
+        var distractorKanji = kanjiDistractors
+            .where((k) => k.character != kanji.character && k.allReadings.isNotEmpty)
+            .where((k) => k.primaryReading != correctAnswer)
+            .toList()..shuffle(_random);
+            
+        final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
+          text: k.primaryReading,
+          kanjiCharacter: k.character,
+          explanation: k.primaryMeaning(false),
+        )).toList();
+        
+        final dummyReadings = ['あか', 'あお', 'しろ', 'くろ', 'きいろ', 'みどり', 'むらさき', 'ちゃいろ', 'ピンク', 'オレンジ'];
+        dummyReadings.shuffle(_random);
+        
+        while (distractorOptions.length < 3) {
+          final dummy = dummyReadings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        return QuizQuestion(
+          type: QuizType.reading,
+          prompt: kanji.character,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: kanji.character,
+        );
+      } else if (vocab != null) {
+        final correctAnswer = vocab.furigana;
+        if (correctAnswer.isEmpty) return null;
+        
+        final correctOption = QuizOption(
+          text: correctAnswer,
+          kanjiCharacter: vocab.word,
+          explanation: vocab.primaryMeaning(false),
+        );
+
+        var distractorVocab = vocabDistractors
+            .where((v) => v.word != vocab.word && v.furigana.isNotEmpty)
+            .where((v) => v.furigana != correctAnswer)
+            .toList()..shuffle(_random);
+            
+        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+          text: v.furigana,
+          kanjiCharacter: v.word,
+          explanation: v.primaryMeaning(false),
+        )).toList();
+        
+        final dummyReadings = ['ねこ', 'いぬ', 'とり', 'さかな', 'き', 'はな', 'ひ', 'ほし', 'あめ', 'ゆき'];
+        dummyReadings.shuffle(_random);
+        
+        while (distractorOptions.length < 3) {
+          final dummy = dummyReadings.removeLast();
+          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+            distractorOptions.add(QuizOption(text: dummy));
+          }
+        }
+
+        final options = [correctOption, ...distractorOptions]..shuffle(_random);
+        return QuizQuestion(
+          type: QuizType.reading,
+          prompt: vocab.word,
+          correctAnswer: correctAnswer,
+          options: options,
+          kanjiCharacter: vocab.word,
+        );
+      }
+    } else if (type == QuizType.writing) {
+      if (kanji != null) {
+        if (kanji.meanings.isEmpty) return null;
+        return QuizQuestion(
+          type: QuizType.writing,
+          prompt: kanji.primaryMeaning(isId),
+          correctAnswer: kanji.character,
+          options: [],
+          kanjiCharacter: kanji.character,
+        );
+      } else if (vocab != null) {
+        if (vocab.meaning.isEmpty) return null;
+        return QuizQuestion(
+          type: QuizType.writing,
+          prompt: vocab.primaryMeaning(isId),
+          correctAnswer: vocab.word,
+          options: [],
+          kanjiCharacter: vocab.word,
+        );
+      }
+    }
+    return null;
+  }
 
   /// Generate meaning quiz questions
   /// "What does X mean?" → pick from 4 meanings
@@ -382,4 +666,6 @@ class QuizGenerator {
 
     return (questions..shuffle(_random)).take(count).toList();
   }
+
+
 }

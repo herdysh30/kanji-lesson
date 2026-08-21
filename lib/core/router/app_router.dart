@@ -8,6 +8,7 @@ import 'package:kanji_lesson/features/kanji/presentation/screens/vocab_detail_sc
 import 'package:kanji_lesson/features/review/presentation/screens/review_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/progress_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/weak_kanji_screen.dart';
+import 'package:kanji_lesson/features/progress/presentation/screens/quiz_history_screen.dart';
 import 'package:kanji_lesson/features/settings/presentation/screens/settings_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/writing_practice_screen.dart';
 import 'package:kanji_lesson/features/review/presentation/screens/review_session_screen.dart';
@@ -142,6 +143,11 @@ final appRouter = GoRouter(
           path: 'weak',
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const WeakKanjiScreen(),
+        ),
+        GoRoute(
+          path: 'quiz-history',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const QuizHistoryScreen(),
         ),
       ],
     ),

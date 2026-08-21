@@ -14,6 +14,8 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_pr
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kanji_lesson/features/kanji/data/datasources/kanji_alive_remote_data_source.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji_alive_data.dart';
+import 'package:kanji_lesson/features/kanji/data/datasources/sentence_remote_data_source.dart';
+import 'package:kanji_lesson/features/kanji/domain/entities/sentence.dart';
 
 // ─── Core Providers ─────────────────────────────────────────────
 
@@ -43,6 +45,13 @@ final kanjiRemoteDataSourceProvider = Provider<KanjiRemoteDataSource>((ref) {
 
 final kanjiLocalDataSourceProvider = Provider<KanjiLocalDataSource>((ref) {
   return KanjiLocalDataSource(ref.watch(databaseProvider));
+});
+
+final sentenceRemoteDataSourceProvider = Provider<SentenceRemoteDataSource>((ref) {
+  return SentenceRemoteDataSource(
+    dio: ref.watch(dioClientProvider).dio,
+    translationService: ref.watch(translationServiceProvider),
+  );
 });
 
 // ─── Repository Providers ───────────────────────────────────────
@@ -96,6 +105,16 @@ final kanjiDetailProvider = FutureProvider.family<Kanji, String>(
     }
 
     return kanji;
+  },
+);
+
+// ─── Sentences Provider ─────────────────────────────────────────
+
+final kanjiSentencesProvider = FutureProvider.family<List<Sentence>, String>(
+  (ref, character) async {
+    final dataSource = ref.watch(sentenceRemoteDataSourceProvider);
+    // You might want to add database caching here in the future
+    return dataSource.fetchSentences(character);
   },
 );
 

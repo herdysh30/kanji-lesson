@@ -14,7 +14,6 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_provide
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
-import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_alive_display.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
 
 class KanjiDetailScreen extends ConsumerStatefulWidget {

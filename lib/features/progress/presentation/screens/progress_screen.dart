@@ -7,6 +7,7 @@ import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/utils/date_utils.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
+import 'package:kanji_lesson/features/progress/presentation/widgets/streak_calendar_widget.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -37,6 +38,8 @@ class ProgressScreen extends ConsumerWidget {
 
               // ─── Study Streak ─────────────────────────────
               const _StudyStreakCard(),
+              const SizedBox(height: 16),
+              const StreakCalendarWidget(),
               const SizedBox(height: 24),
 
               // ─── Weekly Activity ──────────────────────────
@@ -64,9 +67,18 @@ class ProgressScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // ─── Quiz History ─────────────────────────────
-              Text(
-                'Recent Quiz Results',
-                style: Theme.of(context).textTheme.titleLarge,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recent Quiz Results',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/progress/quiz-history'),
+                    child: const Text('See All'),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               const _QuizHistorySection(),
@@ -100,6 +112,14 @@ class _OverallStatsSection extends ConsumerWidget {
                     iconColor: AppColors.primary,
                     label: 'Learned',
                     value: '${overall.totalLearned}',
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => const _ProgressListBottomSheet(title: 'Learned Items', statusFilter: 'learned'),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -109,6 +129,14 @@ class _OverallStatsSection extends ConsumerWidget {
                     iconColor: AppColors.gold,
                     label: 'Mastered',
                     value: '${overall.mastered}',
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => const _ProgressListBottomSheet(title: 'Mastered Items', statusFilter: 'mastered'),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -122,6 +150,14 @@ class _OverallStatsSection extends ConsumerWidget {
                     iconColor: AppColors.primary,
                     label: 'Reviewing',
                     value: '${overall.reviewing}',
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => const _ProgressListBottomSheet(title: 'Reviewing Items', statusFilter: 'reviewing'),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -153,17 +189,22 @@ class _StatCard extends StatelessWidget {
     required this.iconColor,
     required this.label,
     required this.value,
+    this.onTap,
   });
 
   final IconData icon;
   final Color iconColor;
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Row(
           children: [
@@ -198,6 +239,7 @@ class _StatCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -315,28 +357,31 @@ class _WeeklyActivityChart extends ConsumerWidget {
                               ),
                         ),
                         const SizedBox(height: 4),
-                        Container(
-                          width: 28,
-                          height: barHeight.clamp(4.0, 100.0),
-                          decoration: BoxDecoration(
-                            gradient: day.reviewed > 0
-                                ? LinearGradient(
-                                    colors: isToday
-                                        ? [AppColors.primary, AppColors.primaryLight]
-                                        : [
-                                            AppColors.primary.withValues(alpha: 0.5),
-                                            AppColors.primaryLight.withValues(alpha: 0.5),
-                                          ],
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                  )
-                                : null,
-                            color: day.reviewed == 0
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                : null,
-                            borderRadius: BorderRadius.circular(6),
+                        Tooltip(
+                          message: '${DateFormat('MMM d, yyyy').format(day.date)}\nReviewed: ${day.reviewed}\nAccuracy: ${(day.accuracy * 100).round()}%',
+                          child: Container(
+                            width: 28,
+                            height: barHeight.clamp(4.0, 100.0),
+                            decoration: BoxDecoration(
+                              gradient: day.reviewed > 0
+                                  ? LinearGradient(
+                                      colors: isToday
+                                          ? [AppColors.primary, AppColors.primaryLight]
+                                          : [
+                                              AppColors.primary.withValues(alpha: 0.5),
+                                              AppColors.primaryLight.withValues(alpha: 0.5),
+                                            ],
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                    )
+                                  : null,
+                              color: day.reviewed == 0
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                  : null,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -642,5 +687,86 @@ class _QuizHistorySection extends ConsumerWidget {
       default:
         return type[0].toUpperCase() + type.substring(1);
     }
+  }
+}
+
+// ─── Progress List Bottom Sheet ─────────────────────────────────
+
+class _ProgressListBottomSheet extends ConsumerStatefulWidget {
+  const _ProgressListBottomSheet({required this.title, required this.statusFilter});
+  final String title;
+  final String statusFilter;
+
+  @override
+  ConsumerState<_ProgressListBottomSheet> createState() => _ProgressListBottomSheetState();
+}
+
+class _ProgressListBottomSheetState extends ConsumerState<_ProgressListBottomSheet> {
+  @override
+  Widget build(BuildContext context) {
+    final listAsync = ref.watch(progressListProvider(widget.statusFilter));
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.5,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Text(
+                widget.title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              Expanded(
+                child: listAsync.when(
+                  data: (items) {
+                    if (items.isEmpty) {
+                      return const Center(child: Text('No items found.'));
+                    }
+                    return ListView.builder(
+                      controller: scrollController,
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final total = item.correctCount + item.wrongCount;
+                        final accuracy = total > 0 ? item.correctCount / total : 0.0;
+                        return ListTile(
+                          title: Text(item.kanjiCharacter, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          subtitle: Text('Status: ${item.status[0].toUpperCase()}${item.status.substring(1)}'),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text('${(accuracy * 100).round()}%', style: TextStyle(
+                                color: accuracy >= 0.8 ? AppColors.correct : (accuracy >= 0.5 ? AppColors.warning : Theme.of(context).colorScheme.error),
+                                fontWeight: FontWeight.bold,
+                              )),
+                              Text('${item.correctCount}/$total', style: Theme.of(context).textTheme.bodySmall),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, st) => Center(child: Text('Error: $e')),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

@@ -49,4 +49,46 @@ class TranslationService {
     
     return [];
   }
+
+  /// Retrieves romaji for a list of Japanese texts
+  Future<List<String>> getRomajis(List<String> japaneseTexts) async {
+    if (japaneseTexts.isEmpty) return [];
+
+    try {
+      final textToTranslate = japaneseTexts.join(' | ');
+
+      final response = await _dio.get(
+        'https://translate.googleapis.com/translate_a/single',
+        queryParameters: {
+          'client': 'gtx',
+          'sl': 'ja',
+          'tl': 'ja',
+          'dt': 'rm',
+          'q': textToTranslate,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data as List;
+        final segments = data[0] as List;
+        
+        final StringBuffer romaji = StringBuffer();
+        for (final segment in segments) {
+          if (segment is List && segment.length >= 4 && segment[3] != null) {
+            romaji.write(segment[3].toString());
+          }
+        }
+
+        return romaji
+            .toString()
+            .split('|')
+            .map((e) => e.trim())
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('Romaji Error: $e');
+    }
+    
+    return List.filled(japaneseTexts.length, '');
+  }
 }

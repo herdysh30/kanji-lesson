@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
-import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
+import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
     as mlkit;
@@ -26,6 +28,38 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   bool _isChecking = false;
   bool _showHint = false;
 
+  final FlutterTts _flutterTts = FlutterTts();
+  bool _isTtsInit = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    await _flutterTts.setLanguage("ja-JP");
+    _isTtsInit = true;
+  }
+
+  @override
+  void dispose() {
+    _flutterTts.stop();
+    super.dispose();
+  }
+
+  Future<void> _playCurrentAudio(QuizQuestion question) async {
+    if (!_isTtsInit) return;
+    // For reading quizzes, only play audio after answer is revealed
+    if (question.type == QuizType.reading && !_isAnswerRevealed) return;
+    final text = question.sentenceObj != null
+        ? question.sentenceObj!.japanese
+        : (question.kanjiCharacter ?? question.correctAnswer);
+    try {
+      await _flutterTts.speak(text);
+    } catch (_) {}
+  }
+
   void _handleOptionSelected(int index, QuizQuestion question) {
     if (_isAnswerRevealed) return; // Prevent multiple taps
 
@@ -33,6 +67,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       _selectedAnswerIndex = index;
       _isAnswerRevealed = true;
     });
+
+    _playCurrentAudio(question);
 
     final notifier = ref.read(quizSessionProvider.notifier);
     notifier.answerCurrent(index);
@@ -57,9 +93,98 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
   }
 
+  String _kanaToRomaji(String kana) {
+    if (kana.isEmpty) return '';
+    if (!RegExp(r'[\u3040-\u309F\u30A0-\u30FF]').hasMatch(kana)) return '';
+    
+    final map = {
+      'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo',
+      'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
+      'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho',
+      'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
+      'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo',
+      'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
+      'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo',
+      'ぎゃ': 'gya', 'ぎゅ': 'gyu', 'ぎょ': 'gyo',
+      'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo',
+      'びゃ': 'bya', 'びゅ': 'byu', 'びょ': 'byo',
+      'ぴゃ': 'pya', 'ぴゅ': 'pyu', 'ぴょ': 'pyo',
+      'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
+      'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so',
+      'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
+      'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no',
+      'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
+      'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo',
+      'や': 'ya', 'ゆ': 'yu', 'よ': 'yo',
+      'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro',
+      'わ': 'wa', 'を': 'o', 'ん': 'n',
+      'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge', 'ご': 'go',
+      'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo',
+      'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de', 'ど': 'do',
+      'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo',
+      'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
+      'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o',
+      'ー': '-',
+    };
+
+    String result = kana;
+    
+    // Sort keys by length descending to match longest first
+    final keys = map.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+    
+    // Handle small tsu (sokuon)
+    for (int i = 0; i < result.length; i++) {
+      if (result[i] == 'っ' && i + 1 < result.length) {
+        for (final k in keys) {
+           if (result.substring(i + 1).startsWith(k)) {
+              final romaji = map[k]!;
+              result = result.replaceRange(i, i + 1, romaji[0]);
+              break;
+           }
+        }
+      }
+    }
+
+    for (final k in keys) {
+      result = result.replaceAll(k, map[k]!);
+    }
+    return result;
+  }
+
+  Widget _buildSentenceText(BuildContext context, QuizQuestion question) {
+    if (question.kanjiCharacter == null) return Text(question.prompt);
+    
+    final parts = question.prompt.split(question.kanjiCharacter!);
+    if (parts.length == 1) return Text(question.prompt); // Kanji not found in string
+    
+    final baseStyle = AppTheme.kanjiLarge(context).copyWith(
+      fontSize: 28,
+      fontWeight: FontWeight.normal,
+      height: 1.2,
+    );
+    final boldStyle = baseStyle.copyWith(
+      fontWeight: FontWeight.w900,
+      color: Theme.of(context).colorScheme.primary,
+    );
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: baseStyle,
+        children: [
+          for (int i = 0; i < parts.length; i++) ...[
+            TextSpan(text: parts[i]),
+            if (i < parts.length - 1)
+              TextSpan(text: question.kanjiCharacter, style: boldStyle),
+          ]
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final questionsAsync = ref.watch(quizQuestionsProvider);
+    final initDataAsync = ref.watch(quizInitDataProvider);
     final sessionState = ref.watch(quizSessionProvider);
 
     return PopScope(
@@ -77,10 +202,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               Consumer(
                 builder: (context, ref, _) {
                   final sessionState = ref.watch(quizSessionProvider);
-                  final progress = sessionState.questions.isEmpty
+                  final progress = sessionState.tasks.isEmpty
                       ? 0.0
                       : sessionState.currentIndex /
-                            sessionState.questions.length;
+                            sessionState.tasks.length;
                   return SafeArea(
                     bottom: false,
                     child: LinearProgressIndicator(
@@ -109,9 +234,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ],
           ),
         ),
-        body: questionsAsync.when(
-          data: (questions) {
-            if (questions.isEmpty) {
+        body: initDataAsync.when(
+          data: (initData) {
+            if (initData.tasks.isEmpty) {
               final setup = ref.watch(quizSetupProvider);
               return Center(
                 child: Padding(
@@ -119,7 +244,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   child: Text(
                     'Not enough data to generate quiz.\n\nDebug Info:\n'
                     'JLPT Level: ${setup.selectedJlptLevel}\n'
-                    'Item Type: ${setup.itemType.name}\n'
+                    'Item Type: ${setup.selectedItemTypes.map((e) => e.name).join(', ')}\n'
                     'Quiz Types: ${setup.selectedQuizTypes.map((e) => e.name).join(', ')}\n'
                     'Make sure you have learned some Kanji/Vocab first.',
                     textAlign: TextAlign.center,
@@ -128,13 +253,24 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               );
             }
 
-            // Initialize session with loaded questions
+            // Initialize session with loaded tasks
             Future.microtask(() {
-              ref.read(quizSessionProvider.notifier).initialize(questions);
+              ref.read(quizSessionProvider.notifier).initialize(initData);
             });
 
             final currentQuestion = sessionState.currentQuestion;
-            if (currentQuestion == null) return const SizedBox.shrink();
+            if (currentQuestion == null) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Menyiapkan kuis...'),
+                  ],
+                ),
+              );
+            }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -145,7 +281,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     vertical: 8.0,
                   ),
                   child: Text(
-                    'Question ${sessionState.currentIndex + 1} of ${sessionState.questions.length}',
+                    'Question ${sessionState.currentIndex + 1} of ${sessionState.tasks.length}',
                     style: Theme.of(context).textTheme.labelMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -159,21 +295,37 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         vertical: 12.0,
                         horizontal: 16.0,
                       ),
-                      child: SizedBox(
-                        height: 110,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.center,
-                          child: Text(
-                            currentQuestion.prompt,
-                            style: AppTheme.kanjiLarge(context).copyWith(
-                              fontSize: 96,
-                              fontWeight: FontWeight.bold,
-                              height: 1.1,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 110,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.center,
+                              child: currentQuestion.sentenceObj != null
+                                  ? _buildSentenceText(context, currentQuestion)
+                                  : Text(
+                                      currentQuestion.prompt,
+                                      style: AppTheme.kanjiLarge(context).copyWith(
+                                        fontSize: 96,
+                                        fontWeight: FontWeight.bold,
+                                        height: 1.1,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                        ),
+                          // Show audio button ONLY after answered or if hint is shown
+                          if (_isAnswerRevealed || _showHint) ...[
+                            const SizedBox(height: 8),
+                            KanjiAudioButton(
+                              character: currentQuestion.sentenceObj != null
+                                  ? currentQuestion.sentenceObj!.japanese
+                                  : (currentQuestion.kanjiCharacter ?? currentQuestion.prompt),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
@@ -184,12 +336,60 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         vertical: 10.0,
                         horizontal: 16.0,
                       ),
-                      child: Text(
-                        currentQuestion.prompt,
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            currentQuestion.prompt,
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          KanjiAudioButton(
+                            character: currentQuestion.kanjiCharacter ?? currentQuestion.correctAnswer,
+                          ),
+                        ],
                       ),
+                    ),
+                  ),
+
+                // Sentence translations (Only for Sentence Quiz)
+                if (currentQuestion.sentenceObj != null && _isAnswerRevealed)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                    child: Column(
+                      children: [
+                        if (currentQuestion.sentenceObj!.romaji.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              currentQuestion.sentenceObj!.romaji,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        Text(
+                          currentQuestion.sentenceObj!.english,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontStyle: FontStyle.italic,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          currentQuestion.sentenceObj!.indonesian,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontStyle: FontStyle.italic,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
 
@@ -202,23 +402,44 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       child: AnimatedSize(
                         duration: const Duration(milliseconds: 200),
                         child: _showHint
-                            ? Text(
-                                currentQuestion
-                                        .options[currentQuestion.correctIndex]
-                                        .explanation ??
-                                    '',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                textAlign: TextAlign.center,
+                            ? InkWell(
+                                onTap: () => setState(() => _showHint = false),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        currentQuestion.sentenceObj != null
+                                            ? currentQuestion.sentenceObj!.hiragana
+                                            : (currentQuestion.options[currentQuestion.correctIndex].explanation ?? ''),
+                                        style: Theme.of(context).textTheme.titleMedium
+                                            ?.copyWith(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Icon(
+                                        Icons.visibility_off,
+                                        size: 18,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               )
                             : OutlinedButton(
-                                onPressed: () =>
-                                    setState(() => _showHint = true),
+                                onPressed: () {
+                                  setState(() => _showHint = true);
+                                  ref.read(quizSessionProvider.notifier).markHintUsed();
+                                },
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Theme.of(
                                     context,
@@ -260,7 +481,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                      _getInstructionText(currentQuestion.type),
+                      _getInstructionText(currentQuestion),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 18,
@@ -375,6 +596,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                     ),
                                                     textAlign: TextAlign.center,
                                                   ),
+                                                  if (RegExp(r'[\u3040-\u309F\u30A0-\u30FF]').hasMatch(option.text))
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 2),
+                                                      child: Text(
+                                                        _kanaToRomaji(option.text),
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: textColor.withValues(alpha: 0.6),
+                                                          fontStyle: FontStyle.italic,
+                                                        ),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                                    ),
                                                   // Show explanation after answering
                                                   if (_isAnswerRevealed &&
                                                       option.kanjiCharacter !=
@@ -386,7 +620,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                           ),
                                                       child: Text(
                                                         _getOptionExplanation(
-                                                          currentQuestion.type,
+                                                          currentQuestion,
                                                           option,
                                                         ),
                                                         style: TextStyle(
@@ -444,18 +678,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                           top: 4,
                                           bottom: 8,
                                         ),
-                                        child: SizedBox(
-                                          width: double.infinity,
-                                          height: 52,
-                                          child: FilledButton.icon(
-                                            onPressed: _onNextPressed,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 52,
+                                                child: FilledButton.icon(
+                                                  onPressed: _onNextPressed,
                                             icon: const Icon(
                                               Icons.arrow_forward_rounded,
                                             ),
                                             label: Text(
                                               sessionState.currentIndex >=
                                                       sessionState
-                                                              .questions
+                                                              .tasks
                                                               .length -
                                                           1
                                                   ? 'See Results'
@@ -465,7 +701,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
+                                              ),
+                                            ),
                                           ),
+                                          ],
                                         ),
                                       ),
                                   ],
@@ -494,8 +733,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     );
   }
 
-  String _getInstructionText(QuizType type) {
-    switch (type) {
+  String _getInstructionText(QuizQuestion question) {
+    if (question.sentenceObj != null) {
+      if (question.type == QuizType.meaning) return 'Identify the meaning of the bolded word';
+      if (question.type == QuizType.reading) return 'Identify the reading of the bolded word';
+    }
+    switch (question.type) {
       case QuizType.meaning:
         return 'What does this mean?';
       case QuizType.reading:
@@ -505,11 +748,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
   }
 
-  /// Get explanation text for a quiz option based on quiz type
-  String _getOptionExplanation(QuizType type, QuizOption option) {
+  String _getOptionExplanation(QuizQuestion question, QuizOption option) {
     final kanji = option.kanjiCharacter ?? '';
     final explanation = option.explanation ?? '';
-    switch (type) {
+    if (question.sentenceObj != null) {
+      return explanation;
+    }
+    switch (question.type) {
       case QuizType.meaning:
         return '$kanji — $explanation';
       case QuizType.reading:
@@ -588,6 +833,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     _showHint = true;
                     _selectedAnswerIndex = 1; // 1 means incorrect
                   });
+                  _playCurrentAudio(currentQuestion);
                   ref.read(quizSessionProvider.notifier).answerCurrent(-1);
                 },
                 style: TextButton.styleFrom(
@@ -604,8 +850,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           width: double.infinity,
           height: 48,
           child: _isAnswerRevealed
-              ? FilledButton.icon(
-                  onPressed: _onNextPressed,
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: _onNextPressed,
                   icon: Icon(
                     _selectedAnswerIndex == 0
                         ? Icons.check_circle_rounded
@@ -621,6 +872,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                         ? 'Correct! → Next'
                         : 'Wrong (${currentQuestion.correctAnswer}) → Next',
                   ),
+                        ),
+                      ),
+                    ),
+                  ],
                 )
               : FilledButton.icon(
                   onPressed:
@@ -679,6 +934,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     setState(() {
       _selectedAnswerIndex = isCorrect ? 0 : 1;
     });
+
+    _playCurrentAudio(currentQuestion);
 
     // We must manually add options to the question so the notifier knows about the correct index.
     // However, writing question options are already set to [k.character].

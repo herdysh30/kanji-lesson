@@ -6,6 +6,7 @@ import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
 import 'package:kanji_lesson/features/review/domain/services/srs_engine.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
@@ -245,6 +246,7 @@ class _Flashcard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Fetch full details for the back of the card
     final detailAsync = ref.watch(reviewItemDetailProvider(entry.kanjiCharacter));
+    final sentencesAsync = ref.watch(kanjiSentencesProvider(entry.kanjiCharacter));
     final isId = ref.watch(localeProvider).languageCode == 'id';
 
     return GestureDetector(
@@ -279,18 +281,76 @@ class _Flashcard extends ConsumerWidget {
                 ),
               ),
             ),
+            
+            // Show sentence on the front of the card if available
+            sentencesAsync.when(
+              data: (sentences) {
+                if (sentences.isEmpty) return const SizedBox.shrink();
+                final sentence = sentences.first;
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                  child: _buildSentenceText(context, sentence.japanese, entry.kanjiCharacter),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
             if (isFlipped) ...[
               const SizedBox(height: 32),
               const Divider(indent: 32, endIndent: 32),
               const SizedBox(height: 24),
+              
+              // Show sentence translation on the back
+              sentencesAsync.when(
+                data: (sentences) {
+                  if (sentences.isEmpty) return const SizedBox.shrink();
+                  final sentence = sentences.first;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0, left: 24, right: 24),
+                    child: Column(
+                      children: [
+                        Text(
+                          sentence.english,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (isId && sentence.indonesian.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            sentence.indonesian,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ]
+                      ],
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
               detailAsync.when(
                 data: (detail) => Column(
                   children: [
                     if (detail.isVocab) ...[
                       if (detail.furigana != null && detail.furigana!.isNotEmpty) ...[
-                        Text(
-                          detail.furigana!,
-                          style: AppTheme.japaneseReading(context, fontSize: 28),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              detail.furigana!,
+                              style: AppTheme.japaneseReading(context, fontSize: 28),
+                            ),
+                            const SizedBox(width: 8),
+                            KanjiAudioButton(character: entry.kanjiCharacter),
+                          ],
                         ),
                         const SizedBox(height: 8),
                       ],
@@ -310,9 +370,16 @@ class _Flashcard extends ConsumerWidget {
                       ),
                     ] else ...[
                       if (detail.primaryReading != null && detail.primaryReading!.isNotEmpty) ...[
-                        Text(
-                          detail.primaryReading!,
-                          style: AppTheme.japaneseReading(context, fontSize: 28),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              detail.primaryReading!,
+                              style: AppTheme.japaneseReading(context, fontSize: 28),
+                            ),
+                            const SizedBox(width: 8),
+                            KanjiAudioButton(character: entry.kanjiCharacter),
+                          ],
                         ),
                         const SizedBox(height: 8),
                       ],
@@ -354,6 +421,35 @@ class _Flashcard extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSentenceText(BuildContext context, String fullText, String target) {
+    final parts = fullText.split(target);
+    if (parts.length == 1) return Text(fullText, textAlign: TextAlign.center); 
+    
+    final baseStyle = AppTheme.kanjiLarge(context).copyWith(
+      fontSize: 24,
+      fontWeight: FontWeight.normal,
+      height: 1.2,
+    );
+    final boldStyle = baseStyle.copyWith(
+      fontWeight: FontWeight.w900,
+      color: Theme.of(context).colorScheme.primary,
+    );
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: baseStyle,
+        children: [
+          for (int i = 0; i < parts.length; i++) ...[
+            TextSpan(text: parts[i]),
+            if (i < parts.length - 1)
+              TextSpan(text: target, style: boldStyle),
+          ]
+        ],
       ),
     );
   }

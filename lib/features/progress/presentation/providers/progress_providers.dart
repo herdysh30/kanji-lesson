@@ -139,6 +139,29 @@ final studyStreakProvider = FutureProvider<int>((ref) async {
   return AppDateUtils.calculateStreak(dates);
 });
 
+// ─── Streak Dates Provider ──────────────────────────────────────
+
+final streakDatesProvider = FutureProvider<List<DateTime>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final recentProgress = await db.getRecentDailyProgress(365);
+  final datesStr = recentProgress
+      .where((e) => (e.newKanjiCount + e.reviewedKanjiCount) > 0)
+      .map((e) => e.date)
+      .toList();
+  return datesStr.map((s) => DateTime.parse(s)).toList();
+});
+
+// ─── Progress List Provider ──────────────────────────────────────
+
+final progressListProvider = FutureProvider.family<List<UserKanjiProgressEntry>, String?>((ref, status) async {
+  final db = ref.watch(databaseProvider);
+  if (status == null || status == 'learned') {
+    final all = await db.getAllProgress();
+    return all.where((e) => e.status != 'unseen').toList();
+  }
+  return db.getProgressByStatus(status);
+});
+
 // ─── Weak Kanji List Provider (Full Data) ───────────────────────
 
 final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {

@@ -15,7 +15,7 @@ class QuizResultScreen extends ConsumerWidget {
 
     // Calculate score
     final result = QuizSessionResult(
-      questions: state.questions,
+      questions: state.resolvedQuestions,
       answers: state.answers,
       jlptLevel: setup.selectedJlptLevel,
       selectedQuizTypes: setup.selectedQuizTypes,
@@ -113,7 +113,7 @@ class QuizResultScreen extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final q = result.incorrectQuestions[index];
                   // Find the answer they picked
-                  final questionIndex = state.questions.indexOf(q);
+                  final questionIndex = state.resolvedQuestions.indexOf(q);
                   final selectedAnswerIndex = state.answers[questionIndex];
                   final selectedAnswer = (selectedAnswerIndex >= 0 && selectedAnswerIndex < q.options.length)
                       ? q.options[selectedAnswerIndex].text
@@ -169,8 +169,8 @@ class QuizResultScreen extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      // Just invalidate the session provider, it will load new questions and reset
-                      ref.invalidate(quizQuestionsProvider);
+                      // Just invalidate the session provider, it will load new tasks and reset
+                      ref.invalidate(quizInitDataProvider);
                       ref.invalidate(quizSessionProvider);
                       context.pushReplacement('/quiz/session');
                     },

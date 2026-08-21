@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
-import 'package:kanji_lesson/core/database/app_database.dart';
+
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
@@ -74,35 +74,44 @@ class QuizSetupScreen extends ConsumerWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                ChoiceChip(
-                  label: const Text('Mixed (Kanji & Vocab)'),
-                  selected: setup.itemType == ReviewItemType.mixed,
-                  labelStyle: TextStyle(
-                    color: setup.itemType == ReviewItemType.mixed ? Colors.white : Theme.of(context).colorScheme.onSurface,
-                  ),
-                  onSelected: (val) {
-                    if (val) notifier.setItemType(ReviewItemType.mixed);
-                  },
+                FilterChip(
+                  label: const Text('Kanji'),
+                  selected: setup.selectedItemTypes.contains(QuizItemType.kanji),
+                      onSelected: (val) {
+                        final newTypes = Set<QuizItemType>.from(setup.selectedItemTypes);
+                        if (val) {
+                          newTypes.add(QuizItemType.kanji);
+                        } else {
+                          newTypes.remove(QuizItemType.kanji);
+                        }
+                        if (newTypes.isNotEmpty) notifier.setItemTypes(newTypes);
+                      },
                 ),
-                ChoiceChip(
-                  label: const Text('Kanji Only'),
-                  selected: setup.itemType == ReviewItemType.kanji,
-                  labelStyle: TextStyle(
-                    color: setup.itemType == ReviewItemType.kanji ? Colors.white : Theme.of(context).colorScheme.onSurface,
-                  ),
-                  onSelected: (val) {
-                    if (val) notifier.setItemType(ReviewItemType.kanji);
-                  },
+                FilterChip(
+                  label: const Text('Vocabulary'),
+                  selected: setup.selectedItemTypes.contains(QuizItemType.vocab),
+                      onSelected: (val) {
+                        final newTypes = Set<QuizItemType>.from(setup.selectedItemTypes);
+                        if (val) {
+                          newTypes.add(QuizItemType.vocab);
+                        } else {
+                          newTypes.remove(QuizItemType.vocab);
+                        }
+                        if (newTypes.isNotEmpty) notifier.setItemTypes(newTypes);
+                      },
                 ),
-                ChoiceChip(
-                  label: const Text('Vocabulary Only'),
-                  selected: setup.itemType == ReviewItemType.vocab,
-                  labelStyle: TextStyle(
-                    color: setup.itemType == ReviewItemType.vocab ? Colors.white : Theme.of(context).colorScheme.onSurface,
-                  ),
-                  onSelected: (val) {
-                    if (val) notifier.setItemType(ReviewItemType.vocab);
-                  },
+                FilterChip(
+                  label: const Text('Sentence'),
+                  selected: setup.selectedItemTypes.contains(QuizItemType.sentence),
+                      onSelected: (val) {
+                        final newTypes = Set<QuizItemType>.from(setup.selectedItemTypes);
+                        if (val) {
+                          newTypes.add(QuizItemType.sentence);
+                        } else {
+                          newTypes.remove(QuizItemType.sentence);
+                        }
+                        if (newTypes.isNotEmpty) notifier.setItemTypes(newTypes);
+                      },
                 ),
               ],
             ),
