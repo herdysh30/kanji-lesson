@@ -83,7 +83,12 @@ class NotificationService {
     return granted ?? false;
   }
 
-  Future<void> scheduleDailyReminder(TimeOfDay time, {bool skipToday = false}) async {
+  Future<void> scheduleDailyReminder(
+    TimeOfDay time, {
+    bool skipToday = false,
+    bool playSound = true,
+    bool enableVibration = true,
+  }) async {
     await cancelReminder(); // Clear existing
 
     var now = tz.TZDateTime.now(tz.local);
@@ -100,18 +105,22 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'daily_reminder_channel',
       'Daily Reminder',
       channelDescription: 'Reminds you to study kanji daily',
       importance: Importance.max,
       priority: Priority.high,
+      playSound: playSound,
+      enableVibration: enableVibration,
     );
     
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentSound: playSound,
+      ),
     );
 
     await _notificationsPlugin.zonedSchedule(

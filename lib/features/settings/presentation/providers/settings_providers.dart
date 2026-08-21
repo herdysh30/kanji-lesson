@@ -61,9 +61,16 @@ class DailyGoalNotifier extends StateNotifier<int> {
 // ─── Reminder ───────────────────────────────────────────────
 
 class ReminderState {
-  const ReminderState({required this.enabled, required this.time});
+  const ReminderState({
+    required this.enabled, 
+    required this.time,
+    required this.sound,
+    required this.vibration,
+  });
   final bool enabled;
   final TimeOfDay time;
+  final bool sound;
+  final bool vibration;
 }
 
 final reminderProvider = StateNotifierProvider<ReminderNotifier, ReminderState>((ref) {
@@ -76,18 +83,50 @@ class ReminderNotifier extends StateNotifier<ReminderState> {
       : super(ReminderState(
           enabled: _repository.reminderEnabled,
           time: _repository.reminderTime,
+          sound: _repository.reminderSound,
+          vibration: _repository.reminderVibration,
         ));
         
   final SettingsRepository _repository;
 
   Future<void> setEnabled(bool enabled) async {
     await _repository.setReminderEnabled(enabled);
-    state = ReminderState(enabled: enabled, time: state.time);
+    state = ReminderState(
+      enabled: enabled, 
+      time: state.time, 
+      sound: state.sound, 
+      vibration: state.vibration,
+    );
   }
 
   Future<void> setTime(TimeOfDay time) async {
     await _repository.setReminderTime(time);
-    state = ReminderState(enabled: state.enabled, time: time);
+    state = ReminderState(
+      enabled: state.enabled, 
+      time: time, 
+      sound: state.sound, 
+      vibration: state.vibration,
+    );
+  }
+
+  Future<void> setSound(bool sound) async {
+    await _repository.setReminderSound(sound);
+    state = ReminderState(
+      enabled: state.enabled, 
+      time: state.time, 
+      sound: sound, 
+      vibration: state.vibration,
+    );
+  }
+
+  Future<void> setVibration(bool vibration) async {
+    await _repository.setReminderVibration(vibration);
+    state = ReminderState(
+      enabled: state.enabled, 
+      time: state.time, 
+      sound: state.sound, 
+      vibration: vibration,
+    );
   }
 }
 

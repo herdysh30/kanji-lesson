@@ -105,9 +105,11 @@ class SettingsScreen extends ConsumerWidget {
                   );
                   if (time != null) {
                     await ref.read(reminderProvider.notifier).setTime(time);
-                    await NotificationService().scheduleDailyReminder(time);
+                    final state = ref.read(reminderProvider);
+                    await NotificationService().scheduleDailyReminder(time, playSound: state.sound, enableVibration: state.vibration);
                   } else {
-                    await NotificationService().scheduleDailyReminder(ref.read(reminderProvider).time);
+                    final state = ref.read(reminderProvider);
+                    await NotificationService().scheduleDailyReminder(state.time, playSound: state.sound, enableVibration: state.vibration);
                   }
                 }
               } else {
@@ -115,7 +117,7 @@ class SettingsScreen extends ConsumerWidget {
               }
             },
           ),
-          if (ref.watch(reminderProvider).enabled)
+          if (ref.watch(reminderProvider).enabled) ...[
             ListTile(
               leading: const Icon(Icons.access_time_rounded, color: Colors.transparent),
               title: const Text('Change Reminder Time'),
@@ -127,10 +129,32 @@ class SettingsScreen extends ConsumerWidget {
                 );
                 if (time != null) {
                   await ref.read(reminderProvider.notifier).setTime(time);
-                  await NotificationService().scheduleDailyReminder(time);
+                  final state = ref.read(reminderProvider);
+                  await NotificationService().scheduleDailyReminder(time, playSound: state.sound, enableVibration: state.vibration);
                 }
               },
             ),
+            SwitchListTile(
+              secondary: const Icon(Icons.volume_up_rounded, color: Colors.transparent),
+              title: const Text('Sound'),
+              value: ref.watch(reminderProvider).sound,
+              onChanged: (val) async {
+                await ref.read(reminderProvider.notifier).setSound(val);
+                final state = ref.read(reminderProvider);
+                await NotificationService().scheduleDailyReminder(state.time, playSound: state.sound, enableVibration: state.vibration);
+              },
+            ),
+            SwitchListTile(
+              secondary: const Icon(Icons.vibration_rounded, color: Colors.transparent),
+              title: const Text('Vibration'),
+              value: ref.watch(reminderProvider).vibration,
+              onChanged: (val) async {
+                await ref.read(reminderProvider.notifier).setVibration(val);
+                final state = ref.read(reminderProvider);
+                await NotificationService().scheduleDailyReminder(state.time, playSound: state.sound, enableVibration: state.vibration);
+              },
+            ),
+          ],
           const Divider(),
 
           // ─── Theme ──────────────────────────────────────────

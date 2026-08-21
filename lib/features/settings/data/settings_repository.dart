@@ -21,6 +21,8 @@ class SettingsRepository {
   static const _keyReminderEnabled = 'app_reminder_enabled';
   static const _keyReminderHour = 'app_reminder_hour';
   static const _keyReminderMinute = 'app_reminder_minute';
+  static const _keyReminderSound = 'app_reminder_sound';
+  static const _keyReminderVibration = 'app_reminder_vibration';
 
   // Locale
   String get locale => _prefs.getString(_keyLocale) ?? 'en';
@@ -66,6 +68,12 @@ class SettingsRepository {
     await _prefs.setInt(_keyReminderMinute, time.minute);
   }
 
+  bool get reminderSound => _prefs.getBool(_keyReminderSound) ?? true;
+  Future<void> setReminderSound(bool enabled) => _prefs.setBool(_keyReminderSound, enabled);
+
+  bool get reminderVibration => _prefs.getBool(_keyReminderVibration) ?? true;
+  Future<void> setReminderVibration(bool enabled) => _prefs.setBool(_keyReminderVibration, enabled);
+
   // ─── Daily Progress & Streak ─────────────────────────────────
 
   String get lastActiveDate => _prefs.getString(_keyLastActiveDate) ?? '';
@@ -99,7 +107,12 @@ class SettingsRepository {
       await _updateStreak(todayStr);
       
       if (reminderEnabled) {
-        await NotificationService().scheduleDailyReminder(reminderTime, skipToday: true);
+        await NotificationService().scheduleDailyReminder(
+          reminderTime, 
+          skipToday: true,
+          playSound: reminderSound,
+          enableVibration: reminderVibration,
+        );
       }
     }
   }
