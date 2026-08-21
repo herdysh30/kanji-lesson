@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
@@ -138,10 +139,15 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
                                 ),
                                 Text(
                                   '${item.correctAnswers}/${item.totalQuestions}',
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
                                 ),
                               ],
                             ),
+                            onTap: () {
+                              context.push('/progress/quiz-history-detail', extra: item);
+                            },
                           );
                         },
                       ),
