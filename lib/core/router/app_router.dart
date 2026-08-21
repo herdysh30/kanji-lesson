@@ -18,13 +18,18 @@ import 'package:kanji_lesson/features/review/presentation/screens/review_result_
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_setup_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_result_screen.dart';
+import 'package:kanji_lesson/features/splash/presentation/screens/splash_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
