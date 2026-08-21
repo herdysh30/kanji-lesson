@@ -71,9 +71,11 @@ class SettingsRepository {
 
     // Check if goal reached
     final goal = dailyGoal;
-    if (currentCount < goal && newCount >= goal) {
-      // Goal reached for today! Update streak!
-      _updateStreak(todayStr);
+    final lastActive = lastActiveDate;
+    
+    if (newCount >= goal && lastActive != todayStr) {
+      // Goal reached for today and streak not yet updated!
+      await _updateStreak(todayStr);
     }
   }
 
