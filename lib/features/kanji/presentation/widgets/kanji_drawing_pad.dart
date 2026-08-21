@@ -136,36 +136,36 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                         Positioned.fill(
                           child: svgAsync.when(
                             data: (svgStrings) {
-                              return Center(
-                                child: FittedBox(
-                                  fit: BoxFit.contain,
-                                  child: SizedBox(
-                                    width: columns * 120.0,
-                                    child: Wrap(
-                                      alignment: WrapAlignment.center,
-                                      children: List.generate(widget.character.length, (index) {
-                                        final char = widget.character[index];
-                                        final svgStr = svgStrings[index];
-                                        
-                                        if (svgStr == null) {
-                                          return SizedBox(
-                                            width: 120,
-                                            height: 120,
-                                            child: Center(
-                                              child: Text(
-                                                char,
-                                                style: TextStyle(
-                                                  fontSize: 100,
-                                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                                ),
+                              return LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final cellWidth = constraints.maxWidth / columns;
+                                  final cellHeight = constraints.maxHeight / rows;
+                                  
+                                  return Wrap(
+                                    alignment: WrapAlignment.center,
+                                    children: List.generate(widget.character.length, (index) {
+                                      final char = widget.character[index];
+                                      final svgStr = svgStrings[index];
+                                      
+                                      if (svgStr == null) {
+                                        return SizedBox(
+                                          width: cellWidth,
+                                          height: cellHeight,
+                                          child: Center(
+                                            child: Text(
+                                              char,
+                                              style: TextStyle(
+                                                fontSize: cellHeight * 0.8,
+                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                                               ),
                                             ),
-                                          );
-                                        }
+                                          ),
+                                        );
+                                      }
                                       
                                       return SizedBox(
-                                        width: 120,
-                                        height: 120,
+                                        width: cellWidth,
+                                        height: cellHeight,
                                         child: SvgPicture.string(
                                           svgStr,
                                           fit: BoxFit.contain,
@@ -176,37 +176,35 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                         ),
                                       );
                                     }),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                                  );
+                                },
+                              );
+                            },
                             loading: () => const Center(child: CircularProgressIndicator()),
-                            error: (_, __) => Center(
-                              child: FittedBox(
-                                fit: BoxFit.contain,
-                                child: SizedBox(
-                                  width: columns * 120.0,
-                                  child: Wrap(
-                                    alignment: WrapAlignment.center,
-                                    children: List.generate(widget.character.length, (index) {
-                                      return SizedBox(
-                                        width: 120,
-                                        height: 120,
-                                        child: Center(
-                                          child: Text(
-                                            widget.character[index],
-                                            style: TextStyle(
-                                              fontSize: 100,
-                                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
-                                            ),
+                            error: (_, __) => LayoutBuilder(
+                              builder: (context, constraints) {
+                                final cellWidth = constraints.maxWidth / columns;
+                                final cellHeight = constraints.maxHeight / rows;
+                                
+                                return Wrap(
+                                  alignment: WrapAlignment.center,
+                                  children: List.generate(widget.character.length, (index) {
+                                    return SizedBox(
+                                      width: cellWidth,
+                                      height: cellHeight,
+                                      child: Center(
+                                        child: Text(
+                                          widget.character[index],
+                                          style: TextStyle(
+                                            fontSize: cellHeight * 0.8,
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                                           ),
                                         ),
-                                      );
-                                    }),
-                                  ),
-                                ),
-                              ),
+                                      ),
+                                    );
+                                  }),
+                                );
+                              },
                             ),
                           ),
                         ),
