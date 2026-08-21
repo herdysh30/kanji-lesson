@@ -8,12 +8,14 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_provide
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -41,12 +43,12 @@ class HomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'こんにちは',
+                          l10n.greeting,
                           style: Theme.of(context).textTheme.headlineLarge,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "What shall we learn today?",
+                          l10n.whatShallWeLearnToday,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -95,14 +97,14 @@ class HomeScreen extends ConsumerWidget {
                 Row(
                   children: [
                     Expanded(child: _QuickActionCard(
-                      label: 'Review',
+                      label: l10n.review,
                       icon: Icons.replay_rounded,
                       onTap: () => context.go('/review'),
                       count: ref.watch(dueReviewCountProvider),
                     )),
                     const SizedBox(width: 12),
                     Expanded(child: _QuickActionCard(
-                      label: 'Progress',
+                      label: l10n.progress,
                       icon: Icons.bar_chart_rounded,
                       onTap: () => context.push('/progress'),
                     )),
@@ -115,20 +117,20 @@ class HomeScreen extends ConsumerWidget {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: () => context.go('/learn'),
-                    child: const Text('Continue Learning'),
+                    onPressed: () => StatefulNavigationShell.of(context).goBranch(1),
+                    child: Text(l10n.continueLearning),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sectionGap),
 
                 // ─── JLPT Progress ─────────────────────────────
                 Text(
-                  'JLPT Progress',
+                  l10n.jlptProgress,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Track your progress across levels',
+                  l10n.trackYourProgressAcrossLevels,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -150,6 +152,7 @@ class HomeScreen extends ConsumerWidget {
 class _DailyGoalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final progressState = ref.watch(dailyProgressProvider);
     final goal = ref.watch(dailyGoalProvider);
     
@@ -168,7 +171,7 @@ class _DailyGoalCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            completed ? 'Today\'s Goal — Complete ✓' : 'Today\'s Goal',
+            completed ? l10n.todaysGoalComplete : l10n.todaysGoal,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -197,7 +200,7 @@ class _DailyGoalCard extends ConsumerWidget {
           if (!completed) ...[
             const SizedBox(height: 8),
             Text(
-              '${goal - done} more to complete today\'s goal',
+              l10n.moreToComplete(goal - done),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 12,

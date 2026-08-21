@@ -4,15 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class JlptSelectionScreen extends ConsumerWidget {
   const JlptSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('JLPT Levels'),
+        title: Text(l10n.jlptLevels),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -32,6 +34,7 @@ class _JlptLevelCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final stats = ref.watch(jlptStatsProvider(level));
     final color = AppColors.primary;
     final description = AppConstants.jlptLevelDescriptions[level] ?? '';
@@ -84,7 +87,7 @@ class _JlptLevelCard extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${data.learned} / ${data.total} learned',
+                              l10n.learnedCount(data.learned, data.total),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 8),

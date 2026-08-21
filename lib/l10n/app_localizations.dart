@@ -107,7 +107,7 @@ abstract class AppLocalizations {
   /// No description provided for @greeting.
   ///
   /// In en, this message translates to:
-  /// **'Hello 👋'**
+  /// **'こんにちは'**
   String get greeting;
 
   /// No description provided for @readyToLearn.
@@ -235,6 +235,546 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// No description provided for @accentColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent Color'**
+  String get accentColor;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language / Bahasa'**
+  String get language;
+
+  /// No description provided for @dailyGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Goal'**
+  String get dailyGoal;
+
+  /// No description provided for @currentGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Current goal: {count} correct answers'**
+  String currentGoal(int count);
+
+  /// No description provided for @dailyReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reminder'**
+  String get dailyReminder;
+
+  /// No description provided for @reminderSetFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder set for {time}'**
+  String reminderSetFor(String time);
+
+  /// No description provided for @turnOnToGetReminded.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on to get reminded to study'**
+  String get turnOnToGetReminded;
+
+  /// No description provided for @notificationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission denied'**
+  String get notificationPermissionDenied;
+
+  /// No description provided for @changeReminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Reminder Time'**
+  String get changeReminderTime;
+
+  /// No description provided for @sound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get sound;
+
+  /// No description provided for @vibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get vibration;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
+  /// No description provided for @light.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get light;
+
+  /// No description provided for @dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get dark;
+
+  /// No description provided for @resetLearningProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Learning Progress'**
+  String get resetLearningProgress;
+
+  /// No description provided for @clearProgressSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear progress for all or specific JLPT levels'**
+  String get clearProgressSubtitle;
+
+  /// No description provided for @resetAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset ALL Data (Danger)'**
+  String get resetAllData;
+
+  /// No description provided for @deleteAllProgressSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes ALL progress, history, and cached data'**
+  String get deleteAllProgressSubtitle;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @resetProgressDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Progress?'**
+  String get resetProgressDialogTitle;
+
+  /// No description provided for @resetProgressDialogContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to reset progress for a specific JLPT level or all levels? This action cannot be undone.'**
+  String get resetProgressDialogContent;
+
+  /// No description provided for @allLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'All Levels'**
+  String get allLevels;
+
+  /// No description provided for @progressResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress reset successfully'**
+  String get progressResetSuccess;
+
+  /// No description provided for @dangerZoneResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'RESET ALL DATA'**
+  String get dangerZoneResetTitle;
+
+  /// No description provided for @dangerZoneResetContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you absolutely sure you want to delete ALL data? This includes your streaks, custom settings, and learning progress. This action is PERMANENT.'**
+  String get dangerZoneResetContent;
+
+  /// No description provided for @quizSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Setup'**
+  String get quizSetup;
+
+  /// No description provided for @startQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Quiz'**
+  String get startQuiz;
+
+  /// No description provided for @jlptLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'JLPT Level'**
+  String get jlptLevel;
+
+  /// No description provided for @numberOfQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Questions'**
+  String get numberOfQuestions;
+
+  /// No description provided for @itemType.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Type'**
+  String get itemType;
+
+  /// No description provided for @questionType.
+  ///
+  /// In en, this message translates to:
+  /// **'Question Type'**
+  String get questionType;
+
+  /// No description provided for @multipleChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Choice'**
+  String get multipleChoice;
+
+  /// No description provided for @typing.
+  ///
+  /// In en, this message translates to:
+  /// **'Typing'**
+  String get typing;
+
+  /// No description provided for @reading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get reading;
+
+  /// No description provided for @quiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get quiz;
+
+  /// No description provided for @quitQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit Quiz'**
+  String get quitQuiz;
+
+  /// No description provided for @quitQuizConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to quit? Your current progress will be lost.'**
+  String get quitQuizConfirm;
+
+  /// No description provided for @quit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit'**
+  String get quit;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get finish;
+
+  /// No description provided for @quizResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Result'**
+  String get quizResult;
+
+  /// No description provided for @score.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get score;
+
+  /// No description provided for @correct.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get correct;
+
+  /// No description provided for @incorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect'**
+  String get incorrect;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get backToHome;
+
+  /// No description provided for @streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get streak;
+
+  /// No description provided for @selectSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Source'**
+  String get selectSource;
+
+  /// No description provided for @myLearned.
+  ///
+  /// In en, this message translates to:
+  /// **'My Learned'**
+  String get myLearned;
+
+  /// No description provided for @sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Sentence'**
+  String get sentence;
+
+  /// No description provided for @writing.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing'**
+  String get writing;
+
+  /// No description provided for @questionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Questions'**
+  String questionsCount(int count);
+
+  /// No description provided for @maxItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Max: {max} items'**
+  String maxItems(int max);
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @notEnoughItemsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough items in the selected source for the chosen types.'**
+  String get notEnoughItemsError;
+
+  /// No description provided for @whatShallWeLearnToday.
+  ///
+  /// In en, this message translates to:
+  /// **'What shall we learn today?'**
+  String get whatShallWeLearnToday;
+
+  /// No description provided for @progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get progress;
+
+  /// No description provided for @trackYourProgressAcrossLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your progress across levels'**
+  String get trackYourProgressAcrossLevels;
+
+  /// No description provided for @todaysGoalComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Goal — Complete ✓'**
+  String get todaysGoalComplete;
+
+  /// No description provided for @moreToComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining} more to complete today\'s goal'**
+  String moreToComplete(int remaining);
+
+  /// No description provided for @reviewDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Dashboard'**
+  String get reviewDashboard;
+
+  /// No description provided for @reviewsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Reviews Due'**
+  String reviewsDue(int count);
+
+  /// No description provided for @noReviewsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'No Reviews Due'**
+  String get noReviewsDue;
+
+  /// No description provided for @timeToStrengthen.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to strengthen your memory!'**
+  String get timeToStrengthen;
+
+  /// No description provided for @youreAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up for now.'**
+  String get youreAllCaughtUp;
+
+  /// No description provided for @startReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Review'**
+  String get startReview;
+
+  /// No description provided for @learnNewItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn New Items'**
+  String get learnNewItems;
+
+  /// No description provided for @loadingReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading reviews...'**
+  String get loadingReviews;
+
+  /// No description provided for @unableToLoadReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load due reviews.'**
+  String get unableToLoadReviews;
+
+  /// No description provided for @kanjiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Kanji Only'**
+  String get kanjiOnly;
+
+  /// No description provided for @vocabOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocab Only'**
+  String get vocabOnly;
+
+  /// No description provided for @mixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed (Kanji & Vocab)'**
+  String get mixed;
+
+  /// No description provided for @anyLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Any Level'**
+  String get anyLevel;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Items'**
+  String itemsCount(int count);
+
+  /// No description provided for @startLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Learning'**
+  String get startLearning;
+
+  /// No description provided for @noNewItemsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No new items available for this selection.'**
+  String get noNewItemsAvailable;
+
+  /// No description provided for @jlptLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'JLPT Levels'**
+  String get jlptLevels;
+
+  /// No description provided for @learnedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{learned} / {total} learned'**
+  String learnedCount(int learned, int total);
+
+  /// No description provided for @practiceRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Random'**
+  String get practiceRandom;
+
+  /// No description provided for @searchKanjiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search kanji, reading, or meaning...'**
+  String get searchKanjiHint;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterKanji.
+  ///
+  /// In en, this message translates to:
+  /// **'Kanji'**
+  String get filterKanji;
+
+  /// No description provided for @filterVocab.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocab'**
+  String get filterVocab;
+
+  /// No description provided for @filterLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning'**
+  String get filterLearning;
+
+  /// No description provided for @filterMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get filterMastered;
+
+  /// No description provided for @noItemsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No items found'**
+  String get noItemsFound;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @unableToLoadData.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load data.\nPlease check your internet connection.'**
+  String get unableToLoadData;
 }
 
 class _AppLocalizationsDelegate

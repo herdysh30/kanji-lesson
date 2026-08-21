@@ -112,5 +112,66 @@
     }
   },
   "custom": "Custom",
-  "notEnoughItemsError": "Not enough items in the selected source for the chosen types."
+  "notEnoughItemsError": "Not enough items in the selected source for the chosen types.",
+  "greeting": "こんにちは",
+  "whatShallWeLearnToday": "What shall we learn today?",
+  "review": "Review",
+  "progress": "Progress",
+  "continueLearning": "Continue Learning",
+  "jlptProgress": "JLPT Progress",
+  "trackYourProgressAcrossLevels": "Track your progress across levels",
+  "todaysGoalComplete": "Today's Goal — Complete ✓",
+  "todaysGoal": "Today's Goal",
+  "moreToComplete": "{remaining} more to complete today's goal",
+  "@moreToComplete": {
+    "placeholders": {
+      "remaining": { "type": "int" }
+    }
+  },
+  "reviewDashboard": "Review Dashboard",
+  "reviewsDue": "{count} Reviews Due",
+  "@reviewsDue": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noReviewsDue": "No Reviews Due",
+  "timeToStrengthen": "Time to strengthen your memory!",
+  "youreAllCaughtUp": "You're all caught up for now.",
+  "startReview": "Start Review",
+  "learnNewItems": "Learn New Items",
+  "loadingReviews": "Loading reviews...",
+  "unableToLoadReviews": "Unable to load due reviews.",
+  "kanjiOnly": "Kanji Only",
+  "vocabOnly": "Vocab Only",
+  "mixed": "Mixed (Kanji & Vocab)",
+  "jlptLevel": "JLPT Level",
+  "anyLevel": "Any Level",
+  "amount": "Amount",
+  "itemsCount": "{count} Items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "startLearning": "Start Learning",
+  "noNewItemsAvailable": "No new items available for this selection.",
+  "jlptLevels": "JLPT Levels",
+  "learnedCount": "{learned} / {total} learned",
+  "@learnedCount": {
+    "placeholders": {
+      "learned": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "practiceRandom": "Practice Random",
+  "searchKanjiHint": "Search kanji, reading, or meaning...",
+  "filterAll": "All",
+  "filterKanji": "Kanji",
+  "filterVocab": "Vocab",
+  "filterLearning": "Learning",
+  "filterMastered": "Mastered",
+  "noItemsFound": "No items found",
+  "loading": "Loading...",
+  "unableToLoadData": "Unable to load data.\nPlease check your internet connection."
 }

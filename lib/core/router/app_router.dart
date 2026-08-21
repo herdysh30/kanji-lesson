@@ -178,8 +178,15 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     final unselectedColor = Theme.of(context).colorScheme.onSurfaceVariant;
     final bgColor = Theme.of(context).colorScheme.surface;
 
-    return Scaffold(
-      body: navigationShell,
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _go(0);
+        }
+      },
+      child: Scaffold(
+        body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: bgColor,
@@ -246,6 +253,7 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

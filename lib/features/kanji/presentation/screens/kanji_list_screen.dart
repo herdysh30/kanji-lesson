@@ -8,6 +8,7 @@ import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/core/widgets/empty_state_widget.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class KanjiListScreen extends ConsumerWidget {
   const KanjiListScreen({super.key, required this.jlptLevel});
@@ -16,6 +17,7 @@ class KanjiListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final gridItems = ref.watch(filteredGridListProvider(jlptLevel));
     final searchQuery = ref.watch(kanjiSearchQueryProvider);
     final filter = ref.watch(kanjiFilterProvider);
@@ -29,7 +31,7 @@ class KanjiListScreen extends ConsumerWidget {
           context.push('/learn/$jlptLevel/practice');
         },
         icon: const Icon(Icons.draw_rounded),
-        label: const Text('Practice Random'),
+        label: Text(l10n.practiceRandom),
       ),
       body: Column(
         children: [
@@ -38,7 +40,7 @@ class KanjiListScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: 'Search kanji, reading, or meaning...',
+                hintText: l10n.searchKanjiHint,
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: searchQuery.isNotEmpty
                     ? IconButton(
@@ -63,11 +65,11 @@ class KanjiListScreen extends ConsumerWidget {
                 children: KanjiFilter.values.map((f) {
                   final isSelected = filter == f;
                   final label = switch (f) {
-                    KanjiFilter.all => 'All',
-                    KanjiFilter.kanji => 'Kanji',
-                    KanjiFilter.vocab => 'Vocab',
-                    KanjiFilter.learning => 'Learning',
-                    KanjiFilter.mastered => 'Mastered',
+                    KanjiFilter.all => l10n.filterAll,
+                    KanjiFilter.kanji => l10n.filterKanji,
+                    KanjiFilter.vocab => l10n.filterVocab,
+                    KanjiFilter.learning => l10n.filterLearning,
+                    KanjiFilter.mastered => l10n.filterMastered,
                   };
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -98,8 +100,8 @@ class KanjiListScreen extends ConsumerWidget {
             child: gridItems.when(
               data: (items) {
                 if (items.isEmpty) {
-                  return const EmptyStateWidget(
-                    message: 'No items found',
+                  return EmptyStateWidget(
+                    message: l10n.noItemsFound,
                     icon: Icons.search_off_rounded,
                   );
                 }
@@ -139,9 +141,9 @@ class KanjiListScreen extends ConsumerWidget {
                 ),
               );
             },
-              loading: () => const AppLoadingWidget(message: 'Loading...'),
+              loading: () => AppLoadingWidget(message: l10n.loading),
               error: (error, _) => AppErrorWidget(
-                message: 'Unable to load data.\nPlease check your internet connection.',
+                message: l10n.unableToLoadData,
                 onRetry: () => ref.invalidate(filteredGridListProvider(jlptLevel)),
               ),
             ),
