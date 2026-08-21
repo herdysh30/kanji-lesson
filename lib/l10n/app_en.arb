@@ -282,5 +282,6 @@
       "total": { "type": "int" },
       "time": { "type": "String" }
     }
-  }
+  },
+  "kanjiOfTheDay": "Kanji of the Day"
 }

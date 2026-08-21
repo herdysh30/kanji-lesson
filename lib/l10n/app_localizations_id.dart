@@ -606,4 +606,7 @@ class AppLocalizationsId extends AppLocalizations {
   String quizHistorySubtitle(int correct, int total, String time) {
     return '$correct/$total benar  ·  $time';
   }
+
+  @override
+  String get kanjiOfTheDay => 'Kanji Hari Ini';
 }

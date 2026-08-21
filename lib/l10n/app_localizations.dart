@@ -1201,6 +1201,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{correct}/{total} correct  ·  {time}'**
   String quizHistorySubtitle(int correct, int total, String time);
+
+  /// No description provided for @kanjiOfTheDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Kanji of the Day'**
+  String get kanjiOfTheDay;
 }
 
 class _AppLocalizationsDelegate

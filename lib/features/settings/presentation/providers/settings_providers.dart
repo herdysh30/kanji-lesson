@@ -194,3 +194,20 @@ class AccentColorNotifier extends StateNotifier<int> {
     state = colorValue;
   }
 }
+
+// ─── Kanji of the Day Widget ────────────────────────────────
+
+final showKanjiOfTheDayProvider = StateNotifierProvider<KanjiOfTheDayNotifier, bool>((ref) {
+  final repo = ref.watch(settingsRepositoryProvider);
+  return KanjiOfTheDayNotifier(repo);
+});
+
+class KanjiOfTheDayNotifier extends StateNotifier<bool> {
+  KanjiOfTheDayNotifier(this._repository) : super(_repository.showKanjiOfTheDay);
+  final SettingsRepository _repository;
+
+  Future<void> setShowKanjiOfTheDay(bool show) async {
+    await _repository.setShowKanjiOfTheDay(show);
+    state = show;
+  }
+}

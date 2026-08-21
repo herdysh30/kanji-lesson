@@ -8,6 +8,7 @@ import 'package:kanji_lesson/features/settings/presentation/providers/settings_p
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class VocabDetailScreen extends ConsumerWidget {
@@ -67,10 +68,27 @@ class VocabDetailScreen extends ConsumerWidget {
                         style: AppTheme.japaneseReading(context, fontSize: 24),
                       ),
                     const SizedBox(height: 8),
-                    Text(
-                      vocab.word,
-                      style: AppTheme.kanjiLarge(context),
-                      textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(width: 40),
+                        Text(
+                          vocab.word,
+                          style: AppTheme.kanjiLarge(context),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(
+                          width: 40,
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: KanjiAudioButton(character: vocab.word),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     Text(

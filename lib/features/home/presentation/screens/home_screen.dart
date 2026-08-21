@@ -8,6 +8,7 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_provide
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
+import 'package:kanji_lesson/core/services/widget_updater.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -16,6 +17,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    // Keep widget updater alive
+    ref.read(widgetUpdaterProvider);
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -92,6 +95,12 @@ class HomeScreen extends ConsumerWidget {
                 // ─── Daily Goal ────────────────────────────────
                 _DailyGoalCard(),
                 const SizedBox(height: AppSpacing.lg),
+
+                // ─── Kanji of the Day ──────────────────────────
+                if (ref.watch(showKanjiOfTheDayProvider)) ...[
+                  _KanjiOfTheDayCard(),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
 
                 // ─── Quick Actions ────────────────────────────
                 Row(
@@ -342,6 +351,116 @@ class _JlptProgressRow extends ConsumerWidget {
           error: (_, __) => Text('N$level — Unable to load'),
         ),
       ),
+    );
+  }
+}
+
+// ─── Kanji of the Day Card ──────────────────────────────────────
+
+class _KanjiOfTheDayCard extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final itemAsync = ref.watch(itemOfTheDayProvider);
+
+    return itemAsync.when(
+      data: (item) {
+        if (item == null) return const SizedBox.shrink();
+
+        return GestureDetector(
+          onTap: () {
+            ref.read(kanjiSearchQueryProvider.notifier).state = item.text;
+            if (item.isVocab) {
+              context.push('/learn/${item.jlptLevel}/vocab/${item.text}');
+            } else {
+              context.push('/learn/${item.jlptLevel}/${item.text}');
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.isVocab ? "Vocab of the Day" : ((l10n as dynamic).kanjiOfTheDay as String),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (item.meaning.isNotEmpty)
+                        Text(
+                          item.meaning,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (item.reading.isNotEmpty)
+                        Text(
+                          item.reading,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                    ],
+                  ),
+                ),
+                Text(
+                  item.text,
+                  style: TextStyle(
+                    fontSize: item.isVocab ? 32 : 48,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => Container(
+        height: 100,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

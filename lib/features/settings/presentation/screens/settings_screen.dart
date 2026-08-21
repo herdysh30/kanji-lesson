@@ -75,6 +75,18 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(),
 
+          // ─── Kanji of the Day ─────────────────────────────
+          SwitchListTile(
+            secondary: const Icon(Icons.star_rounded, color: Colors.transparent),
+            title: const Text('Show Kanji of the Day'),
+            subtitle: const Text('Display on Home Screen'),
+            value: ref.watch(showKanjiOfTheDayProvider),
+            onChanged: (val) {
+              ref.read(showKanjiOfTheDayProvider.notifier).setShowKanjiOfTheDay(val);
+            },
+          ),
+          const Divider(),
+
           // ─── Daily Reminder ─────────────────────────────────
           SwitchListTile(
             secondary: const Icon(Icons.notifications_active_rounded),

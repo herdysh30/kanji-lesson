@@ -222,5 +222,6 @@
       "total": { "type": "int" },
       "time": { "type": "String" }
     }
-  }
+  },
+  "kanjiOfTheDay": "Kanji Hari Ini"
 }

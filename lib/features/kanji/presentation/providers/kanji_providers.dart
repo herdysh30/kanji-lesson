@@ -368,3 +368,110 @@ final vocabSentencesProvider = FutureProvider.family<List<Sentence>, String>((re
   final dataSource = ref.watch(sentenceRemoteDataSourceProvider);
   return dataSource.fetchSentences(word);
 });
+
+// ─── Item Of The Day Provider ──────────────────────────────────
+
+class ItemOfTheDay {
+  final String text;
+  final String meaning;
+  final String reading;
+  final bool isVocab;
+  final int jlptLevel;
+
+  ItemOfTheDay({
+    required this.text,
+    required this.meaning,
+    required this.reading,
+    required this.isVocab,
+    required this.jlptLevel,
+  });
+}
+
+final itemOfTheDayProvider = FutureProvider<ItemOfTheDay?>((ref) async {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  final kanjiRepo = ref.watch(kanjiRepositoryProvider);
+  final vocabRepo = ref.watch(jlptVocabRepositoryProvider);
+
+  final today = DateTime.now();
+  final dateString = '${today.year}-${today.month}-${today.day}';
+
+  final cachedDate = prefs.getString('item_of_the_day_date');
+  final cachedText = prefs.getString('item_of_the_day_text');
+  final cachedIsVocab = prefs.getBool('item_of_the_day_is_vocab');
+  final cachedLevel = prefs.getInt('item_of_the_day_level') ?? 1;
+
+  final isId = ref.watch(localeProvider).languageCode == 'id';
+
+  if (cachedDate == dateString && cachedText != null && cachedIsVocab != null) {
+    try {
+      if (cachedIsVocab) {
+        final jlptData = await vocabRepo.getVocabByWord(cachedText);
+        if (jlptData != null) {
+          return ItemOfTheDay(
+            text: jlptData.word,
+            meaning: jlptData.primaryMeaning(isId),
+            reading: jlptData.furigana,
+            isVocab: true,
+            jlptLevel: cachedLevel,
+          );
+        }
+      } else {
+        final kanji = await kanjiRepo.getKanjiDetail(cachedText);
+        return ItemOfTheDay(
+          text: kanji.character,
+          meaning: (isId && kanji.meaningsId.isNotEmpty) ? kanji.meaningsId.first : (kanji.meanings.isNotEmpty ? kanji.meanings.first : ''),
+          reading: kanji.kunyomi.isNotEmpty ? kanji.kunyomi.first : kanji.onyomi.isNotEmpty ? kanji.onyomi.first : '',
+          isVocab: false,
+          jlptLevel: kanji.jlptLevel ?? 1,
+        );
+      }
+    } catch (_) {
+      // Fallback
+    }
+  }
+
+  final jlptLevels = [5, 4, 3, 2, 1];
+  jlptLevels.shuffle();
+  
+  final pickVocab = DateTime.now().millisecond % 2 == 0;
+
+  for (final level in jlptLevels) {
+    if (pickVocab) {
+      final vocabList = await vocabRepo.getVocabByLevel(level);
+      if (vocabList.isNotEmpty) {
+        vocabList.shuffle();
+        final selected = vocabList.first;
+        await prefs.setString('item_of_the_day_date', dateString);
+        await prefs.setString('item_of_the_day_text', selected.word);
+        await prefs.setBool('item_of_the_day_is_vocab', true);
+        await prefs.setInt('item_of_the_day_level', level);
+        return ItemOfTheDay(
+          text: selected.word,
+          meaning: selected.primaryMeaning(isId),
+          reading: selected.furigana,
+          isVocab: true,
+          jlptLevel: level,
+        );
+      }
+    } else {
+      final kanjiList = await kanjiRepo.getKanjiListByJlpt(level);
+      if (kanjiList.isNotEmpty) {
+        kanjiList.shuffle();
+        final selectedChar = kanjiList.first;
+        await prefs.setString('item_of_the_day_date', dateString);
+        await prefs.setString('item_of_the_day_text', selectedChar);
+        await prefs.setBool('item_of_the_day_is_vocab', false);
+        await prefs.setInt('item_of_the_day_level', level);
+        final kanji = await kanjiRepo.getKanjiDetail(selectedChar);
+        return ItemOfTheDay(
+          text: kanji.character,
+          meaning: (isId && kanji.meaningsId.isNotEmpty) ? kanji.meaningsId.first : (kanji.meanings.isNotEmpty ? kanji.meanings.first : ''),
+          reading: kanji.kunyomi.isNotEmpty ? kanji.kunyomi.first : kanji.onyomi.isNotEmpty ? kanji.onyomi.first : '',
+          isVocab: false,
+          jlptLevel: kanji.jlptLevel ?? 1,
+        );
+      }
+    }
+  }
+  return null;
+});

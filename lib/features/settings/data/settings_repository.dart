@@ -150,4 +150,9 @@ class SettingsRepository {
     await _prefs.setInt(_keyCurrentStreak, streak);
     await _prefs.setInt(_keyBestStreak, best);
   }
+
+  // Kanji of the Day
+  static const _keyKanjiOfTheDay = 'app_kanji_of_the_day';
+  bool get showKanjiOfTheDay => _prefs.getBool(_keyKanjiOfTheDay) ?? true;
+  Future<void> setShowKanjiOfTheDay(bool show) => _prefs.setBool(_keyKanjiOfTheDay, show);
 }

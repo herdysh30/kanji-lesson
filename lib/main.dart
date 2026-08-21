@@ -6,12 +6,24 @@ import 'package:kanji_lesson/app.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/core/services/notification_service.dart';
 
+import 'package:kanji_lesson/core/services/widget_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
   final sharedPreferences = await SharedPreferences.getInstance();
-  await NotificationService().init();
+  try {
+    await NotificationService().init();
+  } catch (e) {
+    debugPrint('Init error: $e');
+  }
+
+  try {
+    await WidgetService.initialize();
+  } catch (e) {
+    debugPrint('WidgetService init error: $e');
+  }
 
   runApp(
     ProviderScope(

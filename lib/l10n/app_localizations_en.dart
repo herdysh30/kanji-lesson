@@ -605,4 +605,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String quizHistorySubtitle(int correct, int total, String time) {
     return '$correct/$total correct  ·  $time';
   }
+
+  @override
+  String get kanjiOfTheDay => 'Kanji of the Day';
 }
