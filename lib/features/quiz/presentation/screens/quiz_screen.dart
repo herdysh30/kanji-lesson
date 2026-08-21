@@ -125,16 +125,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               if (currentQuestion.type != QuizType.writing)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                     child: SizedBox(
-                      height: 84,
+                      height: 110,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.center,
                         child: Text(
                           currentQuestion.prompt,
                           style: AppTheme.kanjiLarge(context).copyWith(
-                            fontSize: 80,
+                            fontSize: 96,
                             fontWeight: FontWeight.bold,
                             height: 1.1,
                           ),
@@ -147,10 +147,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               if (currentQuestion.type == QuizType.writing)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                     child: Text(
                       currentQuestion.prompt,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                       textAlign: TextAlign.center,
@@ -162,7 +162,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               if (currentQuestion.type != QuizType.writing && !_isAnswerRevealed)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
+                    padding: const EdgeInsets.only(bottom: 8.0),
                     child: AnimatedSize(
                       duration: const Duration(milliseconds: 200),
                       child: _showHint
@@ -176,12 +176,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                             )
                           : TextButton.icon(
                               onPressed: () => setState(() => _showHint = true),
-                              icon: const Icon(Icons.lightbulb_outline, size: 18),
-                              label: const Text('Show Hint'),
+                              icon: const Icon(Icons.lightbulb_outline, size: 20),
+                              label: const Text('Show Hint', style: TextStyle(fontSize: 14)),
                               style: TextButton.styleFrom(
-                                foregroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                                foregroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               ),
                             ),
                     ),
@@ -191,12 +190,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               // Question Instruction
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 12.0),
                   child: Text(
                     _getInstructionText(currentQuestion.type),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -238,16 +237,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                     }
                       
                                     return Padding(
-                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      padding: const EdgeInsets.only(bottom: 12.0),
                                       child: SizedBox(
                                         width: double.infinity,
                                         child: FilledButton(
                                           style: FilledButton.styleFrom(
                                             backgroundColor: buttonColor,
                                             foregroundColor: textColor,
-                                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius: BorderRadius.circular(14),
                                             ),
                                           ),
                                           onPressed: () => _handleOptionSelected(index, currentQuestion),
@@ -257,19 +256,19 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                               Text(
                                                 option.text,
                                                 style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
+                                                  fontSize: 17,
+                                                  fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.w600,
                                                 ),
                                                 textAlign: TextAlign.center,
                                               ),
                                               // Show explanation after answering
                                               if (_isAnswerRevealed && option.kanjiCharacter != null)
                                                 Padding(
-                                                  padding: const EdgeInsets.only(top: 4),
+                                                  padding: const EdgeInsets.only(top: 6),
                                                   child: Text(
                                                     _getOptionExplanation(currentQuestion.type, option),
                                                     style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 13,
                                                       color: textColor.withValues(alpha: 0.85),
                                                       fontWeight: FontWeight.w400,
                                                     ),
@@ -288,14 +287,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       padding: const EdgeInsets.only(top: 4, bottom: 8),
                                       child: SizedBox(
                                         width: double.infinity,
-                                        height: 44,
+                                        height: 48,
                                         child: TextButton(
                                           onPressed: () => _handleOptionSelected(-1, currentQuestion),
                                           style: TextButton.styleFrom(
                                             foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                                            visualDensity: VisualDensity.compact,
                                           ),
-                                          child: const Text('I don\'t know / Skip'),
+                                          child: const Text('I don\'t know / Skip', style: TextStyle(fontSize: 15)),
                                         ),
                                       ),
                                     ),
@@ -305,7 +303,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                       padding: const EdgeInsets.only(top: 4, bottom: 8),
                                       child: SizedBox(
                                         width: double.infinity,
-                                        height: 48,
+                                        height: 52,
                                         child: FilledButton.icon(
                                           onPressed: _onNextPressed,
                                           icon: const Icon(Icons.arrow_forward_rounded),
@@ -313,6 +311,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                             sessionState.currentIndex >= sessionState.questions.length - 1
                                                 ? 'See Results'
                                                 : 'Next Question',
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ),
