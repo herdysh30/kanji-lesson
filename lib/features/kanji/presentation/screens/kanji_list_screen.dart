@@ -261,7 +261,7 @@ class _VocabGridTile extends ConsumerWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.go('/learn/$jlptLevel/vocab/$word'),
+        onTap: () => context.go('/learn/$jlptLevel/vocab/${Uri.encodeComponent(word)}'),
         child: Stack(
           children: [
             Center(
