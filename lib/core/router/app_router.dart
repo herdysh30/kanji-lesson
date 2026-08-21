@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/home/presentation/screens/home_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/jlpt_selection_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/kanji_list_screen.dart';
@@ -9,6 +10,7 @@ import 'package:kanji_lesson/features/review/presentation/screens/review_screen.
 import 'package:kanji_lesson/features/progress/presentation/screens/progress_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/weak_kanji_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/quiz_history_screen.dart';
+import 'package:kanji_lesson/features/progress/presentation/screens/quiz_history_detail_screen.dart';
 import 'package:kanji_lesson/features/settings/presentation/screens/settings_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/writing_practice_screen.dart';
 import 'package:kanji_lesson/features/review/presentation/screens/review_session_screen.dart';
@@ -148,6 +150,14 @@ final appRouter = GoRouter(
           path: 'quiz-history',
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const QuizHistoryScreen(),
+        ),
+        GoRoute(
+          path: 'quiz-history-detail',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            final entry = state.extra as QuizResultEntry;
+            return QuizHistoryDetailScreen(entry: entry);
+          },
         ),
       ],
     ),

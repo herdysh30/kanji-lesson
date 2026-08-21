@@ -3,11 +3,13 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_provide
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
+import 'dart:convert';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:equatable/equatable.dart';
+import 'package:kanji_lesson/features/quiz/domain/models/quiz_attempt.dart';
 
 enum QuizItemType {
   kanji,
@@ -209,6 +211,8 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
       qVocab = setup.questionCount;
     }
 
+    final Set<String> usedPrompts = {};
+
     if (qKanji > 0) {
       List<Kanji> validKanji = List.of(kanjiPool);
       if (type == QuizType.meaning || type == QuizType.writing) {
@@ -217,7 +221,9 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
         validKanji.retainWhere((k) => k.allReadings.isNotEmpty);
       }
       validKanji.shuffle();
-      allTasks.addAll(validKanji.take(qKanji).map((k) => QuizTask(type: type, kanji: k)));
+      final selected = validKanji.take(qKanji).toList();
+      usedPrompts.addAll(selected.map((k) => k.character));
+      allTasks.addAll(selected.map((k) => QuizTask(type: type, kanji: k)));
     }
 
     if (qVocab > 0) {
@@ -227,6 +233,7 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
       } else if (type == QuizType.reading) {
         validVocab.retainWhere((v) => v.furigana.isNotEmpty);
       }
+      validVocab.removeWhere((v) => usedPrompts.contains(v.word));
       validVocab.shuffle();
       allTasks.addAll(validVocab.take(qVocab).map((v) => QuizTask(type: type, vocab: v)));
     }
@@ -322,6 +329,20 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
   final Ref _ref;
   
   QuizSessionInitData? _initData;
+  bool get isGeneratingNext => state.isGeneratingNext;
+  bool get isFinished => state.isFinished;
+
+  void startRetake(List<QuizQuestion> questions) {
+    state = state.copyWith(
+      tasks: [],
+      resolvedQuestions: questions,
+      currentIndex: 0,
+      answers: [],
+      hintedQuestionIndices: {},
+      isFinished: false,
+      isGeneratingNext: false,
+    );
+  }
 
   void initialize(QuizSessionInitData initData) {
     if (state.tasks.isNotEmpty) return; // already initialized
@@ -454,18 +475,32 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
 
   Future<void> _saveQuizResult() async {
     int correctCount = 0;
+    List<QuizAttemptRecord> attempts = [];
+
     for (int i = 0; i < state.resolvedQuestions.length; i++) {
-      if (i < state.answers.length && state.answers[i] == state.resolvedQuestions[i].correctIndex) {
-        correctCount++;
-      }
+      final question = state.resolvedQuestions[i];
+      final isAnswered = i < state.answers.length;
+      final userAnswerIndex = isAnswered ? state.answers[i] : -1;
+      final isCorrect = userAnswerIndex == question.correctIndex;
+
+      if (isCorrect) correctCount++;
+      
+      attempts.add(QuizAttemptRecord(
+        question: question,
+        userAnswer: isAnswered && userAnswerIndex >= 0 ? question.options[userAnswerIndex].text : '',
+        isCorrect: isCorrect,
+      ));
     }
+    
     final accuracy = state.resolvedQuestions.isEmpty ? 0.0 : correctCount / state.resolvedQuestions.length;
+    final questionsJsonStr = jsonEncode(attempts.map((a) => a.toJson()).toList());
     
     await _db.insertQuizResult(QuizResultEntriesCompanion.insert(
       quizType: 'mixed',
       totalQuestions: state.resolvedQuestions.length,
       correctAnswers: correctCount,
       accuracy: accuracy,
+      questionsJson: drift.Value(questionsJsonStr),
     ));
   }
 }

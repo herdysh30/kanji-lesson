@@ -290,7 +290,7 @@ class QuizGenerator {
         final correctOption = QuizOption(
           text: correctAnswer,
           kanjiCharacter: kanji.character,
-          explanation: kanji.primaryMeaning(false),
+          explanation: kanji.primaryMeaning(isId),
         );
 
         var distractorKanji = kanjiDistractors
@@ -301,7 +301,7 @@ class QuizGenerator {
         final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
           text: k.primaryReading,
           kanjiCharacter: k.character,
-          explanation: k.primaryMeaning(false),
+          explanation: k.primaryMeaning(isId),
         )).toList();
         
         final dummyReadings = ['あか', 'あお', 'しろ', 'くろ', 'きいろ', 'みどり', 'むらさき', 'ちゃいろ', 'ピンク', 'オレンジ'];
@@ -329,7 +329,7 @@ class QuizGenerator {
         final correctOption = QuizOption(
           text: correctAnswer,
           kanjiCharacter: vocab.word,
-          explanation: vocab.primaryMeaning(false),
+          explanation: vocab.primaryMeaning(isId),
         );
 
         var distractorVocab = vocabDistractors
@@ -340,7 +340,7 @@ class QuizGenerator {
         final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
           text: v.furigana,
           kanjiCharacter: v.word,
-          explanation: v.primaryMeaning(false),
+          explanation: v.primaryMeaning(isId),
         )).toList();
         
         final dummyReadings = ['ねこ', 'いぬ', 'とり', 'さかな', 'き', 'はな', 'ひ', 'ほし', 'あめ', 'ゆき'];
@@ -511,6 +511,7 @@ class QuizGenerator {
     List<Kanji> kanjiDistractors = const [],
     List<JlptVocab> vocabDistractors = const [],
     int count = 10,
+    bool isId = false,
   }) {
     final questions = <QuizQuestion>[];
     
@@ -529,7 +530,7 @@ class QuizGenerator {
         final correctOption = QuizOption(
           text: correctAnswer,
           kanjiCharacter: kanji.character,
-          explanation: kanji.primaryMeaning(false),
+          explanation: kanji.primaryMeaning(isId),
         );
 
         final dKanjiPool = kanjiDistractors.isNotEmpty ? kanjiDistractors : kanjiPool;
@@ -541,7 +542,7 @@ class QuizGenerator {
         final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
           text: k.primaryReading,
           kanjiCharacter: k.character,
-          explanation: k.primaryMeaning(false),
+          explanation: k.primaryMeaning(isId),
         )).toList();
         
         final dummyReadings = ['あか', 'あお', 'しろ', 'くろ', 'きいろ', 'みどり', 'むらさき', 'ちゃいろ', 'ピンク', 'オレンジ'];
@@ -577,7 +578,7 @@ class QuizGenerator {
         final correctOption = QuizOption(
           text: correctAnswer,
           kanjiCharacter: vocab.word,
-          explanation: vocab.primaryMeaning(false),
+          explanation: vocab.primaryMeaning(isId),
         );
 
         final dVocabPool = vocabDistractors.isNotEmpty ? vocabDistractors : vocabPool;
@@ -589,7 +590,7 @@ class QuizGenerator {
         final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
           text: v.furigana,
           kanjiCharacter: v.word,
-          explanation: v.primaryMeaning(false),
+          explanation: v.primaryMeaning(isId),
         )).toList();
         
         final dummyReadings = ['ねこ', 'いぬ', 'とり', 'さかな', 'き', 'はな', 'ひ', 'ほし', 'あめ', 'ゆき'];

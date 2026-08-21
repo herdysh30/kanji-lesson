@@ -117,7 +117,7 @@ class QuizResultScreen extends ConsumerWidget {
                   final selectedAnswerIndex = state.answers[questionIndex];
                   final selectedAnswer = (selectedAnswerIndex >= 0 && selectedAnswerIndex < q.options.length)
                       ? q.options[selectedAnswerIndex].text
-                      : (q.type == QuizType.writing ? '(Incorrect Drawing)' : 'Unknown');
+                      : (q.type == QuizType.writing ? '(Incorrect Drawing)' : 'Skipped');
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -128,15 +128,19 @@ class QuizResultScreen extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                q.prompt,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  q.prompt,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: q.sentenceObj != null ? 18 : 24, // Smaller font for sentences
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 12),
                               Expanded(
+                                flex: 2,
                                 child: Text(
                                   q.correctAnswer,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
