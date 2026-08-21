@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
-import 'package:kanji_lesson/core/theme/app_theme.dart';
+import 'package:kanji_lesson/core/theme/app_spacing.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
@@ -13,7 +13,6 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -24,56 +23,75 @@ class HomeScreen extends ConsumerWidget {
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenH,
+              vertical: AppSpacing.screenV,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ─── Greeting ──────────────────────────────────
+                const SizedBox(height: 8),
                 Text(
-                  'こんにちは 👋',
-                  style: AppTheme.japaneseText(context, fontSize: 28),
+                  'こんにちは',
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Ready to learn some Kanji?',
+                  "What shall we learn today?",
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
 
-                // ─── Daily Goal Card ───────────────────────────
+                // ─── Daily Goal ────────────────────────────────
                 _DailyGoalCard(),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
 
-                // ─── Action Cards Row ──────────────────────────
+                // ─── Quick Actions ────────────────────────────
                 Row(
                   children: [
-                    Expanded(child: _ReviewCard()),
+                    Expanded(child: _QuickActionCard(
+                      label: 'Review',
+                      icon: Icons.replay_rounded,
+                      onTap: () => context.go('/review'),
+                      count: ref.watch(dueReviewCountProvider),
+                    )),
                     const SizedBox(width: 12),
-                    Expanded(child: _WeakKanjiCard()),
+                    Expanded(child: _QuickActionCard(
+                      label: 'Progress',
+                      icon: Icons.bar_chart_rounded,
+                      onTap: () => context.push('/progress'),
+                    )),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
 
                 // ─── Continue Learning ─────────────────────────
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  height: 52,
+                  child: ElevatedButton(
                     onPressed: () => context.go('/learn'),
-                    icon: const Icon(Icons.school_rounded),
-                    label: const Text('Continue Learning'),
+                    child: const Text('Continue Learning'),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.sectionGap),
 
                 // ─── JLPT Progress ─────────────────────────────
                 Text(
                   'JLPT Progress',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
+                Text(
+                  'Track your progress across levels',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: AppSpacing.md),
                 ...AppConstants.jlptLevels.map(
-                  (level) => _JlptProgressTile(level: level),
+                  (level) => _JlptProgressRow(level: level),
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -90,158 +108,138 @@ class _DailyGoalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(dailyStatsProvider);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: stats.when(
-          data: (data) {
-            final goal = data?.dailyGoal ?? AppConstants.defaultDailyGoal;
-            final done = (data?.newKanjiCount ?? 0) +
-                (data?.reviewedKanjiCount ?? 0);
-            final progress = goal > 0 ? (done / goal).clamp(0.0, 1.0) : 0.0;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: stats.when(
+        data: (data) {
+          final goal = data?.dailyGoal ?? AppConstants.defaultDailyGoal;
+          final done = (data?.newKanjiCount ?? 0) +
+              (data?.reviewedKanjiCount ?? 0);
+          final progress = goal > 0 ? (done / goal).clamp(0.0, 1.0) : 0.0;
+          final completed = data?.goalCompleted == true;
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Today's Goal",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      '$done / $goal',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                  ],
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                completed ? 'Today\'s Goal — Complete ✓' : 'Today\'s Goal',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 10,
-                    backgroundColor: Theme.of(context)
-                        .progressIndicatorTheme
-                        .linearTrackColor,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '$done / $goal',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              if (!completed) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '${goal - done} more to complete today\'s goal',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
                   ),
                 ),
-                if (data?.goalCompleted == true) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    '🎉 Goal completed!',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.correct,
-                        ),
-                  ),
-                ],
               ],
-            );
-          },
-          loading: () => const SizedBox(
-            height: 60,
-            child: Center(child: CircularProgressIndicator()),
+            ],
+          );
+        },
+        loading: () => const SizedBox(
+          height: 80,
+          child: Center(
+            child: CircularProgressIndicator(color: Colors.white),
           ),
-          error: (_, __) => const Text('Unable to load daily stats'),
+        ),
+        error: (_, __) => const Text(
+          'Unable to load',
+          style: TextStyle(color: Colors.white),
         ),
       ),
     );
   }
 }
 
-// ─── Review Card ────────────────────────────────────────────────
+// ─── Quick Action Card ──────────────────────────────────────────
 
-class _ReviewCard extends ConsumerWidget {
+class _QuickActionCard extends StatelessWidget {
+  const _QuickActionCard({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.count,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final AsyncValue<int>? count;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final count = ref.watch(dueReviewCountProvider);
+  Widget build(BuildContext context) {
 
     return GestureDetector(
-      onTap: () => context.go('/review'),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Icon(
-                Icons.replay_rounded,
-                size: 32,
-                color: AppColors.primary,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Review',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 4),
-              count.when(
-                data: (c) => Text(
-                  '$c Kanji',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: c > 0 ? AppColors.secondary : null,
-                        fontWeight: c > 0 ? FontWeight.w600 : null,
-                      ),
-                ),
-                loading: () => const Text('...'),
-                error: (_, __) => const Text('—'),
-              ),
-            ],
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          border: Border.all(
+            color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
+            width: 0.5,
           ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 2),
+            if (count != null) count!.when(
+              data: (c) => Text(
+                '$c items',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              loading: () => const Text('...'),
+              error: (_, __) => const Text('—'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ─── Weak Kanji Card ────────────────────────────────────────────
+// ─── JLPT Progress Row ─────────────────────────────────────────
 
-class _WeakKanjiCard extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final weak = ref.watch(weakKanjiCountProvider);
-
-    return GestureDetector(
-      onTap: () => context.push('/progress/weak'),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                size: 32,
-                color: AppColors.warning,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Weak Kanji',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 4),
-              weak.when(
-                data: (c) => Text(
-                  '$c Kanji',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                loading: () => const Text('...'),
-                error: (_, __) => const Text('—'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── JLPT Progress Tile ────────────────────────────────────────
-
-class _JlptProgressTile extends ConsumerWidget {
-  const _JlptProgressTile({required this.level});
+class _JlptProgressRow extends ConsumerWidget {
+  const _JlptProgressRow({required this.level});
   final int level;
 
   @override
@@ -249,28 +247,25 @@ class _JlptProgressTile extends ConsumerWidget {
     final stats = ref.watch(jlptStatsProvider(level));
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 14),
       child: GestureDetector(
         onTap: () => context.go('/learn/$level'),
         child: stats.when(
           data: (data) => Row(
             children: [
-              Container(
-                width: 48,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.jlptColor(level).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              // Level label
+              SizedBox(
+                width: 32,
                 child: Text(
                   'N$level',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.jlptColor(level),
-                      ),
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
+              // Progress bar
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,22 +279,20 @@ class _JlptProgressTile extends ConsumerWidget {
                         ),
                         Text(
                           data.progressPercent,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(3),
                       child: LinearProgressIndicator(
                         value: data.progress,
-                        minHeight: 6,
-                        color: AppColors.jlptColor(level),
-                        backgroundColor: AppColors.jlptColor(level)
-                            .withValues(alpha: 0.15),
+                        minHeight: 5,
+                        color: AppColors.primary,
+                        backgroundColor: AppColors.primaryLight.withValues(alpha: 0.08),
                       ),
                     ),
                   ],
@@ -308,11 +301,12 @@ class _JlptProgressTile extends ConsumerWidget {
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Theme.of(context).textTheme.bodySmall?.color,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ],
           ),
-          loading: () => const SizedBox(height: 40),
+          loading: () => const SizedBox(height: 36),
           error: (_, __) => Text('N$level — Unable to load'),
         ),
       ),

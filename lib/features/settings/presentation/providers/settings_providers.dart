@@ -7,7 +7,8 @@ final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   return SettingsRepository(ref.watch(sharedPreferencesProvider));
 });
 
-// Locale Provider
+// ─── Locale ──────────────────────────────────────────────────
+
 final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
   final repo = ref.watch(settingsRepositoryProvider);
   return LocaleNotifier(repo);
@@ -23,7 +24,8 @@ class LocaleNotifier extends StateNotifier<Locale> {
   }
 }
 
-// Theme Provider
+// ─── Theme Mode ─────────────────────────────────────────────
+
 final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
   final repo = ref.watch(settingsRepositoryProvider);
   return ThemeModeNotifier(repo);
@@ -39,7 +41,8 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   }
 }
 
-// Daily Goal Provider
+// ─── Daily Goal ─────────────────────────────────────────────
+
 final dailyGoalProvider = StateNotifierProvider<DailyGoalNotifier, int>((ref) {
   final repo = ref.watch(settingsRepositoryProvider);
   return DailyGoalNotifier(repo);
@@ -52,5 +55,22 @@ class DailyGoalNotifier extends StateNotifier<int> {
   Future<void> setDailyGoal(int goal) async {
     await _repository.setDailyGoal(goal);
     state = goal;
+  }
+}
+
+// ─── Accent Color ───────────────────────────────────────────
+
+final accentColorProvider = StateNotifierProvider<AccentColorNotifier, int>((ref) {
+  final repo = ref.watch(settingsRepositoryProvider);
+  return AccentColorNotifier(repo);
+});
+
+class AccentColorNotifier extends StateNotifier<int> {
+  AccentColorNotifier(this._repository) : super(_repository.accentColorValue);
+  final SettingsRepository _repository;
+
+  Future<void> setAccentColor(int colorValue) async {
+    await _repository.setAccentColor(colorValue);
+    state = colorValue;
   }
 }

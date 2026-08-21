@@ -35,7 +35,7 @@ class VocabDetailScreen extends ConsumerWidget {
             ),
             child: Text(
               'N$jlptLevel',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
               ),

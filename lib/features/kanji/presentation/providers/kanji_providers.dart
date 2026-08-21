@@ -12,6 +12,8 @@ import 'package:kanji_lesson/features/kanji/domain/entities/vocabulary.dart';
 import 'package:kanji_lesson/features/kanji/domain/repositories/kanji_repository.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kanji_lesson/features/kanji/data/datasources/kanji_alive_remote_data_source.dart';
+import 'package:kanji_lesson/features/kanji/domain/entities/kanji_alive_data.dart';
 
 // ─── Core Providers ─────────────────────────────────────────────
 
@@ -329,3 +331,14 @@ final kanjiProgressProvider =
     return db.getProgress(character);
   },
 );
+
+// ─── KanjiAlive Provider ────────────────────────────────────────
+
+final kanjiAliveRemoteDataSourceProvider = Provider<KanjiAliveRemoteDataSource>((ref) {
+  return KanjiAliveRemoteDataSource(ref.watch(dioClientProvider));
+});
+
+final kanjiAliveDetailProvider = FutureProvider.family<KanjiAliveData?, String>((ref, character) async {
+  final dataSource = ref.watch(kanjiAliveRemoteDataSourceProvider);
+  return dataSource.getKanjiDetails(character);
+});

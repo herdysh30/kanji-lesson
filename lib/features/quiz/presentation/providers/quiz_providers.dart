@@ -6,6 +6,7 @@ import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
+import 'package:drift/drift.dart' as drift;
 
 class QuizSetupState {
   const QuizSetupState({
@@ -211,13 +212,15 @@ class QuizSessionState {
 }
 
 class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
-  QuizSessionNotifier() 
+  QuizSessionNotifier(this._db) 
       : super(const QuizSessionState(
           questions: [],
           currentIndex: 0,
           answers: [],
           isFinished: false,
         ));
+
+  final AppDatabase _db;
 
   void initialize(List<QuizQuestion> questions) {
     if (state.questions.isNotEmpty) return; // already initialized
@@ -233,6 +236,52 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     
     final newAnswers = List<int>.from(state.answers)..add(selectedIndex);
     state = state.copyWith(answers: newAnswers);
+    
+    // Update progress in database
+    final question = state.currentQuestion!;
+    final isCorrect = selectedIndex == question.correctIndex;
+    // Writing quiz overrides correctIndex to 0 if correct, 1 if wrong in UI logic, but `answerCurrent` receives it.
+    // Actually, writing quiz passes 0 for correct, 1 for wrong. We can just rely on `isCorrect`.
+    // Wait, let's just check if selectedIndex == correctIndex.
+    final item = question.kanjiCharacter ?? question.correctAnswer;
+    
+    // Use the existing SRS method to update correct/wrong count
+    // Quiz might not change interval/ease, but it should at least increment correct/wrong count.
+    _updateProgress(item, isCorrect);
+  }
+  
+  Future<void> _updateProgress(String item, bool isCorrect) async {
+    final progress = await _db.getProgress(item);
+    if (progress == null) {
+      final now = DateTime.now();
+      await _db.upsertProgress(UserKanjiProgressEntriesCompanion.insert(
+        kanjiCharacter: item,
+        status: const drift.Value('learning'),
+        correctCount: drift.Value(isCorrect ? 1 : 0),
+        wrongCount: drift.Value(isCorrect ? 0 : 1),
+        firstLearnedAt: drift.Value(now),
+        nextReviewAt: drift.Value(now),
+      ));
+    } else {
+      final total = progress.correctCount + progress.wrongCount + 1;
+      final correct = progress.correctCount + (isCorrect ? 1 : 0);
+      final accuracy = correct / total;
+      
+      String newStatus = progress.status;
+      if (progress.status != 'mastered' && total >= 5 && accuracy >= 0.8) {
+        newStatus = 'mastered';
+      } else if (progress.status == 'mastered' && accuracy < 0.8) {
+        newStatus = 'reviewing';
+      }
+
+      await _db.upsertProgress(UserKanjiProgressEntriesCompanion(
+        kanjiCharacter: drift.Value(progress.kanjiCharacter),
+        status: drift.Value(newStatus),
+        correctCount: drift.Value(progress.correctCount + (isCorrect ? 1 : 0)),
+        wrongCount: drift.Value(progress.wrongCount + (isCorrect ? 0 : 1)),
+        updatedAt: drift.Value(DateTime.now()),
+      ));
+    }
   }
   
   void nextQuestion() {
@@ -241,12 +290,31 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     final nextIndex = state.currentIndex + 1;
     if (nextIndex >= state.questions.length) {
       state = state.copyWith(isFinished: true);
+      _saveQuizResult();
     } else {
       state = state.copyWith(currentIndex: nextIndex);
     }
   }
+
+  Future<void> _saveQuizResult() async {
+    int correctCount = 0;
+    for (int i = 0; i < state.questions.length; i++) {
+      if (i < state.answers.length && state.answers[i] == state.questions[i].correctIndex) {
+        correctCount++;
+      }
+    }
+    final accuracy = state.questions.isEmpty ? 0.0 : correctCount / state.questions.length;
+    
+    await _db.insertQuizResult(QuizResultEntriesCompanion.insert(
+      quizType: 'mixed', // Simplified, could get from setup
+      totalQuestions: state.questions.length,
+      correctAnswers: correctCount,
+      accuracy: accuracy,
+    ));
+  }
 }
 
 final quizSessionProvider = StateNotifierProvider.autoDispose<QuizSessionNotifier, QuizSessionState>((ref) {
-  return QuizSessionNotifier();
+  final db = ref.watch(databaseProvider);
+  return QuizSessionNotifier(db);
 });

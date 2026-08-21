@@ -32,4 +32,9 @@ class SettingsRepository {
   // Daily Goal
   int get dailyGoal => _prefs.getInt(_keyDailyGoal) ?? 10;
   Future<void> setDailyGoal(int goal) => _prefs.setInt(_keyDailyGoal, goal);
+
+  // Accent Color
+  static const _keyAccent = 'app_accent_color';
+  int get accentColorValue => _prefs.getInt(_keyAccent) ?? 0xFFC62828;
+  Future<void> setAccentColor(int value) => _prefs.setInt(_keyAccent, value);
 }

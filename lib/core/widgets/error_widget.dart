@@ -6,12 +6,10 @@ class AppErrorWidget extends StatelessWidget {
     super.key,
     required this.message,
     this.onRetry,
-    this.icon,
   });
 
   final String message;
   final VoidCallback? onRetry;
-  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -21,22 +19,21 @@ class AppErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon ?? Icons.error_outline_rounded,
-              size: 64,
-              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.6),
+            Text(
+              'Something went wrong.',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 24),
               OutlinedButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded),
+                icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Retry'),
               ),
             ],

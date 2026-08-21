@@ -15,6 +15,7 @@ import 'package:kanji_lesson/features/review/presentation/screens/review_result_
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_setup_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_result_screen.dart';
+
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouter = GoRouter(
@@ -26,7 +27,6 @@ final appRouter = GoRouter(
         return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
       },
       branches: [
-        // Branch 0: Home
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -35,7 +35,6 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Branch 1: Learn
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -81,7 +80,6 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Branch 2: Review
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -90,7 +88,6 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Branch 3: Quiz
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -99,7 +96,6 @@ final appRouter = GoRouter(
             ),
           ],
         ),
-        // Branch 4: Settings
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -110,7 +106,6 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    // Fullscreen Quiz Session & Result (No Bottom Nav Bar)
     GoRoute(
       path: '/quiz/session',
       parentNavigatorKey: _rootNavigatorKey,
@@ -121,7 +116,6 @@ final appRouter = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const QuizResultScreen(),
     ),
-    // Fullscreen Review Session & Result (No Bottom Nav Bar)
     GoRoute(
       path: '/review/session',
       parentNavigatorKey: _rootNavigatorKey,
@@ -139,7 +133,6 @@ final appRouter = GoRouter(
         );
       },
     ),
-    // Standalone progress / weak kanji routes
     GoRoute(
       path: '/progress',
       parentNavigatorKey: _rootNavigatorKey,
@@ -155,51 +148,147 @@ final appRouter = GoRouter(
   ],
 );
 
+// ─── Minimalist Bottom Navigation ────────────────────────────────
+
 class ScaffoldWithBottomNavBar extends StatelessWidget {
-  const ScaffoldWithBottomNavBar({
-    required this.navigationShell,
-    super.key,
-  });
+  const ScaffoldWithBottomNavBar({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedColor = Theme.of(context).colorScheme.primary;
+    final unselectedColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    final bgColor = Theme.of(context).colorScheme.surface;
+
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          border: Border(
+            top: BorderSide(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : const Color(0xFFE5E5E5),
+              width: 0.5,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school_rounded),
-            label: 'Learn',
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 56,
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home_rounded,
+                  label: 'Home',
+                  isActive: navigationShell.currentIndex == 0,
+                  activeColor: selectedColor,
+                  inactiveColor: unselectedColor,
+                  onTap: () => _go(0),
+                ),
+                _NavItem(
+                  icon: Icons.menu_book_outlined,
+                  activeIcon: Icons.menu_book_rounded,
+                  label: 'Learn',
+                  isActive: navigationShell.currentIndex == 1,
+                  activeColor: selectedColor,
+                  inactiveColor: unselectedColor,
+                  onTap: () => _go(1),
+                ),
+                _NavItem(
+                  icon: Icons.replay_outlined,
+                  activeIcon: Icons.replay_rounded,
+                  label: 'Review',
+                  isActive: navigationShell.currentIndex == 2,
+                  activeColor: selectedColor,
+                  inactiveColor: unselectedColor,
+                  onTap: () => _go(2),
+                ),
+                _NavItem(
+                  icon: Icons.quiz_outlined,
+                  activeIcon: Icons.quiz_rounded,
+                  label: 'Quiz',
+                  isActive: navigationShell.currentIndex == 3,
+                  activeColor: selectedColor,
+                  inactiveColor: unselectedColor,
+                  onTap: () => _go(3),
+                ),
+                _NavItem(
+                  icon: Icons.settings_outlined,
+                  activeIcon: Icons.settings_rounded,
+                  label: 'Settings',
+                  isActive: navigationShell.currentIndex == 4,
+                  activeColor: selectedColor,
+                  inactiveColor: unselectedColor,
+                  onTap: () => _go(4),
+                ),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.replay_rounded),
-            label: 'Review',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.quiz_rounded),
-            label: 'Quiz',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_rounded),
-            label: 'Settings',
-          ),
-        ],
-        currentIndex: navigationShell.currentIndex,
-        onTap: (int idx) => _onItemTapped(idx, context),
+        ),
       ),
     );
   }
 
-  void _onItemTapped(int index, BuildContext context) {
+  void _go(int index) {
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isActive,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isActive;
+  final Color activeColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isActive ? activeColor : inactiveColor;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isActive ? activeIcon : icon,
+              size: 22,
+              color: color,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

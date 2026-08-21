@@ -40,6 +40,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: const Text('My Learned'),
                   selected: setup.selectedJlptLevel == null,
+                  labelStyle: TextStyle(
+                    color: setup.selectedJlptLevel == null ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (val) {
                     if (val) notifier.setJlptLevel(null);
                   },
@@ -48,6 +51,9 @@ class QuizSetupScreen extends ConsumerWidget {
                   return ChoiceChip(
                     label: Text('JLPT N$level'),
                     selected: setup.selectedJlptLevel == level,
+                    labelStyle: TextStyle(
+                      color: setup.selectedJlptLevel == level ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                    ),
                     onSelected: (val) {
                       if (val) notifier.setJlptLevel(level);
                     },
@@ -71,6 +77,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: const Text('Mixed (Kanji & Vocab)'),
                   selected: setup.itemType == ReviewItemType.mixed,
+                  labelStyle: TextStyle(
+                    color: setup.itemType == ReviewItemType.mixed ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (val) {
                     if (val) notifier.setItemType(ReviewItemType.mixed);
                   },
@@ -78,6 +87,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: const Text('Kanji Only'),
                   selected: setup.itemType == ReviewItemType.kanji,
+                  labelStyle: TextStyle(
+                    color: setup.itemType == ReviewItemType.kanji ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (val) {
                     if (val) notifier.setItemType(ReviewItemType.kanji);
                   },
@@ -85,6 +97,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: const Text('Vocabulary Only'),
                   selected: setup.itemType == ReviewItemType.vocab,
+                  labelStyle: TextStyle(
+                    color: setup.itemType == ReviewItemType.vocab ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (val) {
                     if (val) notifier.setItemType(ReviewItemType.vocab);
                   },
@@ -107,16 +122,25 @@ class QuizSetupScreen extends ConsumerWidget {
                 FilterChip(
                   label: const Text('Meaning'),
                   selected: setup.selectedQuizTypes.contains(QuizType.meaning),
+                  labelStyle: TextStyle(
+                    color: setup.selectedQuizTypes.contains(QuizType.meaning) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (_) => notifier.toggleQuizType(QuizType.meaning),
                 ),
                 FilterChip(
                   label: const Text('Reading'),
                   selected: setup.selectedQuizTypes.contains(QuizType.reading),
+                  labelStyle: TextStyle(
+                    color: setup.selectedQuizTypes.contains(QuizType.reading) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (_) => notifier.toggleQuizType(QuizType.reading),
                 ),
                 FilterChip(
                   label: const Text('Writing'),
                   selected: setup.selectedQuizTypes.contains(QuizType.writing),
+                  labelStyle: TextStyle(
+                    color: setup.selectedQuizTypes.contains(QuizType.writing) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (_) => notifier.toggleQuizType(QuizType.writing),
                 ),
               ],
@@ -199,6 +223,9 @@ class QuizSetupScreen extends ConsumerWidget {
                   return ChoiceChip(
                     label: Text('$count Questions'),
                     selected: setup.questionCount == count && !setup.isCustomCount,
+                    labelStyle: TextStyle(
+                      color: (setup.questionCount == count && !setup.isCustomCount) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                    ),
                     onSelected: (val) {
                       if (val) notifier.setQuestionCount(count);
                     },
@@ -207,6 +234,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: const Text('Custom'),
                   selected: setup.isCustomCount,
+                  labelStyle: TextStyle(
+                    color: setup.isCustomCount ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                   onSelected: (val) {
                     if (val) {
                       notifier.setQuestionCount(setup.questionCount, isCustom: true);

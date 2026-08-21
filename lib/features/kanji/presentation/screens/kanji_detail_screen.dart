@@ -14,6 +14,8 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_provide
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_alive_display.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
 
 class KanjiDetailScreen extends ConsumerStatefulWidget {
   const KanjiDetailScreen({
@@ -182,9 +184,26 @@ class _KanjiDetailBody extends StatelessWidget {
         children: [
           // ─── Large Kanji Display ─────────────────────────
           const SizedBox(height: 16),
-          Text(
-            kanji.character,
-            style: AppTheme.kanjiLarge(context),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: 40), // Balance out the trailing button
+              Text(
+                kanji.character,
+                style: AppTheme.kanjiLarge(context),
+              ),
+              SizedBox(
+                width: 40,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: KanjiAudioButton(character: kanji.character),
+                  ),
+                ),
+              ),
+            ],
           ),
           if (kanji.primaryReading.isNotEmpty) ...[
             const SizedBox(height: 4),
@@ -206,17 +225,22 @@ class _KanjiDetailBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          FilledButton.tonalIcon(
-            onPressed: () {
-              showPracticeWritingDialog(
-                context,
-                character: kanji.character,
-                reading: kanji.primaryReading,
-                meaning: displayMeanings.isNotEmpty ? displayMeanings.first : null,
-              );
-            },
-            icon: const Icon(Icons.draw_rounded),
-            label: const Text('Practice Writing'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FilledButton.tonalIcon(
+                onPressed: () {
+                  showPracticeWritingDialog(
+                    context,
+                    character: kanji.character,
+                    reading: kanji.primaryReading,
+                    meaning: displayMeanings.isNotEmpty ? displayMeanings.first : null,
+                  );
+                },
+                icon: const Icon(Icons.draw_rounded),
+                label: Text(isId ? 'Latihan Menulis' : 'Practice Writing'),
+              ),
+            ],
           ),
           const SizedBox(height: 32),
 
@@ -248,7 +272,7 @@ class _KanjiDetailBody extends StatelessWidget {
                 children: kanji.onyomi
                     .map((r) => Chip(
                           label: Text(r, style: AppTheme.japaneseText(context, fontSize: 14)),
-                          backgroundColor: AppColors.primary.withValues(alpha: 0.08),
+                          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.08),
                         ))
                     .toList(),
               ),
@@ -265,7 +289,7 @@ class _KanjiDetailBody extends StatelessWidget {
                 children: kanji.kunyomi
                     .map((r) => Chip(
                           label: Text(r, style: AppTheme.japaneseText(context, fontSize: 14)),
-                          backgroundColor: AppColors.secondary.withValues(alpha: 0.08),
+                          backgroundColor: AppColors.primaryLight.withValues(alpha: 0.08),
                         ))
                     .toList(),
               ),
@@ -281,7 +305,7 @@ class _KanjiDetailBody extends StatelessWidget {
                 if (kanji.jlptLevel != null)
                   _InfoChip(
                     label: 'JLPT N${kanji.jlptLevel}',
-                    color: AppColors.jlptColor(kanji.jlptLevel!),
+                    color: AppColors.primary,
                   ),
                 if (kanji.grade != null)
                   _InfoChip(

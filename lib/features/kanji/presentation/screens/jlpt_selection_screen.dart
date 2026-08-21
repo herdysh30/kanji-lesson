@@ -33,7 +33,7 @@ class _JlptLevelCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(jlptStatsProvider(level));
-    final color = AppColors.jlptColor(level);
+    final color = AppColors.primary;
     final description = AppConstants.jlptLevelDescriptions[level] ?? '';
 
     return Padding(

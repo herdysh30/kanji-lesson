@@ -478,4 +478,20 @@ class AppDatabase extends _$AppDatabase {
     await delete(dailyProgressEntries).go();
     await delete(quizResultEntries).go();
   }
+
+  Future<void> resetJlptProgress(int jlptLevel) async {
+    final kanjiChars = await (select(kanjiEntries)..where((k) => k.jlptLevel.equals(jlptLevel)))
+        .map((k) => k.character)
+        .get();
+
+    final vocabWords = await (select(jlptVocabEntries)..where((v) => v.level.equals(jlptLevel)))
+        .map((v) => v.word)
+        .get();
+
+    final allItems = [...kanjiChars, ...vocabWords];
+
+    if (allItems.isNotEmpty) {
+      await (delete(userKanjiProgressEntries)..where((t) => t.kanjiCharacter.isIn(allItems))).go();
+    }
+  }
 }
