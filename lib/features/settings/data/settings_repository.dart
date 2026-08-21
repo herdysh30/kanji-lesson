@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kanji_lesson/core/services/notification_service.dart';
 
 class SettingsRepository {
   SettingsRepository(this._prefs);
@@ -15,6 +16,11 @@ class SettingsRepository {
   static const _keyBestStreak = 'app_best_streak';
   static const _keyTodayProgressDate = 'app_today_progress_date';
   static const _keyTodayProgressCount = 'app_today_progress_count';
+  
+  // Reminder Keys
+  static const _keyReminderEnabled = 'app_reminder_enabled';
+  static const _keyReminderHour = 'app_reminder_hour';
+  static const _keyReminderMinute = 'app_reminder_minute';
 
   // Locale
   String get locale => _prefs.getString(_keyLocale) ?? 'en';
@@ -44,6 +50,21 @@ class SettingsRepository {
   static const _keyAccent = 'app_accent_color';
   int get accentColorValue => _prefs.getInt(_keyAccent) ?? 0xFFC62828;
   Future<void> setAccentColor(int value) => _prefs.setInt(_keyAccent, value);
+
+  // ─── Reminder ───────────────────────────────────────────────
+
+  bool get reminderEnabled => _prefs.getBool(_keyReminderEnabled) ?? false;
+  Future<void> setReminderEnabled(bool enabled) => _prefs.setBool(_keyReminderEnabled, enabled);
+
+  TimeOfDay get reminderTime => TimeOfDay(
+        hour: _prefs.getInt(_keyReminderHour) ?? 20,
+        minute: _prefs.getInt(_keyReminderMinute) ?? 0,
+      );
+      
+  Future<void> setReminderTime(TimeOfDay time) async {
+    await _prefs.setInt(_keyReminderHour, time.hour);
+    await _prefs.setInt(_keyReminderMinute, time.minute);
+  }
 
   // ─── Daily Progress & Streak ─────────────────────────────────
 
@@ -76,6 +97,10 @@ class SettingsRepository {
     if (newCount >= goal && lastActive != todayStr) {
       // Goal reached for today and streak not yet updated!
       await _updateStreak(todayStr);
+      
+      if (reminderEnabled) {
+        await NotificationService().scheduleDailyReminder(reminderTime, skipToday: true);
+      }
     }
   }
 

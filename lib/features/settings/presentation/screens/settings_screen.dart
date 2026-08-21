@@ -6,6 +6,7 @@ import 'package:kanji_lesson/features/progress/presentation/providers/progress_p
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
+import 'package:kanji_lesson/core/services/notification_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -62,6 +63,74 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
+          const Divider(),
+
+          // ─── Daily Goal ─────────────────────────────────────
+          ListTile(
+            leading: const Icon(Icons.track_changes_rounded),
+            title: const Text('Daily Goal'),
+            subtitle: Text('Current goal: ${ref.watch(dailyGoalProvider)} correct answers'),
+            trailing: const Icon(Icons.edit_rounded),
+            onTap: () => _showDailyGoalPicker(context, ref),
+          ),
+          const Divider(),
+
+          // ─── Daily Reminder ─────────────────────────────────
+          SwitchListTile(
+            secondary: const Icon(Icons.notifications_active_rounded),
+            title: const Text('Daily Reminder'),
+            subtitle: Text(ref.watch(reminderProvider).enabled 
+                ? 'Reminder set for ${ref.watch(reminderProvider).time.format(context)}'
+                : 'Turn on to get reminded to study'),
+            value: ref.watch(reminderProvider).enabled,
+            onChanged: (val) async {
+              await ref.read(reminderProvider.notifier).setEnabled(val);
+              if (val) {
+                // Request permissions
+                final granted = await NotificationService().requestPermissions();
+                if (!granted) {
+                  ref.read(reminderProvider.notifier).setEnabled(false);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Notification permission denied')),
+                    );
+                  }
+                  return;
+                }
+                
+                if (context.mounted) {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: ref.read(reminderProvider).time,
+                  );
+                  if (time != null) {
+                    await ref.read(reminderProvider.notifier).setTime(time);
+                    await NotificationService().scheduleDailyReminder(time);
+                  } else {
+                    await NotificationService().scheduleDailyReminder(ref.read(reminderProvider).time);
+                  }
+                }
+              } else {
+                await NotificationService().cancelReminder();
+              }
+            },
+          ),
+          if (ref.watch(reminderProvider).enabled)
+            ListTile(
+              leading: const Icon(Icons.access_time_rounded, color: Colors.transparent),
+              title: const Text('Change Reminder Time'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () async {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: ref.read(reminderProvider).time,
+                );
+                if (time != null) {
+                  await ref.read(reminderProvider.notifier).setTime(time);
+                  await NotificationService().scheduleDailyReminder(time);
+                }
+              },
+            ),
           const Divider(),
 
           // ─── Theme ──────────────────────────────────────────
@@ -140,6 +209,47 @@ class SettingsScreen extends ConsumerWidget {
                         : null,
                     onTap: () {
                       ref.read(accentColorProvider.notifier).setAccentColor(option.color.toARGB32());
+                      Navigator.pop(context);
+                    },
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDailyGoalPicker(BuildContext context, WidgetRef ref) {
+    final currentGoal = ref.read(dailyGoalProvider);
+    final options = [5, 10, 15, 20, 30, 50];
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Daily Goal', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 20),
+                ...options.map((option) {
+                  final isSelected = option == currentGoal;
+                  return ListTile(
+                    title: Text('$option correct answers'),
+                    trailing: isSelected
+                        ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
+                        : null,
+                    onTap: () {
+                      ref.read(dailyGoalProvider.notifier).setDailyGoal(option);
                       Navigator.pop(context);
                     },
                   );

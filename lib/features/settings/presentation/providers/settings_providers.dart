@@ -58,6 +58,39 @@ class DailyGoalNotifier extends StateNotifier<int> {
   }
 }
 
+// ─── Reminder ───────────────────────────────────────────────
+
+class ReminderState {
+  const ReminderState({required this.enabled, required this.time});
+  final bool enabled;
+  final TimeOfDay time;
+}
+
+final reminderProvider = StateNotifierProvider<ReminderNotifier, ReminderState>((ref) {
+  final repo = ref.watch(settingsRepositoryProvider);
+  return ReminderNotifier(repo);
+});
+
+class ReminderNotifier extends StateNotifier<ReminderState> {
+  ReminderNotifier(this._repository) 
+      : super(ReminderState(
+          enabled: _repository.reminderEnabled,
+          time: _repository.reminderTime,
+        ));
+        
+  final SettingsRepository _repository;
+
+  Future<void> setEnabled(bool enabled) async {
+    await _repository.setReminderEnabled(enabled);
+    state = ReminderState(enabled: enabled, time: state.time);
+  }
+
+  Future<void> setTime(TimeOfDay time) async {
+    await _repository.setReminderTime(time);
+    state = ReminderState(enabled: state.enabled, time: time);
+  }
+}
+
 // ─── Daily Progress & Streak ────────────────────────────────
 
 class DailyProgressState {
