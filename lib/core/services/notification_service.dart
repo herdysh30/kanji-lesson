@@ -22,8 +22,8 @@ class NotificationService {
     // Initialize Timezone
     tz.initializeTimeZones();
     try {
-      final timeZoneName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      final timeZone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZone.identifier));
     } catch (_) {
       // Fallback if fails
     }
@@ -46,7 +46,7 @@ class NotificationService {
     );
 
     await _notificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (details) {
         // Handle notification tap
       },
@@ -115,19 +115,17 @@ class NotificationService {
     );
 
     await _notificationsPlugin.zonedSchedule(
-      _dailyReminderId,
-      'Time to Study!',
-      "Don't lose your streak! Complete your daily goal now. 🔥",
-      scheduledDate,
-      platformChannelSpecifics,
+      id: _dailyReminderId,
+      title: 'Time to Study!',
+      body: "Don't lose your streak! Complete your daily goal now. 🔥",
+      scheduledDate: scheduledDate,
+      notificationDetails: platformChannelSpecifics,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
   Future<void> cancelReminder() async {
-    await _notificationsPlugin.cancel(_dailyReminderId);
+    await _notificationsPlugin.cancel(id: _dailyReminderId);
   }
 }
