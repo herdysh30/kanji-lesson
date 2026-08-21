@@ -124,7 +124,7 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              DateFormat('MMM d, yyyy - HH:mm').format(item.date),
+                              DateFormat('d MMM yyyy - HH:mm', Localizations.localeOf(context).languageCode).format(item.date),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             trailing: Column(

@@ -354,7 +354,8 @@ class _WeeklyActivityChart extends ConsumerWidget {
                   final barHeight =
                       maxValue > 0 ? (day.reviewed / maxValue) * 120.0 : 0.0;
                   final isToday = AppDateUtils.isToday(day.date);
-                  final dayLabel = DateFormat('E').format(day.date).substring(0, 2);
+                  final locale = Localizations.localeOf(context).languageCode;
+                  final dayLabel = DateFormat('E', locale).format(day.date);
 
                   return Expanded(
                     child: Column(
@@ -371,7 +372,7 @@ class _WeeklyActivityChart extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Tooltip(
-                          message: '${DateFormat('MMM d, yyyy').format(day.date)}\n${l10n.reviewed}: ${day.reviewed}\n${l10n.accuracy}: ${(day.accuracy * 100).round()}%',
+                          message: '${DateFormat('d MMM yyyy', locale).format(day.date)}\n${l10n.reviewed}: ${day.reviewed}\n${l10n.accuracy}: ${(day.accuracy * 100).round()}%',
                           child: Container(
                             width: 28,
                             height: barHeight.clamp(4.0, 100.0),
