@@ -77,6 +77,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 FilterChip(
                   label: const Text('Kanji'),
                   selected: setup.selectedItemTypes.contains(QuizItemType.kanji),
+                  labelStyle: TextStyle(
+                    color: setup.selectedItemTypes.contains(QuizItemType.kanji) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                       onSelected: (val) {
                         final newTypes = Set<QuizItemType>.from(setup.selectedItemTypes);
                         if (val) {
@@ -90,6 +93,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 FilterChip(
                   label: const Text('Vocabulary'),
                   selected: setup.selectedItemTypes.contains(QuizItemType.vocab),
+                  labelStyle: TextStyle(
+                    color: setup.selectedItemTypes.contains(QuizItemType.vocab) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                       onSelected: (val) {
                         final newTypes = Set<QuizItemType>.from(setup.selectedItemTypes);
                         if (val) {
@@ -103,6 +109,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 FilterChip(
                   label: const Text('Sentence'),
                   selected: setup.selectedItemTypes.contains(QuizItemType.sentence),
+                  labelStyle: TextStyle(
+                    color: setup.selectedItemTypes.contains(QuizItemType.sentence) ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
                       onSelected: (val) {
                         final newTypes = Set<QuizItemType>.from(setup.selectedItemTypes);
                         if (val) {
