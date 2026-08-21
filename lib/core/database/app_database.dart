@@ -83,6 +83,7 @@ class QuizResultEntries extends Table {
   IntColumn get totalQuestions => integer()();
   IntColumn get correctAnswers => integer()();
   RealColumn get accuracy => real()();
+  TextColumn get questionsJson => text().nullable()();
 }
 
 /// Similar kanji relationships (local data)

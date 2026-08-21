@@ -2544,6 +2544,17 @@ class $QuizResultEntriesTable extends QuizResultEntries
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _questionsJsonMeta = const VerificationMeta(
+    'questionsJson',
+  );
+  @override
+  late final GeneratedColumn<String> questionsJson = GeneratedColumn<String>(
+    'questions_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2553,6 +2564,7 @@ class $QuizResultEntriesTable extends QuizResultEntries
     totalQuestions,
     correctAnswers,
     accuracy,
+    questionsJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2619,6 +2631,15 @@ class $QuizResultEntriesTable extends QuizResultEntries
     } else if (isInserting) {
       context.missing(_accuracyMeta);
     }
+    if (data.containsKey('questions_json')) {
+      context.handle(
+        _questionsJsonMeta,
+        questionsJson.isAcceptableOrUnknown(
+          data['questions_json']!,
+          _questionsJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2656,6 +2677,10 @@ class $QuizResultEntriesTable extends QuizResultEntries
         DriftSqlType.double,
         data['${effectivePrefix}accuracy'],
       )!,
+      questionsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}questions_json'],
+      ),
     );
   }
 
@@ -2673,6 +2698,7 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
   final int totalQuestions;
   final int correctAnswers;
   final double accuracy;
+  final String? questionsJson;
   const QuizResultEntry({
     required this.id,
     required this.date,
@@ -2681,6 +2707,7 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
     required this.totalQuestions,
     required this.correctAnswers,
     required this.accuracy,
+    this.questionsJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2694,6 +2721,9 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
     map['total_questions'] = Variable<int>(totalQuestions);
     map['correct_answers'] = Variable<int>(correctAnswers);
     map['accuracy'] = Variable<double>(accuracy);
+    if (!nullToAbsent || questionsJson != null) {
+      map['questions_json'] = Variable<String>(questionsJson);
+    }
     return map;
   }
 
@@ -2708,6 +2738,9 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
       totalQuestions: Value(totalQuestions),
       correctAnswers: Value(correctAnswers),
       accuracy: Value(accuracy),
+      questionsJson: questionsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(questionsJson),
     );
   }
 
@@ -2724,6 +2757,7 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
       totalQuestions: serializer.fromJson<int>(json['totalQuestions']),
       correctAnswers: serializer.fromJson<int>(json['correctAnswers']),
       accuracy: serializer.fromJson<double>(json['accuracy']),
+      questionsJson: serializer.fromJson<String?>(json['questionsJson']),
     );
   }
   @override
@@ -2737,6 +2771,7 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
       'totalQuestions': serializer.toJson<int>(totalQuestions),
       'correctAnswers': serializer.toJson<int>(correctAnswers),
       'accuracy': serializer.toJson<double>(accuracy),
+      'questionsJson': serializer.toJson<String?>(questionsJson),
     };
   }
 
@@ -2748,6 +2783,7 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
     int? totalQuestions,
     int? correctAnswers,
     double? accuracy,
+    Value<String?> questionsJson = const Value.absent(),
   }) => QuizResultEntry(
     id: id ?? this.id,
     date: date ?? this.date,
@@ -2756,6 +2792,9 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
     totalQuestions: totalQuestions ?? this.totalQuestions,
     correctAnswers: correctAnswers ?? this.correctAnswers,
     accuracy: accuracy ?? this.accuracy,
+    questionsJson: questionsJson.present
+        ? questionsJson.value
+        : this.questionsJson,
   );
   QuizResultEntry copyWithCompanion(QuizResultEntriesCompanion data) {
     return QuizResultEntry(
@@ -2770,6 +2809,9 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
           ? data.correctAnswers.value
           : this.correctAnswers,
       accuracy: data.accuracy.present ? data.accuracy.value : this.accuracy,
+      questionsJson: data.questionsJson.present
+          ? data.questionsJson.value
+          : this.questionsJson,
     );
   }
 
@@ -2782,7 +2824,8 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
           ..write('quizType: $quizType, ')
           ..write('totalQuestions: $totalQuestions, ')
           ..write('correctAnswers: $correctAnswers, ')
-          ..write('accuracy: $accuracy')
+          ..write('accuracy: $accuracy, ')
+          ..write('questionsJson: $questionsJson')
           ..write(')'))
         .toString();
   }
@@ -2796,6 +2839,7 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
     totalQuestions,
     correctAnswers,
     accuracy,
+    questionsJson,
   );
   @override
   bool operator ==(Object other) =>
@@ -2807,7 +2851,8 @@ class QuizResultEntry extends DataClass implements Insertable<QuizResultEntry> {
           other.quizType == this.quizType &&
           other.totalQuestions == this.totalQuestions &&
           other.correctAnswers == this.correctAnswers &&
-          other.accuracy == this.accuracy);
+          other.accuracy == this.accuracy &&
+          other.questionsJson == this.questionsJson);
 }
 
 class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
@@ -2818,6 +2863,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
   final Value<int> totalQuestions;
   final Value<int> correctAnswers;
   final Value<double> accuracy;
+  final Value<String?> questionsJson;
   const QuizResultEntriesCompanion({
     this.id = const Value.absent(),
     this.date = const Value.absent(),
@@ -2826,6 +2872,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
     this.totalQuestions = const Value.absent(),
     this.correctAnswers = const Value.absent(),
     this.accuracy = const Value.absent(),
+    this.questionsJson = const Value.absent(),
   });
   QuizResultEntriesCompanion.insert({
     this.id = const Value.absent(),
@@ -2835,6 +2882,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
     required int totalQuestions,
     required int correctAnswers,
     required double accuracy,
+    this.questionsJson = const Value.absent(),
   }) : quizType = Value(quizType),
        totalQuestions = Value(totalQuestions),
        correctAnswers = Value(correctAnswers),
@@ -2847,6 +2895,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
     Expression<int>? totalQuestions,
     Expression<int>? correctAnswers,
     Expression<double>? accuracy,
+    Expression<String>? questionsJson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2856,6 +2905,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
       if (totalQuestions != null) 'total_questions': totalQuestions,
       if (correctAnswers != null) 'correct_answers': correctAnswers,
       if (accuracy != null) 'accuracy': accuracy,
+      if (questionsJson != null) 'questions_json': questionsJson,
     });
   }
 
@@ -2867,6 +2917,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
     Value<int>? totalQuestions,
     Value<int>? correctAnswers,
     Value<double>? accuracy,
+    Value<String?>? questionsJson,
   }) {
     return QuizResultEntriesCompanion(
       id: id ?? this.id,
@@ -2876,6 +2927,7 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
       totalQuestions: totalQuestions ?? this.totalQuestions,
       correctAnswers: correctAnswers ?? this.correctAnswers,
       accuracy: accuracy ?? this.accuracy,
+      questionsJson: questionsJson ?? this.questionsJson,
     );
   }
 
@@ -2903,6 +2955,9 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
     if (accuracy.present) {
       map['accuracy'] = Variable<double>(accuracy.value);
     }
+    if (questionsJson.present) {
+      map['questions_json'] = Variable<String>(questionsJson.value);
+    }
     return map;
   }
 
@@ -2915,7 +2970,8 @@ class QuizResultEntriesCompanion extends UpdateCompanion<QuizResultEntry> {
           ..write('quizType: $quizType, ')
           ..write('totalQuestions: $totalQuestions, ')
           ..write('correctAnswers: $correctAnswers, ')
-          ..write('accuracy: $accuracy')
+          ..write('accuracy: $accuracy, ')
+          ..write('questionsJson: $questionsJson')
           ..write(')'))
         .toString();
   }
@@ -4914,6 +4970,7 @@ typedef $$QuizResultEntriesTableCreateCompanionBuilder =
       required int totalQuestions,
       required int correctAnswers,
       required double accuracy,
+      Value<String?> questionsJson,
     });
 typedef $$QuizResultEntriesTableUpdateCompanionBuilder =
     QuizResultEntriesCompanion Function({
@@ -4924,6 +4981,7 @@ typedef $$QuizResultEntriesTableUpdateCompanionBuilder =
       Value<int> totalQuestions,
       Value<int> correctAnswers,
       Value<double> accuracy,
+      Value<String?> questionsJson,
     });
 
 class $$QuizResultEntriesTableFilterComposer
@@ -4967,6 +5025,11 @@ class $$QuizResultEntriesTableFilterComposer
 
   ColumnFilters<double> get accuracy => $composableBuilder(
     column: $table.accuracy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get questionsJson => $composableBuilder(
+    column: $table.questionsJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5014,6 +5077,11 @@ class $$QuizResultEntriesTableOrderingComposer
     column: $table.accuracy,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get questionsJson => $composableBuilder(
+    column: $table.questionsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$QuizResultEntriesTableAnnotationComposer
@@ -5049,6 +5117,11 @@ class $$QuizResultEntriesTableAnnotationComposer
 
   GeneratedColumn<double> get accuracy =>
       $composableBuilder(column: $table.accuracy, builder: (column) => column);
+
+  GeneratedColumn<String> get questionsJson => $composableBuilder(
+    column: $table.questionsJson,
+    builder: (column) => column,
+  );
 }
 
 class $$QuizResultEntriesTableTableManager
@@ -5098,6 +5171,7 @@ class $$QuizResultEntriesTableTableManager
                 Value<int> totalQuestions = const Value.absent(),
                 Value<int> correctAnswers = const Value.absent(),
                 Value<double> accuracy = const Value.absent(),
+                Value<String?> questionsJson = const Value.absent(),
               }) => QuizResultEntriesCompanion(
                 id: id,
                 date: date,
@@ -5106,6 +5180,7 @@ class $$QuizResultEntriesTableTableManager
                 totalQuestions: totalQuestions,
                 correctAnswers: correctAnswers,
                 accuracy: accuracy,
+                questionsJson: questionsJson,
               ),
           createCompanionCallback:
               ({
@@ -5116,6 +5191,7 @@ class $$QuizResultEntriesTableTableManager
                 required int totalQuestions,
                 required int correctAnswers,
                 required double accuracy,
+                Value<String?> questionsJson = const Value.absent(),
               }) => QuizResultEntriesCompanion.insert(
                 id: id,
                 date: date,
@@ -5124,6 +5200,7 @@ class $$QuizResultEntriesTableTableManager
                 totalQuestions: totalQuestions,
                 correctAnswers: correctAnswers,
                 accuracy: accuracy,
+                questionsJson: questionsJson,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
