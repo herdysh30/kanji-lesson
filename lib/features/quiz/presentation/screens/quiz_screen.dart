@@ -61,7 +61,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final questionsAsync = ref.watch(quizQuestionsProvider);
     final sessionState = ref.watch(quizSessionProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _confirmExit(context);
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Quiz Session'),
         leading: IconButton(
@@ -317,7 +323,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
         ),
         error: (_, __) => const Center(child: Text('Failed to load quiz.')),
       ),
-    );
+    ));
   }
 
   String _getInstructionText(QuizType type) {

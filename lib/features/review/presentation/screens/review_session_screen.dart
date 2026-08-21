@@ -161,7 +161,13 @@ class ReviewSessionScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: Text('No items to review')));
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _confirmExit(context);
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text('${state.currentIndex + 1} / ${state.queue.length}'),
         centerTitle: true,
@@ -193,6 +199,7 @@ class ReviewSessionScreen extends ConsumerWidget {
               _ActionArea(isFlipped: state.isFlipped),
             ],
           ),
+        ),
         ),
       ),
     );
