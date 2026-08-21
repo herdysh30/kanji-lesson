@@ -87,25 +87,6 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/review',
               builder: (context, state) => const ReviewScreen(),
-              routes: [
-                GoRoute(
-                  path: 'session',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => const ReviewSessionScreen(),
-                ),
-                GoRoute(
-                  path: 'result',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) {
-                    final extras = state.extra as Map<String, dynamic>? ?? {};
-                    return ReviewResultScreen(
-                      correctCount: extras['correct'] as int? ?? 0,
-                      wrongCount: extras['wrong'] as int? ?? 0,
-                      totalCount: extras['total'] as int? ?? 0,
-                    );
-                  },
-                ),
-              ],
             ),
           ],
         ),
@@ -115,18 +96,6 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/quiz',
               builder: (context, state) => const QuizSetupScreen(),
-              routes: [
-                GoRoute(
-                  path: 'session',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => const QuizScreen(),
-                ),
-                GoRoute(
-                  path: 'result',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => const QuizResultScreen(),
-                ),
-              ],
             ),
           ],
         ),
@@ -140,6 +109,35 @@ final appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    // Fullscreen Quiz Session & Result (No Bottom Nav Bar)
+    GoRoute(
+      path: '/quiz/session',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const QuizScreen(),
+    ),
+    GoRoute(
+      path: '/quiz/result',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const QuizResultScreen(),
+    ),
+    // Fullscreen Review Session & Result (No Bottom Nav Bar)
+    GoRoute(
+      path: '/review/session',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ReviewSessionScreen(),
+    ),
+    GoRoute(
+      path: '/review/result',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final extras = state.extra as Map<String, dynamic>? ?? {};
+        return ReviewResultScreen(
+          correctCount: extras['correct'] as int? ?? 0,
+          wrongCount: extras['wrong'] as int? ?? 0,
+          totalCount: extras['total'] as int? ?? 0,
+        );
+      },
     ),
     // Standalone progress / weak kanji routes
     GoRoute(
