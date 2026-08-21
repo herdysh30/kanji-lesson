@@ -59,25 +59,38 @@ class QuizResultScreen extends ConsumerWidget {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _ScoreItem(
-                    label: 'Score',
-                    value: result.accuracyPercent,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  _ScoreItem(
-                    label: 'Correct',
-                    value: '${result.correctCount}',
-                    color: AppColors.correct,
-                  ),
-                  _ScoreItem(
-                    label: 'Wrong',
-                    value: '${result.incorrectCount}',
-                    color: AppColors.incorrect,
-                  ),
-                ],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _ScoreItem(
+                      label: 'Score',
+                      value: result.accuracyPercent,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 24),
+                    _ScoreItem(
+                      label: 'Correct',
+                      value: '${result.correctCount}',
+                      color: AppColors.correct,
+                    ),
+                    const SizedBox(width: 24),
+                    _ScoreItem(
+                      label: 'Wrong',
+                      value: '${result.incorrectCount}',
+                      color: AppColors.incorrect,
+                    ),
+                    if (result.skippedCount > 0) ...[
+                      const SizedBox(width: 24),
+                      _ScoreItem(
+                        label: 'Skipped',
+                        value: '${result.skippedCount}',
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
             

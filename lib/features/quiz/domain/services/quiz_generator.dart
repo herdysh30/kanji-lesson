@@ -41,7 +41,10 @@ class QuizQuestion {
   final String? kanjiCharacter;
   final String? audioText; // For TTS
 
-  int get correctIndex => options.indexWhere((o) => o.text == correctAnswer);
+  int get correctIndex {
+    if (type == QuizType.writing) return 0;
+    return options.indexWhere((o) => o.text == correctAnswer);
+  }
 }
 
 /// Quiz session result
@@ -60,15 +63,23 @@ class QuizSessionResult {
 
   int get totalQuestions => questions.length;
 
-  int get correctCount {
+  int get skippedCount {
     int count = 0;
     for (int i = 0; i < questions.length && i < answers.length; i++) {
-      if (answers[i] == questions[i].correctIndex) count++;
+      if (answers[i] == -1) count++;
     }
     return count;
   }
 
-  int get incorrectCount => totalQuestions - correctCount;
+  int get correctCount {
+    int count = 0;
+    for (int i = 0; i < questions.length && i < answers.length; i++) {
+      if (answers[i] != -1 && answers[i] == questions[i].correctIndex) count++;
+    }
+    return count;
+  }
+
+  int get incorrectCount => totalQuestions - correctCount - skippedCount;
   double get accuracy =>
       totalQuestions > 0 ? correctCount / totalQuestions : 0.0;
   String get accuracyPercent => '${(accuracy * 100).round()}%';
