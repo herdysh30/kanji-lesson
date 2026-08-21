@@ -223,5 +223,31 @@
       "time": { "type": "String" }
     }
   },
-  "kanjiOfTheDay": "Kanji Hari Ini"
+  "kanjiOfTheDay": "Kanji Hari Ini",
+  "settingsAppearance": "Tampilan",
+  "settingsPreferences": "Preferensi",
+  "settingsStudyReminders": "Belajar & Pengingat",
+  "settingsDataManagement": "Manajemen Data",
+  "quizSession": "Kuis",
+  "questionOf": "Pertanyaan {current} dari {total}",
+  "notEnoughQuizData": "Tidak cukup data untuk membuat kuis.\n\nInfo Debug:\nTingkat JLPT: {level}\nJenis Item: {items}\nJenis Kuis: {types}\nPastikan Anda telah mempelajari beberapa Kanji/Kosakata terlebih dahulu.",
+  "preparingQuiz": "Menyiapkan kuis...",
+  "showHint": "Lihat Petunjuk",
+  "idkSkip": "Lewati / Tidak Tahu",
+  "nextQuestion": "Selanjutnya",
+  "seeResults": "Lihat Hasil",
+  "instructionMeaning": "Pilih arti dari kata yang dicetak tebal",
+  "instructionReading": "Pilih cara baca dari kata yang dicetak tebal",
+  "instructionWhatMeaning": "Apa arti dari ini?",
+  "instructionHowReading": "Bagaimana cara membaca ini?",
+  "instructionDraw": "Tulis hurufnya",
+  "canSelectMultiple": "(Bisa pilih lebih dari satu)",
+  "handwritingModelReady": "Model Tulisan Tangan Siap",
+  "downloadingModel": "Mengunduh model... (~20MB)",
+  "downloadComplete": "Unduhan selesai!",
+  "downloadFailed": "Unduhan gagal.",
+  "downloadHandwritingModel": "Unduh Model Tulisan Tangan",
+  "modelRequired": "Model Diperlukan",
+  "modelRequiredContent": "Untuk menggunakan Kuis Menulis, Anda perlu mengunduh Model AI Tulisan Tangan Jepang (~20MB). Apakah Anda ingin mengunduhnya sekarang?",
+  "download": "Unduh"
 }

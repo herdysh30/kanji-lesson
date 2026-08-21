@@ -9,6 +9,7 @@ import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_but
 import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
     as mlkit;
 
@@ -184,6 +185,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final initDataAsync = ref.watch(quizInitDataProvider);
     final sessionState = ref.watch(quizSessionProvider);
 
@@ -221,7 +223,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ),
               Expanded(
                 child: AppBar(
-                  title: const Text('Quiz Session'),
+                  title: Text(l10n.quizSession),
                   centerTitle: true,
                   leading: IconButton(
                     icon: const Icon(Icons.close_rounded),
@@ -242,11 +244,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Not enough data to generate quiz.\n\nDebug Info:\n'
-                    'JLPT Level: ${setup.selectedJlptLevel}\n'
-                    'Item Type: ${setup.selectedItemTypes.map((e) => e.name).join(', ')}\n'
-                    'Quiz Types: ${setup.selectedQuizTypes.map((e) => e.name).join(', ')}\n'
-                    'Make sure you have learned some Kanji/Vocab first.',
+                    l10n.notEnoughQuizData(
+                      setup.selectedJlptLevel?.toString() ?? l10n.myLearned,
+                      setup.selectedItemTypes.map((e) => e.name).join(', '),
+                      setup.selectedQuizTypes.map((e) => e.name).join(', '),
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -260,13 +262,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
             final currentQuestion = sessionState.currentQuestion;
             if (currentQuestion == null) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Menyiapkan kuis...'),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(l10n.preparingQuiz),
                   ],
                 ),
               );
@@ -281,7 +283,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                     vertical: 8.0,
                   ),
                   child: Text(
-                    'Question ${sessionState.currentIndex + 1} of ${sessionState.tasks.length}',
+                    l10n.questionOf(sessionState.currentIndex + 1, sessionState.tasks.length),
                     style: Theme.of(context).textTheme.labelMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -460,9 +462,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Text(
-                                      'Show Hint',
-                                      style: TextStyle(fontSize: 14),
+                                    Text(
+                                      l10n.showHint,
+                                      style: const TextStyle(fontSize: 14),
                                     ),
                                     const SizedBox(width: 8),
                                     const Icon(
@@ -481,7 +483,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                      _getInstructionText(currentQuestion),
+                      _getInstructionText(currentQuestion, l10n),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 18,
@@ -664,9 +666,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                 context,
                                               ).colorScheme.onSurfaceVariant,
                                             ),
-                                            child: const Text(
-                                              'I don\'t know / Skip',
-                                              style: TextStyle(fontSize: 15),
+                                            child: Text(
+                                              l10n.idkSkip,
+                                              style: const TextStyle(fontSize: 15),
                                             ),
                                           ),
                                         ),
@@ -689,14 +691,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                               Icons.arrow_forward_rounded,
                                             ),
                                             label: Text(
-                                              sessionState.currentIndex >=
-                                                      sessionState
-                                                              .tasks
-                                                              .length -
-                                                          1
-                                                  ? 'See Results'
-                                                  : 'Next Question',
-                                              style: const TextStyle(
+                                                  sessionState.currentIndex >= sessionState.tasks.length - 1
+                                                      ? l10n.seeResults
+                                                      : l10n.nextQuestion,
+                                                  style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -717,13 +715,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               ],
             );
           },
-          loading: () => const Center(
+          loading: () => Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Generating Quiz...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(l10n.preparingQuiz),
               ],
             ),
           ),
@@ -733,18 +731,18 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     );
   }
 
-  String _getInstructionText(QuizQuestion question) {
+  String _getInstructionText(QuizQuestion question, AppLocalizations l10n) {
     if (question.sentenceObj != null) {
-      if (question.type == QuizType.meaning) return 'Identify the meaning of the bolded word';
-      if (question.type == QuizType.reading) return 'Identify the reading of the bolded word';
+      if (question.type == QuizType.meaning) return l10n.instructionMeaning;
+      if (question.type == QuizType.reading) return l10n.instructionReading;
     }
     switch (question.type) {
       case QuizType.meaning:
-        return 'What does this mean?';
+        return l10n.instructionWhatMeaning;
       case QuizType.reading:
-        return 'How do you read this?';
+        return l10n.instructionHowReading;
       case QuizType.writing:
-        return 'Draw the Character';
+        return l10n.instructionDraw;
     }
   }
 
@@ -765,19 +763,20 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Future<void> _confirmExit(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Quit Quiz?'),
-        content: const Text('Your current progress will be lost.'),
+        title: Text(l10n.quitQuiz),
+        content: Text(l10n.quitQuizConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Quit'),
+            child: Text(l10n.quit),
           ),
         ],
       ),

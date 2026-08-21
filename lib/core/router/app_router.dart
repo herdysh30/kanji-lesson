@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/home/presentation/screens/home_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/jlpt_selection_screen.dart';
@@ -178,87 +179,43 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final selectedColor = Theme.of(context).colorScheme.primary;
-    final unselectedColor = Theme.of(context).colorScheme.onSurfaceVariant;
-    final bgColor = Theme.of(context).colorScheme.surface;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    // Use primary color for the bar to make the curve clearly visible
+    final navColor = Theme.of(context).colorScheme.primary;
+    // Use scaffold background color for the floating button to match the gap
+    final activeBtnColor = bgColor;
+    // Unselected icons are white with some transparency
+    final unselectedIconColor = Colors.white.withValues(alpha: 0.7);
+    final currentIndex = navigationShell.currentIndex;
 
     return PopScope(
-      canPop: navigationShell.currentIndex == 0,
+      canPop: currentIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
           _go(0);
         }
       },
       child: Scaffold(
+        extendBody: true,
         body: navigationShell,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: bgColor,
-          border: Border(
-            top: BorderSide(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : const Color(0xFFE5E5E5),
-              width: 0.5,
-            ),
-          ),
+        bottomNavigationBar: CurvedNavigationBar(
+          index: currentIndex,
+          color: navColor,
+          backgroundColor: Colors.transparent, // Background of the gap
+          buttonBackgroundColor: activeBtnColor, // Color of the active floating circle
+          animationCurve: Curves.easeOutBack,
+          animationDuration: const Duration(milliseconds: 350),
+          onTap: _go,
+          items: <Widget>[
+            Icon(Icons.home_rounded, color: currentIndex == 0 ? navColor : unselectedIconColor, size: 28),
+            Icon(Icons.menu_book_rounded, color: currentIndex == 1 ? navColor : unselectedIconColor, size: 28),
+            // Review: Card stack icon
+            Icon(Icons.style_rounded, color: currentIndex == 2 ? navColor : unselectedIconColor, size: 28),
+            // Quiz: Original quiz icon
+            Icon(Icons.quiz_rounded, color: currentIndex == 3 ? navColor : unselectedIconColor, size: 28),
+            Icon(Icons.settings_rounded, color: currentIndex == 4 ? navColor : unselectedIconColor, size: 28),
+          ],
         ),
-        child: SafeArea(
-          child: SizedBox(
-            height: 56,
-            child: Row(
-              children: [
-                _NavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home_rounded,
-                  label: 'Home',
-                  isActive: navigationShell.currentIndex == 0,
-                  activeColor: selectedColor,
-                  inactiveColor: unselectedColor,
-                  onTap: () => _go(0),
-                ),
-                _NavItem(
-                  icon: Icons.menu_book_outlined,
-                  activeIcon: Icons.menu_book_rounded,
-                  label: 'Learn',
-                  isActive: navigationShell.currentIndex == 1,
-                  activeColor: selectedColor,
-                  inactiveColor: unselectedColor,
-                  onTap: () => _go(1),
-                ),
-                _NavItem(
-                  icon: Icons.replay_outlined,
-                  activeIcon: Icons.replay_rounded,
-                  label: 'Review',
-                  isActive: navigationShell.currentIndex == 2,
-                  activeColor: selectedColor,
-                  inactiveColor: unselectedColor,
-                  onTap: () => _go(2),
-                ),
-                _NavItem(
-                  icon: Icons.quiz_outlined,
-                  activeIcon: Icons.quiz_rounded,
-                  label: 'Quiz',
-                  isActive: navigationShell.currentIndex == 3,
-                  activeColor: selectedColor,
-                  inactiveColor: unselectedColor,
-                  onTap: () => _go(3),
-                ),
-                _NavItem(
-                  icon: Icons.settings_outlined,
-                  activeIcon: Icons.settings_rounded,
-                  label: 'Settings',
-                  isActive: navigationShell.currentIndex == 4,
-                  activeColor: selectedColor,
-                  inactiveColor: unselectedColor,
-                  onTap: () => _go(4),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
       ),
     );
   }
@@ -267,57 +224,6 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isActive,
-    required this.activeColor,
-    required this.inactiveColor,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isActive;
-  final Color activeColor;
-  final Color inactiveColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isActive ? activeColor : inactiveColor;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              size: 22,
-              color: color,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

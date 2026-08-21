@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:kanji_lesson/features/home/presentation/widgets/kanji_widget_ui.dart';
 import 'package:kanji_lesson/features/home/presentation/widgets/streak_widget_ui.dart';
-import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 
 class WidgetService {
   static const String appGroupId = 'group.com.yourcompany.kanjilesson';
@@ -43,8 +42,8 @@ class WidgetService {
 
       if (kanjiPath.isNotEmpty && streakPath.isNotEmpty) {
         // 3. Save Paths to Native Storage
-        await HomeWidget.saveWidgetData<String>('kanji_image_path', kanjiPath as String);
-        await HomeWidget.saveWidgetData<String>('streak_image_path', streakPath as String);
+        await HomeWidget.saveWidgetData<String>('kanji_image_path', kanjiPath);
+        await HomeWidget.saveWidgetData<String>('streak_image_path', streakPath);
         // By default, let's reset to view 0 (Kanji) when updating data
         await HomeWidget.saveWidgetData<int>('current_view', 0);
         

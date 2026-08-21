@@ -63,7 +63,13 @@ class QuizSetupNotifier extends StateNotifier<QuizSetupState> {
   QuizSetupNotifier() : super(const QuizSetupState());
 
   void setJlptLevel(int? level) {
-    state = state.copyWith(selectedJlptLevel: level);
+    state = QuizSetupState(
+      selectedJlptLevel: level,
+      questionCount: state.questionCount,
+      isCustomCount: state.isCustomCount,
+      selectedQuizTypes: state.selectedQuizTypes,
+      selectedItemTypes: state.selectedItemTypes,
+    );
   }
 
   void toggleQuizType(QuizType type) {
@@ -394,14 +400,87 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
       final taskIndex = state.resolvedQuestions.length;
       final nextTask = state.tasks[taskIndex];
       
-      final question = await _generator.generateSingleQuestion(
+      var question = await _generator.generateSingleQuestion(
         nextTask,
         kanjiDistractors: _initData!.kanjiDistractors,
         vocabDistractors: _initData!.vocabDistractors,
         isSentence: nextTask.isSentence,
         fetchSentences: (query) => _ref.read(kanjiSentencesProvider(query).future),
-        isId: _initData!.isId,
+        isId: false, // Generate in English first
       );
+
+      if (question != null && _initData!.isId) {
+        final translator = _ref.read(translationServiceProvider);
+        
+        if (question.type == QuizType.meaning) {
+          final textsToTranslate = question.options.map((e) => e.text).toList();
+          if (textsToTranslate.isNotEmpty) {
+            final translated = await translator.translateMeanings(textsToTranslate);
+            if (translated.length == textsToTranslate.length) {
+              final newOptions = <QuizOption>[];
+              for (var i = 0; i < question.options.length; i++) {
+                newOptions.add(QuizOption(
+                  text: translated[i],
+                  kanjiCharacter: question.options[i].kanjiCharacter,
+                  explanation: question.options[i].explanation,
+                ));
+              }
+              final correctIndex = question.correctIndex;
+              question = QuizQuestion(
+                type: question.type,
+                prompt: question.prompt,
+                correctAnswer: newOptions[correctIndex].text,
+                options: newOptions,
+                kanjiCharacter: question.kanjiCharacter,
+                audioText: question.audioText,
+                sentenceObj: question.sentenceObj,
+              );
+            }
+          }
+        } else if (question.type == QuizType.writing) {
+          final translated = await translator.translateMeanings([question.prompt]);
+          if (translated.isNotEmpty) {
+            question = QuizQuestion(
+              type: question.type,
+              prompt: translated.first,
+              correctAnswer: question.correctAnswer,
+              options: question.options,
+              kanjiCharacter: question.kanjiCharacter,
+              audioText: question.audioText,
+              sentenceObj: question.sentenceObj,
+            );
+          }
+        } else if (question.type == QuizType.reading) {
+          final textsToTranslate = question.options.map((e) => e.explanation ?? '').where((e) => e.isNotEmpty).toList();
+          if (textsToTranslate.isNotEmpty) {
+            final translated = await translator.translateMeanings(textsToTranslate);
+            if (translated.length == textsToTranslate.length) {
+              int tIndex = 0;
+              final newOptions = <QuizOption>[];
+              for (var o in question.options) {
+                if (o.explanation != null && o.explanation!.isNotEmpty) {
+                  newOptions.add(QuizOption(
+                    text: o.text,
+                    kanjiCharacter: o.kanjiCharacter,
+                    explanation: translated[tIndex++],
+                  ));
+                } else {
+                  newOptions.add(o);
+                }
+              }
+              question = QuizQuestion(
+                type: question.type,
+                prompt: question.prompt,
+                correctAnswer: question.correctAnswer,
+                options: newOptions,
+                kanjiCharacter: question.kanjiCharacter,
+                audioText: question.audioText,
+                sentenceObj: question.sentenceObj,
+              );
+            }
+          }
+        }
+      }
 
       if (question != null) {
         state = state.copyWith(

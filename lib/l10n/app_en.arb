@@ -283,5 +283,44 @@
       "time": { "type": "String" }
     }
   },
-  "kanjiOfTheDay": "Kanji of the Day"
+  "kanjiOfTheDay": "Kanji of the Day",
+  "settingsAppearance": "Appearance",
+  "settingsPreferences": "Preferences",
+  "settingsStudyReminders": "Study & Reminders",
+  "settingsDataManagement": "Data Management",
+  "quizSession": "Quiz Session",
+  "questionOf": "Question {current} of {total}",
+  "@questionOf": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "notEnoughQuizData": "Not enough data to generate quiz.\n\nDebug Info:\nJLPT Level: {level}\nItem Type: {items}\nQuiz Types: {types}\nMake sure you have learned some Kanji/Vocab first.",
+  "@notEnoughQuizData": {
+    "placeholders": {
+      "level": { "type": "String" },
+      "items": { "type": "String" },
+      "types": { "type": "String" }
+    }
+  },
+  "preparingQuiz": "Preparing quiz...",
+  "showHint": "Show Hint",
+  "idkSkip": "I don't know / Skip",
+  "nextQuestion": "Next Question",
+  "seeResults": "See Results",
+  "instructionMeaning": "Identify the meaning of the bolded word",
+  "instructionReading": "Identify the reading of the bolded word",
+  "instructionWhatMeaning": "What does this mean?",
+  "instructionHowReading": "How do you read this?",
+  "instructionDraw": "Draw the Character",
+  "canSelectMultiple": "(You can select more than one)",
+  "handwritingModelReady": "Handwriting Model Ready",
+  "downloadingModel": "Downloading model... (~20MB)",
+  "downloadComplete": "Download complete!",
+  "downloadFailed": "Download failed.",
+  "downloadHandwritingModel": "Download Handwriting Model",
+  "modelRequired": "Model Required",
+  "modelRequiredContent": "To use the Writing Quiz, you need to download the Japanese Handwriting AI Model (~20MB). Do you want to download it now?",
+  "download": "Download"
 }

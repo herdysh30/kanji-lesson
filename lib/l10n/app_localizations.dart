@@ -1207,6 +1207,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kanji of the Day'**
   String get kanjiOfTheDay;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get settingsPreferences;
+
+  /// No description provided for @settingsStudyReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Study & Reminders'**
+  String get settingsStudyReminders;
+
+  /// No description provided for @settingsDataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get settingsDataManagement;
+
+  /// No description provided for @quizSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Session'**
+  String get quizSession;
+
+  /// No description provided for @questionOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {current} of {total}'**
+  String questionOf(int current, int total);
+
+  /// No description provided for @notEnoughQuizData.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough data to generate quiz.\n\nDebug Info:\nJLPT Level: {level}\nItem Type: {items}\nQuiz Types: {types}\nMake sure you have learned some Kanji/Vocab first.'**
+  String notEnoughQuizData(String level, String items, String types);
+
+  /// No description provided for @preparingQuiz.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing quiz...'**
+  String get preparingQuiz;
+
+  /// No description provided for @showHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Hint'**
+  String get showHint;
+
+  /// No description provided for @idkSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t know / Skip'**
+  String get idkSkip;
+
+  /// No description provided for @nextQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Question'**
+  String get nextQuestion;
+
+  /// No description provided for @seeResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See Results'**
+  String get seeResults;
+
+  /// No description provided for @instructionMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify the meaning of the bolded word'**
+  String get instructionMeaning;
+
+  /// No description provided for @instructionReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify the reading of the bolded word'**
+  String get instructionReading;
+
+  /// No description provided for @instructionWhatMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'What does this mean?'**
+  String get instructionWhatMeaning;
+
+  /// No description provided for @instructionHowReading.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you read this?'**
+  String get instructionHowReading;
+
+  /// No description provided for @instructionDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw the Character'**
+  String get instructionDraw;
+
+  /// No description provided for @canSelectMultiple.
+  ///
+  /// In en, this message translates to:
+  /// **'(You can select more than one)'**
+  String get canSelectMultiple;
+
+  /// No description provided for @handwritingModelReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Handwriting Model Ready'**
+  String get handwritingModelReady;
+
+  /// No description provided for @downloadingModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading model... (~20MB)'**
+  String get downloadingModel;
+
+  /// No description provided for @downloadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Download complete!'**
+  String get downloadComplete;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed.'**
+  String get downloadFailed;
+
+  /// No description provided for @downloadHandwritingModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Handwriting Model'**
+  String get downloadHandwritingModel;
+
+  /// No description provided for @modelRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Required'**
+  String get modelRequired;
+
+  /// No description provided for @modelRequiredContent.
+  ///
+  /// In en, this message translates to:
+  /// **'To use the Writing Quiz, you need to download the Japanese Handwriting AI Model (~20MB). Do you want to download it now?'**
+  String get modelRequiredContent;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
 }
 
 class _AppLocalizationsDelegate

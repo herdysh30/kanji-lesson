@@ -160,15 +160,25 @@ class QuizGenerator {
 
         var distractorVocab = vocabDistractors
             .where((v) => v.word != vocab.word)
+            .where((v) => !isId || type != QuizType.meaning || (v.meaningId != null && v.meaningId!.isNotEmpty))
             .where((v) => (type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana).isNotEmpty)
             .where((v) => (type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana) != correctAnswer)
             .toList()..shuffle(_random);
             
-        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
-          text: type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana,
-          kanjiCharacter: v.word,
-          explanation: type == QuizType.meaning ? v.furigana : v.primaryMeaning(isId),
-        )).toList();
+        final Set<String> usedTexts = {correctAnswer};
+        final distractorOptions = <QuizOption>[];
+        for (var v in distractorVocab) {
+          if (distractorOptions.length >= 3) break;
+          final text = type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana;
+          if (!usedTexts.contains(text)) {
+            usedTexts.add(text);
+            distractorOptions.add(QuizOption(
+              text: text,
+              kanjiCharacter: v.word,
+              explanation: type == QuizType.meaning ? v.furigana : v.primaryMeaning(isId),
+            ));
+          }
+        }
         
         final dummyOptions = type == QuizType.meaning 
             ? (isId ? ['air', 'api', 'tanah', 'angin', 'langit', 'bulan', 'matahari', 'bintang'] : ['water', 'fire', 'earth', 'wind', 'sky', 'moon', 'sun', 'star'])
@@ -178,7 +188,8 @@ class QuizGenerator {
 
         while (distractorOptions.length < 3 && dummies.isNotEmpty) {
           final dummy = dummies.removeLast();
-          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+          if (!usedTexts.contains(dummy)) {
+            usedTexts.add(dummy);
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -212,17 +223,27 @@ class QuizGenerator {
 
         var distractorKanji = kanjiDistractors
             .where((k) => k.character != kanji.character && k.meanings.isNotEmpty)
+            .where((k) => !isId || k.meaningsId.isNotEmpty)
             .where((k) => k.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
             
         final List<Kanji> selected = [];
+        final Set<String> usedTexts = {correctAnswer};
         for (var k in distractorKanji) {
           if (selected.length >= 3) break;
-          if (k.strokeCount == kanji.strokeCount) selected.add(k);
+          final m = k.primaryMeaning(isId);
+          if (k.strokeCount == kanji.strokeCount && !usedTexts.contains(m)) {
+            selected.add(k);
+            usedTexts.add(m);
+          }
         }
         for (var k in distractorKanji) {
           if (selected.length >= 3) break;
-          if (!selected.contains(k)) selected.add(k);
+          final m = k.primaryMeaning(isId);
+          if (!selected.contains(k) && !usedTexts.contains(m)) {
+            selected.add(k);
+            usedTexts.add(m);
+          }
         }
             
         final distractorOptions = selected.map((k) => QuizOption(
@@ -237,7 +258,8 @@ class QuizGenerator {
         
         while (distractorOptions.length < 3) {
           final dummy = dummyMeanings.removeLast();
-          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+          if (!usedTexts.contains(dummy)) {
+            usedTexts.add(dummy);
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -263,21 +285,38 @@ class QuizGenerator {
 
         var distractorVocab = vocabDistractors
             .where((v) => v.word != vocab.word)
+            .where((v) => !isId || (v.meaningId != null && v.meaningId!.isNotEmpty))
             .where((v) => v.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
             
         final List<JlptVocab> selected = [];
+        final Set<String> usedTexts = {correctAnswer};
+        
         final sameStart = distractorVocab.where((v) => v.word.isNotEmpty && vocab.word.isNotEmpty && v.word.characters.first == vocab.word.characters.first).toList();
-        if (sameStart.isNotEmpty) selected.add(sameStart[0]);
-        if (sameStart.length > 1 && _random.nextBool()) selected.add(sameStart[1]);
+        for (var v in sameStart) {
+          if (selected.length >= 2) break;
+          final m = v.primaryMeaning(isId);
+          if (!usedTexts.contains(m)) {
+            selected.add(v);
+            usedTexts.add(m);
+          }
+        }
         
         for (var v in distractorVocab) {
           if (selected.length >= 3) break;
-          if (!selected.contains(v) && v.word.length == vocab.word.length) selected.add(v);
+          final m = v.primaryMeaning(isId);
+          if (!selected.contains(v) && v.word.length == vocab.word.length && !usedTexts.contains(m)) {
+            selected.add(v);
+            usedTexts.add(m);
+          }
         }
         for (var v in distractorVocab) {
           if (selected.length >= 3) break;
-          if (!selected.contains(v)) selected.add(v);
+          final m = v.primaryMeaning(isId);
+          if (!selected.contains(v) && !usedTexts.contains(m)) {
+            selected.add(v);
+            usedTexts.add(m);
+          }
         }
             
         final distractorOptions = selected.map((v) => QuizOption(
@@ -292,7 +331,8 @@ class QuizGenerator {
         
         while (distractorOptions.length < 3) {
           final dummy = dummyMeanings.removeLast();
-          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+          if (!usedTexts.contains(dummy)) {
+            usedTexts.add(dummy);
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -324,17 +364,30 @@ class QuizGenerator {
             .toList()..shuffle(_random);
             
         final List<Kanji> selected = [];
+        final Set<String> usedTexts = {correctAnswer};
+        
         final sameEnding = distractorKanji.where((k) => k.primaryReading.isNotEmpty && kanji.primaryReading.isNotEmpty && k.primaryReading.characters.last == kanji.primaryReading.characters.last).toList();
-        if (sameEnding.isNotEmpty) selected.add(sameEnding[0]);
-        if (sameEnding.length > 1 && _random.nextBool()) selected.add(sameEnding[1]);
+        for (var k in sameEnding) {
+          if (selected.length >= 2) break;
+          if (!usedTexts.contains(k.primaryReading)) {
+            selected.add(k);
+            usedTexts.add(k.primaryReading);
+          }
+        }
         
         for (var k in distractorKanji) {
           if (selected.length >= 3) break;
-          if (!selected.contains(k) && k.primaryReading.length == kanji.primaryReading.length) selected.add(k);
+          if (!selected.contains(k) && k.primaryReading.length == kanji.primaryReading.length && !usedTexts.contains(k.primaryReading)) {
+            selected.add(k);
+            usedTexts.add(k.primaryReading);
+          }
         }
         for (var k in distractorKanji) {
           if (selected.length >= 3) break;
-          if (!selected.contains(k)) selected.add(k);
+          if (!selected.contains(k) && !usedTexts.contains(k.primaryReading)) {
+            selected.add(k);
+            usedTexts.add(k.primaryReading);
+          }
         }
             
         final distractorOptions = selected.map((k) => QuizOption(
@@ -348,7 +401,8 @@ class QuizGenerator {
         
         while (distractorOptions.length < 3) {
           final dummy = dummyReadings.removeLast();
-          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+          if (!usedTexts.contains(dummy)) {
+            usedTexts.add(dummy);
             distractorOptions.add(QuizOption(text: dummy));
           }
         }
@@ -377,17 +431,30 @@ class QuizGenerator {
             .toList()..shuffle(_random);
             
         final List<JlptVocab> selected = [];
+        final Set<String> usedTexts = {correctAnswer};
+        
         final sameEnding = distractorVocab.where((v) => v.furigana.isNotEmpty && vocab.furigana.isNotEmpty && v.furigana.characters.last == vocab.furigana.characters.last).toList();
-        if (sameEnding.isNotEmpty) selected.add(sameEnding[0]);
-        if (sameEnding.length > 1 && _random.nextBool()) selected.add(sameEnding[1]);
+        for (var v in sameEnding) {
+          if (selected.length >= 2) break;
+          if (!usedTexts.contains(v.furigana)) {
+            selected.add(v);
+            usedTexts.add(v.furigana);
+          }
+        }
         
         for (var v in distractorVocab) {
           if (selected.length >= 3) break;
-          if (!selected.contains(v) && v.furigana.length == vocab.furigana.length) selected.add(v);
+          if (!selected.contains(v) && v.furigana.length == vocab.furigana.length && !usedTexts.contains(v.furigana)) {
+            selected.add(v);
+            usedTexts.add(v.furigana);
+          }
         }
         for (var v in distractorVocab) {
           if (selected.length >= 3) break;
-          if (!selected.contains(v)) selected.add(v);
+          if (!selected.contains(v) && !usedTexts.contains(v.furigana)) {
+            selected.add(v);
+            usedTexts.add(v.furigana);
+          }
         }
             
         final distractorOptions = selected.map((v) => QuizOption(
@@ -401,7 +468,8 @@ class QuizGenerator {
         
         while (distractorOptions.length < 3) {
           final dummy = dummyReadings.removeLast();
-          if (!distractorOptions.any((o) => o.text == dummy) && dummy != correctAnswer) {
+          if (!usedTexts.contains(dummy)) {
+            usedTexts.add(dummy);
             distractorOptions.add(QuizOption(text: dummy));
           }
         }

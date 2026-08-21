@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -194,10 +195,67 @@ class ReviewSessionScreen extends ConsumerWidget {
           child: Column(
             children: [
               Expanded(
-                child: _Flashcard(
-                  entry: currentItem,
-                  isFlipped: state.isFlipped,
-                  onFlip: () => ref.read(reviewSessionProvider.notifier).flipCard(),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final queue = state.queue;
+                    final currentIndex = state.currentIndex;
+                    const maxBackgrounds = 3;
+                    
+                    // Render items from currentIndex - 1 (the one just answered, sliding off)
+                    // up to currentIndex + maxBackgrounds (the deepest visible background card).
+                    final startIndex = math.max(0, currentIndex - 1);
+                    final endIndex = math.min(currentIndex + maxBackgrounds + 1, queue.length);
+                    
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Render from back to front (highest index to lowest)
+                        for (int i = endIndex - 1; i >= startIndex; i--)
+                          Builder(
+                            key: ValueKey('review_card_$i'),
+                            builder: (context) {
+                              final item = queue[i];
+                              final d = i - currentIndex; // -1 (discarded), 0 (front), 1+ (background)
+                              
+                              final isDiscarded = d < 0;
+                              final isFront = d == 0;
+                              
+                              // Clamped distance for background visual sizing
+                              final clampedD = math.max(0, d);
+                              
+                              final screenWidth = MediaQuery.of(context).size.width;
+                              
+                              // Discarded cards fly out to the left
+                              final double top = isDiscarded ? 0 : clampedD * 14.0;
+                              final double bottom = isDiscarded ? maxBackgrounds * 14.0 : (maxBackgrounds - clampedD) * 14.0;
+                              final double left = isDiscarded ? -screenWidth : clampedD * 16.0;
+                              final double right = isDiscarded ? screenWidth : clampedD * 16.0;
+
+                              return AnimatedPositioned(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                                top: top,
+                                bottom: bottom,
+                                left: left,
+                                right: right,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 300),
+                                  opacity: isDiscarded ? 0.0 : 1.0 - (clampedD * 0.2),
+                                  child: IgnorePointer(
+                                    ignoring: !isFront, // Only the front card can be tapped
+                                    child: _Flashcard(
+                                      entry: item,
+                                      isFlipped: isFront ? state.isFlipped : false,
+                                      onFlip: isFront ? () => ref.read(reviewSessionProvider.notifier).flipCard() : () {},
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          ),
+                      ],
+                    );
+                  }
                 ),
               ),
               const SizedBox(height: 24),

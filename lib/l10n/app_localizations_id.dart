@@ -609,4 +609,88 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get kanjiOfTheDay => 'Kanji Hari Ini';
+
+  @override
+  String get settingsAppearance => 'Tampilan';
+
+  @override
+  String get settingsPreferences => 'Preferensi';
+
+  @override
+  String get settingsStudyReminders => 'Belajar & Pengingat';
+
+  @override
+  String get settingsDataManagement => 'Manajemen Data';
+
+  @override
+  String get quizSession => 'Kuis';
+
+  @override
+  String questionOf(int current, int total) {
+    return 'Pertanyaan $current dari $total';
+  }
+
+  @override
+  String notEnoughQuizData(String level, String items, String types) {
+    return 'Tidak cukup data untuk membuat kuis.\n\nInfo Debug:\nTingkat JLPT: $level\nJenis Item: $items\nJenis Kuis: $types\nPastikan Anda telah mempelajari beberapa Kanji/Kosakata terlebih dahulu.';
+  }
+
+  @override
+  String get preparingQuiz => 'Menyiapkan kuis...';
+
+  @override
+  String get showHint => 'Lihat Petunjuk';
+
+  @override
+  String get idkSkip => 'Lewati / Tidak Tahu';
+
+  @override
+  String get nextQuestion => 'Selanjutnya';
+
+  @override
+  String get seeResults => 'Lihat Hasil';
+
+  @override
+  String get instructionMeaning => 'Pilih arti dari kata yang dicetak tebal';
+
+  @override
+  String get instructionReading =>
+      'Pilih cara baca dari kata yang dicetak tebal';
+
+  @override
+  String get instructionWhatMeaning => 'Apa arti dari ini?';
+
+  @override
+  String get instructionHowReading => 'Bagaimana cara membaca ini?';
+
+  @override
+  String get instructionDraw => 'Tulis hurufnya';
+
+  @override
+  String get canSelectMultiple => '(Bisa pilih lebih dari satu)';
+
+  @override
+  String get handwritingModelReady => 'Model Tulisan Tangan Siap';
+
+  @override
+  String get downloadingModel => 'Mengunduh model... (~20MB)';
+
+  @override
+  String get downloadComplete => 'Unduhan selesai!';
+
+  @override
+  String get downloadFailed => 'Unduhan gagal.';
+
+  @override
+  String get downloadHandwritingModel => 'Unduh Model Tulisan Tangan';
+
+  @override
+  String get modelRequired => 'Model Diperlukan';
+
+  @override
+  String get modelRequiredContent =>
+      'Untuk menggunakan Kuis Menulis, Anda perlu mengunduh Model AI Tulisan Tangan Jepang (~20MB). Apakah Anda ingin mengunduhnya sekarang?';
+
+  @override
+  String get download => 'Unduh';
 }

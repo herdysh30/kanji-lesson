@@ -608,4 +608,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kanjiOfTheDay => 'Kanji of the Day';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsPreferences => 'Preferences';
+
+  @override
+  String get settingsStudyReminders => 'Study & Reminders';
+
+  @override
+  String get settingsDataManagement => 'Data Management';
+
+  @override
+  String get quizSession => 'Quiz Session';
+
+  @override
+  String questionOf(int current, int total) {
+    return 'Question $current of $total';
+  }
+
+  @override
+  String notEnoughQuizData(String level, String items, String types) {
+    return 'Not enough data to generate quiz.\n\nDebug Info:\nJLPT Level: $level\nItem Type: $items\nQuiz Types: $types\nMake sure you have learned some Kanji/Vocab first.';
+  }
+
+  @override
+  String get preparingQuiz => 'Preparing quiz...';
+
+  @override
+  String get showHint => 'Show Hint';
+
+  @override
+  String get idkSkip => 'I don\'t know / Skip';
+
+  @override
+  String get nextQuestion => 'Next Question';
+
+  @override
+  String get seeResults => 'See Results';
+
+  @override
+  String get instructionMeaning => 'Identify the meaning of the bolded word';
+
+  @override
+  String get instructionReading => 'Identify the reading of the bolded word';
+
+  @override
+  String get instructionWhatMeaning => 'What does this mean?';
+
+  @override
+  String get instructionHowReading => 'How do you read this?';
+
+  @override
+  String get instructionDraw => 'Draw the Character';
+
+  @override
+  String get canSelectMultiple => '(You can select more than one)';
+
+  @override
+  String get handwritingModelReady => 'Handwriting Model Ready';
+
+  @override
+  String get downloadingModel => 'Downloading model... (~20MB)';
+
+  @override
+  String get downloadComplete => 'Download complete!';
+
+  @override
+  String get downloadFailed => 'Download failed.';
+
+  @override
+  String get downloadHandwritingModel => 'Download Handwriting Model';
+
+  @override
+  String get modelRequired => 'Model Required';
+
+  @override
+  String get modelRequiredContent =>
+      'To use the Writing Quiz, you need to download the Japanese Handwriting AI Model (~20MB). Do you want to download it now?';
+
+  @override
+  String get download => 'Download';
 }
