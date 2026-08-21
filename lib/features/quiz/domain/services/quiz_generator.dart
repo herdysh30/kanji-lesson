@@ -4,6 +4,7 @@ import 'package:kanji_lesson/features/kanji/domain/entities/kanji.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/jlpt_vocab.dart';
 import 'package:kanji_lesson/features/kanji/domain/entities/sentence.dart';
 
+import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
 
 enum QuizType {
