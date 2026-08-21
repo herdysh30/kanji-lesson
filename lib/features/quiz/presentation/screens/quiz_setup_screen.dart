@@ -7,6 +7,7 @@ import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class QuizSetupScreen extends ConsumerWidget {
   const QuizSetupScreen({super.key});
@@ -17,10 +18,11 @@ class QuizSetupScreen extends ConsumerWidget {
     final notifier = ref.read(quizSetupProvider.notifier);
     final modelStatus = ref.watch(digitalInkModelStatusProvider);
     final maxItemsAsync = ref.watch(maxQuizItemsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz Setup'),
+        title: Text(l10n.quizSetup),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -29,7 +31,7 @@ class QuizSetupScreen extends ConsumerWidget {
           children: [
             // JLPT Level Selection
             Text(
-              'Select Source',
+              l10n.selectSource,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -38,7 +40,7 @@ class QuizSetupScreen extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 ChoiceChip(
-                  label: const Text('My Learned'),
+                  label: Text(l10n.myLearned),
                   selected: setup.selectedJlptLevel == null,
                   labelStyle: TextStyle(
                     color: setup.selectedJlptLevel == null ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -66,7 +68,7 @@ class QuizSetupScreen extends ConsumerWidget {
 
             // Item Type Selection
             Text(
-              'Item Type',
+              l10n.itemType,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -75,7 +77,7 @@ class QuizSetupScreen extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 FilterChip(
-                  label: const Text('Kanji'),
+                  label: Text(l10n.kanji),
                   selected: setup.selectedItemTypes.contains(QuizItemType.kanji),
                   labelStyle: TextStyle(
                     color: setup.selectedItemTypes.contains(QuizItemType.kanji) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -91,7 +93,7 @@ class QuizSetupScreen extends ConsumerWidget {
                       },
                 ),
                 FilterChip(
-                  label: const Text('Vocabulary'),
+                  label: Text(l10n.vocabulary),
                   selected: setup.selectedItemTypes.contains(QuizItemType.vocab),
                   labelStyle: TextStyle(
                     color: setup.selectedItemTypes.contains(QuizItemType.vocab) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -107,7 +109,7 @@ class QuizSetupScreen extends ConsumerWidget {
                       },
                 ),
                 FilterChip(
-                  label: const Text('Sentence'),
+                  label: Text(l10n.sentence),
                   selected: setup.selectedItemTypes.contains(QuizItemType.sentence),
                   labelStyle: TextStyle(
                     color: setup.selectedItemTypes.contains(QuizItemType.sentence) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -129,7 +131,7 @@ class QuizSetupScreen extends ConsumerWidget {
             
             // Quiz Type Selection
             Text(
-              'Quiz Type',
+              l10n.questionType,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -138,7 +140,7 @@ class QuizSetupScreen extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 FilterChip(
-                  label: const Text('Meaning'),
+                  label: Text(l10n.meaning),
                   selected: setup.selectedQuizTypes.contains(QuizType.meaning),
                   labelStyle: TextStyle(
                     color: setup.selectedQuizTypes.contains(QuizType.meaning) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -146,7 +148,7 @@ class QuizSetupScreen extends ConsumerWidget {
                   onSelected: (_) => notifier.toggleQuizType(QuizType.meaning),
                 ),
                 FilterChip(
-                  label: const Text('Reading'),
+                  label: Text(l10n.reading),
                   selected: setup.selectedQuizTypes.contains(QuizType.reading),
                   labelStyle: TextStyle(
                     color: setup.selectedQuizTypes.contains(QuizType.reading) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -154,7 +156,7 @@ class QuizSetupScreen extends ConsumerWidget {
                   onSelected: (_) => notifier.toggleQuizType(QuizType.reading),
                 ),
                 FilterChip(
-                  label: const Text('Writing'),
+                  label: Text(l10n.writing),
                   selected: setup.selectedQuizTypes.contains(QuizType.writing),
                   labelStyle: TextStyle(
                     color: setup.selectedQuizTypes.contains(QuizType.writing) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -217,12 +219,12 @@ class QuizSetupScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Number of Questions',
+                  l10n.numberOfQuestions,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 maxItemsAsync.when(
                   data: (max) => Text(
-                    'Max: $max items',
+                    l10n.maxItems(max),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -239,7 +241,7 @@ class QuizSetupScreen extends ConsumerWidget {
               children: [
                 ...[10, 20, 30].map((count) {
                   return ChoiceChip(
-                    label: Text('$count Questions'),
+                    label: Text(l10n.questionsCount(count)),
                     selected: setup.questionCount == count && !setup.isCustomCount,
                     labelStyle: TextStyle(
                       color: (setup.questionCount == count && !setup.isCustomCount) ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -250,7 +252,7 @@ class QuizSetupScreen extends ConsumerWidget {
                   );
                 }),
                 ChoiceChip(
-                  label: const Text('Custom'),
+                  label: Text(l10n.custom),
                   selected: setup.isCustomCount,
                   labelStyle: TextStyle(
                     color: setup.isCustomCount ? Colors.white : Theme.of(context).colorScheme.onSurface,
@@ -346,9 +348,9 @@ class QuizSetupScreen extends ConsumerWidget {
                   context.push('/quiz/session');
                 },
                 icon: const Icon(Icons.play_arrow_rounded),
-                label: const Text(
-                  'Start Quiz', 
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                label: Text(
+                  l10n.startQuiz, 
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

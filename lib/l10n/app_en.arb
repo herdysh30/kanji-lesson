@@ -36,5 +36,81 @@
       }
     }
   },
-  "settings": "Settings"
+  "settings": "Settings",
+  "accentColor": "Accent Color",
+  "language": "Language / Bahasa",
+  "dailyGoal": "Daily Goal",
+  "currentGoal": "Current goal: {count} correct answers",
+  "@currentGoal": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "dailyReminder": "Daily Reminder",
+  "reminderSetFor": "Reminder set for {time}",
+  "@reminderSetFor": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "turnOnToGetReminded": "Turn on to get reminded to study",
+  "notificationPermissionDenied": "Notification permission denied",
+  "changeReminderTime": "Change Reminder Time",
+  "sound": "Sound",
+  "vibration": "Vibration",
+  "theme": "Theme",
+  "system": "System",
+  "light": "Light",
+  "dark": "Dark",
+  "resetLearningProgress": "Reset Learning Progress",
+  "clearProgressSubtitle": "Clear progress for all or specific JLPT levels",
+  "resetAllData": "Reset ALL Data (Danger)",
+  "deleteAllProgressSubtitle": "Deletes ALL progress, history, and cached data",
+  "cancel": "Cancel",
+  "reset": "Reset",
+  "resetProgressDialogTitle": "Reset Progress?",
+  "resetProgressDialogContent": "Do you want to reset progress for a specific JLPT level or all levels? This action cannot be undone.",
+  "allLevels": "All Levels",
+  "progressResetSuccess": "Progress reset successfully",
+  "dangerZoneResetTitle": "RESET ALL DATA",
+  "dangerZoneResetContent": "Are you absolutely sure you want to delete ALL data? This includes your streaks, custom settings, and learning progress. This action is PERMANENT.",
+  "quizSetup": "Quiz Setup",
+  "startQuiz": "Start Quiz",
+  "jlptLevel": "JLPT Level",
+  "numberOfQuestions": "Number of Questions",
+  "itemType": "Item Type",
+  "questionType": "Question Type",
+  "multipleChoice": "Multiple Choice",
+  "typing": "Typing",
+  "reading": "Reading",
+  "quiz": "Quiz",
+  "quitQuiz": "Quit Quiz",
+  "quitQuizConfirm": "Are you sure you want to quit? Your current progress will be lost.",
+  "quit": "Quit",
+  "next": "Next",
+  "finish": "Finish",
+  "quizResult": "Quiz Result",
+  "score": "Score",
+  "correct": "Correct",
+  "incorrect": "Incorrect",
+  "backToHome": "Back to Home",
+  "streak": "Streak",
+  "selectSource": "Select Source",
+  "myLearned": "My Learned",
+  "sentence": "Sentence",
+  "writing": "Writing",
+  "questionsCount": "{count} Questions",
+  "@questionsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "maxItems": "Max: {max} items",
+  "@maxItems": {
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
+  "custom": "Custom",
+  "notEnoughItemsError": "Not enough items in the selected source for the chosen types."
 }

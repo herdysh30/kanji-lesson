@@ -25,7 +25,7 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Accent Color ───────────────────────────────────
           ListTile(
             leading: const Icon(Icons.palette_rounded),
-            title: const Text('Accent Color'),
+            title: Text(l10n.accentColor),
             subtitle: Text(
               AppAccentPalette.options
                   .firstWhere((o) => o.color.toARGB32() == accentColor)
@@ -49,7 +49,7 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Language ───────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.language_rounded),
-            title: const Text('Language / Bahasa'),
+            title: Text(l10n.language),
             trailing: DropdownButton<String>(
               value: locale.languageCode,
               items: const [
@@ -68,8 +68,8 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Daily Goal ─────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.track_changes_rounded),
-            title: const Text('Daily Goal'),
-            subtitle: Text('Current goal: ${ref.watch(dailyGoalProvider)} correct answers'),
+            title: Text(l10n.dailyGoal),
+            subtitle: Text(l10n.currentGoal(ref.watch(dailyGoalProvider))),
             trailing: const Icon(Icons.edit_rounded),
             onTap: () => _showDailyGoalPicker(context, ref),
           ),
@@ -78,10 +78,10 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Daily Reminder ─────────────────────────────────
           SwitchListTile(
             secondary: const Icon(Icons.notifications_active_rounded),
-            title: const Text('Daily Reminder'),
+            title: Text(l10n.dailyReminder),
             subtitle: Text(ref.watch(reminderProvider).enabled 
-                ? 'Reminder set for ${ref.watch(reminderProvider).time.format(context)}'
-                : 'Turn on to get reminded to study'),
+                ? l10n.reminderSetFor(ref.watch(reminderProvider).time.format(context))
+                : l10n.turnOnToGetReminded),
             value: ref.watch(reminderProvider).enabled,
             onChanged: (val) async {
               await ref.read(reminderProvider.notifier).setEnabled(val);
@@ -92,7 +92,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref.read(reminderProvider.notifier).setEnabled(false);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Notification permission denied')),
+                      SnackBar(content: Text(l10n.notificationPermissionDenied)),
                     );
                   }
                   return;
@@ -120,7 +120,7 @@ class SettingsScreen extends ConsumerWidget {
           if (ref.watch(reminderProvider).enabled) ...[
             ListTile(
               leading: const Icon(Icons.access_time_rounded, color: Colors.transparent),
-              title: const Text('Change Reminder Time'),
+              title: Text(l10n.changeReminderTime),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () async {
                 final time = await showTimePicker(
@@ -136,7 +136,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             SwitchListTile(
               secondary: const Icon(Icons.volume_up_rounded, color: Colors.transparent),
-              title: const Text('Sound'),
+              title: Text(l10n.sound),
               value: ref.watch(reminderProvider).sound,
               onChanged: (val) async {
                 await ref.read(reminderProvider.notifier).setSound(val);
@@ -146,7 +146,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             SwitchListTile(
               secondary: const Icon(Icons.vibration_rounded, color: Colors.transparent),
-              title: const Text('Vibration'),
+              title: Text(l10n.vibration),
               value: ref.watch(reminderProvider).vibration,
               onChanged: (val) async {
                 await ref.read(reminderProvider.notifier).setVibration(val);
@@ -160,13 +160,13 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Theme ──────────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.dark_mode_rounded),
-            title: const Text('Theme'),
+            title: Text(l10n.theme),
             trailing: DropdownButton<ThemeMode>(
               value: themeMode,
-              items: const [
-                DropdownMenuItem(value: ThemeMode.system, child: Text('System')),
-                DropdownMenuItem(value: ThemeMode.light, child: Text('Light')),
-                DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark')),
+              items: [
+                DropdownMenuItem(value: ThemeMode.system, child: Text(l10n.system)),
+                DropdownMenuItem(value: ThemeMode.light, child: Text(l10n.light)),
+                DropdownMenuItem(value: ThemeMode.dark, child: Text(l10n.dark)),
               ],
               onChanged: (val) {
                 if (val != null) {
@@ -180,8 +180,8 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Reset Progress ─────────────────────────────────
           ListTile(
             leading: const Icon(Icons.refresh_rounded, color: Colors.orange),
-            title: const Text('Reset Learning Progress'),
-            subtitle: const Text('Clear progress for all or specific JLPT levels'),
+            title: Text(l10n.resetLearningProgress),
+            subtitle: Text(l10n.clearProgressSubtitle),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => _showResetDialog(context, ref),
           ),
@@ -190,8 +190,8 @@ class SettingsScreen extends ConsumerWidget {
           // ─── Danger Zone ────────────────────────────────────
           ListTile(
             leading: const Icon(Icons.delete_forever_rounded, color: Colors.red),
-            title: const Text('Reset ALL Data (Danger)'),
-            subtitle: const Text('Deletes ALL progress, history, and cached data'),
+            title: Text(l10n.resetAllData),
+            subtitle: Text(l10n.deleteAllProgressSubtitle),
             textColor: Colors.red,
             onTap: () => _showDangerousResetDialog(context, ref),
           ),
@@ -214,7 +214,7 @@ class SettingsScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Accent Color', style: Theme.of(context).textTheme.titleMedium),
+                Text(l10n.accentColor, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 20),
                 ...AppAccentPalette.options.map((option) {
                   final isSelected = option.color.toARGB32() == currentColor;
@@ -263,7 +263,7 @@ class SettingsScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Daily Goal', style: Theme.of(context).textTheme.titleMedium),
+                Text(l10n.dailyGoal, style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 20),
                 ...options.map((option) {
                   final isSelected = option == currentGoal;
@@ -294,7 +294,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Reset Learning Progress'),
+          title: Text(l10n.resetLearningProgress),
           content: SingleChildScrollView(
             child: RadioGroup<int?>(
               groupValue: selectedLevel,
@@ -304,8 +304,8 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   RadioListTile<int?>(
                     value: null,
-                    title: const Text('All Levels'),
-                    subtitle: const Text('Reset progress for all JLPT levels'),
+                    title: Text(l10n.allLevels),
+                    subtitle: Text(l10n.clearProgressSubtitle),
                   ),
                   ...AppConstants.jlptLevels.map((level) => RadioListTile<int?>(
                     value: level,
@@ -314,7 +314,7 @@ class SettingsScreen extends ConsumerWidget {
                       future: ref.read(jlptStatsProvider(level).future),
                       builder: (_, snapshot) {
                         if (snapshot.hasData) {
-                          return Text('${snapshot.data!.learned} learned, ${snapshot.data!.mastered} mastered');
+                          return Text('${snapshot.data!.learned} ${l10n.learned}, ${snapshot.data!.mastered} ${l10n.mastered}');
                         }
                         return const Text('Loading...');
                       },
@@ -327,7 +327,7 @@ class SettingsScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: Colors.orange),
@@ -342,9 +342,7 @@ class SettingsScreen extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(selectedLevel == null
-                          ? 'All progress reset!'
-                          : 'JLPT N$selectedLevel progress reset!'),
+                      content: Text(l10n.progressResetSuccess),
                     ),
                   );
                   ref.invalidate(overallProgressProvider);
@@ -357,7 +355,7 @@ class SettingsScreen extends ConsumerWidget {
                   }
                 }
               },
-              child: const Text('Reset'),
+              child: Text(l10n.reset),
             ),
           ],
         ),
@@ -372,18 +370,13 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('⚠️ DANGER ZONE'),
+          title: Text('⚠️ ${l10n.dangerZoneResetTitle}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'This will PERMANENTLY DELETE:\n'
-                '• All learning progress (kanji & vocab)\n'
-                '• Daily activity history\n'
-                '• Quiz results history\n'
-                '• Cached kanji & vocabulary data\n\n'
-                'This action CANNOT be undone!',
+              Text(
+                l10n.dangerZoneResetContent,
               ),
               const SizedBox(height: 16),
               CheckboxListTile(
@@ -397,7 +390,7 @@ class SettingsScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -426,7 +419,7 @@ class SettingsScreen extends ConsumerWidget {
                       }
                     }
                   : null,
-              child: const Text('DELETE EVERYTHING'),
+              child: Text(l10n.resetAllData),
             ),
           ],
         ),
