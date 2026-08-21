@@ -467,11 +467,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     bool isCorrect = false;
     final target = currentQuestion.kanjiCharacter ?? currentQuestion.correctAnswer;
     
-    // Check if any of the top candidates match the target character exactly
+    // Check if any of the candidates match the target character
     if (candidates.isNotEmpty) {
-      // Look through top 5 candidates to be more generous
-      final topCandidates = candidates.take(5).map((c) => c.text).toList();
-      if (topCandidates.contains(target)) {
+      final allCandidates = candidates.map((c) => c.text).toList();
+      if (allCandidates.contains(target)) {
         isCorrect = true;
       }
     }

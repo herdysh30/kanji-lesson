@@ -66,8 +66,8 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
 
       final target = _currentItem!.text;
       if (candidates.isNotEmpty) {
-        final topCandidates = candidates.take(5).map((c) => c.text).toList();
-        if (topCandidates.contains(target)) {
+        final allCandidates = candidates.map((c) => c.text).toList();
+        if (allCandidates.contains(target)) {
           setState(() {
             _isCorrect = true;
           });
