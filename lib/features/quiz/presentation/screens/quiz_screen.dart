@@ -112,25 +112,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                 child: Text(
                   'Question ${sessionState.currentIndex + 1} of ${sessionState.questions.length}',
-                  style: Theme.of(context).textTheme.labelLarge,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
               
               // Prompt Area
               if (currentQuestion.type != QuizType.writing)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
+                  padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
                   child: SizedBox(
-                    height: 120,
+                    height: 72,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
                         currentQuestion.prompt,
                         style: AppTheme.kanjiLarge(context).copyWith(
-                          fontSize: 96,
+                          fontSize: 72,
                           fontWeight: FontWeight.bold,
                           height: 1.1,
                         ),
@@ -141,10 +141,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 ),
               if (currentQuestion.type == QuizType.writing)
                 Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
                   child: Text(
                     currentQuestion.prompt,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                     textAlign: TextAlign.center,
@@ -154,13 +154,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               // Hint for Meaning/Reading Quizzes
               if (currentQuestion.type != QuizType.writing && !_isAnswerRevealed)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
+                  padding: const EdgeInsets.only(bottom: 4.0),
                   child: AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     child: _showHint
                         ? Text(
                             currentQuestion.options[currentQuestion.correctIndex].explanation ?? '',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -168,10 +168,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                           )
                         : TextButton.icon(
                             onPressed: () => setState(() => _showHint = true),
-                            icon: const Icon(Icons.lightbulb_outline),
+                            icon: const Icon(Icons.lightbulb_outline, size: 18),
                             label: const Text('Show Hint'),
                             style: TextButton.styleFrom(
                               foregroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                             ),
                           ),
                   ),
@@ -179,11 +181,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
               // Question Instruction
               Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
+                padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   _getInstructionText(currentQuestion.type),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -223,14 +226,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                     }
                       
                                     return Padding(
-                                      padding: const EdgeInsets.only(bottom: 12.0),
+                                      padding: const EdgeInsets.only(bottom: 8.0),
                                       child: SizedBox(
                                         width: double.infinity,
                                         child: FilledButton(
                                           style: FilledButton.styleFrom(
                                             backgroundColor: buttonColor,
                                             foregroundColor: textColor,
-                                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12),
                                             ),
@@ -242,7 +245,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                               Text(
                                                 option.text,
                                                 style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 15,
                                                   fontWeight: _isAnswerRevealed && (isCorrectOption || isSelected) ? FontWeight.bold : FontWeight.normal,
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -250,11 +253,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                               // Show explanation after answering
                                               if (_isAnswerRevealed && option.kanjiCharacter != null)
                                                 Padding(
-                                                  padding: const EdgeInsets.only(top: 6),
+                                                  padding: const EdgeInsets.only(top: 4),
                                                   child: Text(
                                                     _getOptionExplanation(currentQuestion.type, option),
                                                     style: TextStyle(
-                                                      fontSize: 13,
+                                                      fontSize: 12,
                                                       color: textColor.withValues(alpha: 0.85),
                                                       fontWeight: FontWeight.w400,
                                                     ),
@@ -270,14 +273,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   // Skip / Don't Know button
                                   if (!_isAnswerRevealed)
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 8, bottom: 16),
+                                      padding: const EdgeInsets.only(top: 4, bottom: 8),
                                       child: SizedBox(
                                         width: double.infinity,
-                                        height: 56,
+                                        height: 44,
                                         child: TextButton(
                                           onPressed: () => _handleOptionSelected(-1, currentQuestion),
                                           style: TextButton.styleFrom(
                                             foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                                            visualDensity: VisualDensity.compact,
                                           ),
                                           child: const Text('I don\'t know / Skip'),
                                         ),
@@ -286,10 +290,10 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                   // Next button
                                   if (_isAnswerRevealed)
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 4, bottom: 16),
+                                      padding: const EdgeInsets.only(top: 4, bottom: 8),
                                       child: SizedBox(
                                         width: double.infinity,
-                                        height: 56,
+                                        height: 48,
                                         child: FilledButton.icon(
                                           onPressed: _onNextPressed,
                                           icon: const Icon(Icons.arrow_forward_rounded),
@@ -387,20 +391,23 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               showBackground: _showHint || _isAnswerRevealed,
               topAction: TextButton.icon(
                 onPressed: _isAnswerRevealed ? null : () => setState(() => _showHint = !_showHint),
-                icon: Icon(_showHint ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(_showHint ? Icons.visibility_off : Icons.visibility, size: 18),
                 label: Text(_showHint ? 'Hide Hint' : 'Show Hint'),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                ),
               ),
               onInkChanged: (ink) => setState(() => _currentInk = ink),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         if (!_isAnswerRevealed)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: 4),
             child: SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 44,
               child: TextButton(
                 onPressed: () {
                   setState(() {
@@ -412,6 +419,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                  visualDensity: VisualDensity.compact,
                 ),
                 child: const Text('I don\'t know / Skip'),
               ),
@@ -419,7 +427,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           ),
         SizedBox(
           width: double.infinity,
-          height: 56,
+          height: 48,
           child: _isAnswerRevealed
               ? FilledButton.icon(
                   onPressed: _onNextPressed,
@@ -438,12 +446,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       ? null
                       : () => _handleCheckDrawing(currentQuestion),
                   icon: _isChecking
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.check_circle_rounded),
                   label: Text(_isChecking ? 'Checking...' : 'Check Answer'),
                 ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
       ],
     );
   }
