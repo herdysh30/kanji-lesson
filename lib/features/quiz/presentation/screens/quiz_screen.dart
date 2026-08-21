@@ -125,7 +125,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               if (currentQuestion.type != QuizType.writing)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                    padding: const EdgeInsets.only(top: 32.0, bottom: 8.0, left: 16.0, right: 16.0),
                     child: SizedBox(
                       height: 100,
                       child: FittedBox(
@@ -147,7 +147,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
               if (currentQuestion.type == QuizType.writing)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                    padding: const EdgeInsets.only(top: 24.0, bottom: 8.0, left: 16.0, right: 16.0),
                     child: Text(
                       currentQuestion.prompt,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
