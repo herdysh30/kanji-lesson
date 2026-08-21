@@ -215,13 +215,17 @@ class QuizGenerator {
             .where((k) => k.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
             
-        distractorKanji.sort((a, b) {
-          int scoreA = a.strokeCount == kanji.strokeCount ? 2 : 0;
-          int scoreB = b.strokeCount == kanji.strokeCount ? 2 : 0;
-          return scoreB.compareTo(scoreA);
-        });
+        final List<Kanji> selected = [];
+        for (var k in distractorKanji) {
+          if (selected.length >= 3) break;
+          if (k.strokeCount == kanji.strokeCount) selected.add(k);
+        }
+        for (var k in distractorKanji) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(k)) selected.add(k);
+        }
             
-        final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
+        final distractorOptions = selected.map((k) => QuizOption(
           text: k.primaryMeaning(isId),
           kanjiCharacter: k.character,
           explanation: k.primaryReading,
@@ -262,16 +266,21 @@ class QuizGenerator {
             .where((v) => v.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
             
-        distractorVocab.sort((a, b) {
-          int scoreA = 0; int scoreB = 0;
-          if (a.word.length == vocab.word.length) scoreA += 3;
-          if (b.word.length == vocab.word.length) scoreB += 3;
-          if (a.word.isNotEmpty && vocab.word.isNotEmpty && a.word.characters.first == vocab.word.characters.first) scoreA += 2;
-          if (b.word.isNotEmpty && vocab.word.isNotEmpty && b.word.characters.first == vocab.word.characters.first) scoreB += 2;
-          return scoreB.compareTo(scoreA);
-        });
+        final List<JlptVocab> selected = [];
+        final sameStart = distractorVocab.where((v) => v.word.isNotEmpty && vocab.word.isNotEmpty && v.word.characters.first == vocab.word.characters.first).toList();
+        if (sameStart.isNotEmpty) selected.add(sameStart[0]);
+        if (sameStart.length > 1 && _random.nextBool()) selected.add(sameStart[1]);
+        
+        for (var v in distractorVocab) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(v) && v.word.length == vocab.word.length) selected.add(v);
+        }
+        for (var v in distractorVocab) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(v)) selected.add(v);
+        }
             
-        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+        final distractorOptions = selected.map((v) => QuizOption(
           text: v.primaryMeaning(isId),
           kanjiCharacter: v.word,
           explanation: v.furigana,
@@ -314,18 +323,21 @@ class QuizGenerator {
             .where((k) => k.primaryReading != correctAnswer)
             .toList()..shuffle(_random);
             
-        distractorKanji.sort((a, b) {
-          int scoreA = 0; int scoreB = 0;
-          if (a.strokeCount == kanji.strokeCount) scoreA += 1;
-          if (b.strokeCount == kanji.strokeCount) scoreB += 1;
-          if (a.primaryReading.length == kanji.primaryReading.length) scoreA += 2;
-          if (b.primaryReading.length == kanji.primaryReading.length) scoreB += 2;
-          if (a.primaryReading.isNotEmpty && kanji.primaryReading.isNotEmpty && a.primaryReading.characters.last == kanji.primaryReading.characters.last) scoreA += 3;
-          if (b.primaryReading.isNotEmpty && kanji.primaryReading.isNotEmpty && b.primaryReading.characters.last == kanji.primaryReading.characters.last) scoreB += 3;
-          return scoreB.compareTo(scoreA);
-        });
+        final List<Kanji> selected = [];
+        final sameEnding = distractorKanji.where((k) => k.primaryReading.isNotEmpty && kanji.primaryReading.isNotEmpty && k.primaryReading.characters.last == kanji.primaryReading.characters.last).toList();
+        if (sameEnding.isNotEmpty) selected.add(sameEnding[0]);
+        if (sameEnding.length > 1 && _random.nextBool()) selected.add(sameEnding[1]);
+        
+        for (var k in distractorKanji) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(k) && k.primaryReading.length == kanji.primaryReading.length) selected.add(k);
+        }
+        for (var k in distractorKanji) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(k)) selected.add(k);
+        }
             
-        final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
+        final distractorOptions = selected.map((k) => QuizOption(
           text: k.primaryReading,
           kanjiCharacter: k.character,
           explanation: k.primaryMeaning(isId),
@@ -364,18 +376,21 @@ class QuizGenerator {
             .where((v) => v.furigana != correctAnswer)
             .toList()..shuffle(_random);
             
-        distractorVocab.sort((a, b) {
-          int scoreA = 0; int scoreB = 0;
-          if (a.word.length == vocab.word.length) scoreA += 2;
-          if (b.word.length == vocab.word.length) scoreB += 2;
-          if (a.furigana.length == vocab.furigana.length) scoreA += 2;
-          if (b.furigana.length == vocab.furigana.length) scoreB += 2;
-          if (a.furigana.isNotEmpty && vocab.furigana.isNotEmpty && a.furigana.characters.last == vocab.furigana.characters.last) scoreA += 5;
-          if (b.furigana.isNotEmpty && vocab.furigana.isNotEmpty && b.furigana.characters.last == vocab.furigana.characters.last) scoreB += 5;
-          return scoreB.compareTo(scoreA);
-        });
+        final List<JlptVocab> selected = [];
+        final sameEnding = distractorVocab.where((v) => v.furigana.isNotEmpty && vocab.furigana.isNotEmpty && v.furigana.characters.last == vocab.furigana.characters.last).toList();
+        if (sameEnding.isNotEmpty) selected.add(sameEnding[0]);
+        if (sameEnding.length > 1 && _random.nextBool()) selected.add(sameEnding[1]);
+        
+        for (var v in distractorVocab) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(v) && v.furigana.length == vocab.furigana.length) selected.add(v);
+        }
+        for (var v in distractorVocab) {
+          if (selected.length >= 3) break;
+          if (!selected.contains(v)) selected.add(v);
+        }
             
-        final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
+        final distractorOptions = selected.map((v) => QuizOption(
           text: v.furigana,
           kanjiCharacter: v.word,
           explanation: v.primaryMeaning(isId),
