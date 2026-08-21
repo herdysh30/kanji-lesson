@@ -87,8 +87,45 @@ class VocabDetailScreen extends ConsumerWidget {
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxHeight: 500),
-                                child: KanjiDrawingPad(character: vocab.word),
+                                constraints: const BoxConstraints(maxHeight: 520),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (vocab.furigana.isNotEmpty && vocab.furigana != vocab.word)
+                                      Text(
+                                        vocab.furigana,
+                                        style: AppTheme.japaneseReading(context, fontSize: 16).copyWith(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      vocab.word,
+                                      style: AppTheme.japaneseText(context, fontSize: 32).copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (vocab.meaning.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        vocab.meaning,
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                            ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                    const SizedBox(height: 12),
+                                    Expanded(
+                                      child: KanjiDrawingPad(character: vocab.word),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

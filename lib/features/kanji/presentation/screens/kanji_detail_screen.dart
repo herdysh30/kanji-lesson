@@ -216,8 +216,45 @@ class _KanjiDetailBody extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 500),
-                      child: KanjiDrawingPad(character: kanji.character),
+                      constraints: const BoxConstraints(maxHeight: 520),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (kanji.primaryReading.isNotEmpty)
+                            Text(
+                              kanji.primaryReading,
+                              style: AppTheme.japaneseReading(context, fontSize: 16).copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          const SizedBox(height: 2),
+                          Text(
+                            kanji.character,
+                            style: AppTheme.japaneseText(context, fontSize: 32).copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (displayMeanings.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              displayMeanings.first,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          Expanded(
+                            child: KanjiDrawingPad(character: kanji.character),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
