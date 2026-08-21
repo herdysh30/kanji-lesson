@@ -13,7 +13,7 @@ import 'package:kanji_lesson/features/kanji/domain/entities/vocabulary.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
-import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
 
 class KanjiDetailScreen extends ConsumerStatefulWidget {
   const KanjiDetailScreen({
@@ -208,66 +208,11 @@ class _KanjiDetailBody extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.tonalIcon(
             onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => Dialog(
-                  insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: MediaQuery.of(context).size.height * 0.75,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.close_rounded),
-                                onPressed: () => Navigator.pop(context),
-                                tooltip: 'Close',
-                              ),
-                            ],
-                          ),
-                          if (kanji.primaryReading.isNotEmpty)
-                            Text(
-                              kanji.primaryReading,
-                              style: AppTheme.japaneseReading(context, fontSize: 16).copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          const SizedBox(height: 2),
-                          Text(
-                            kanji.character,
-                            style: AppTheme.japaneseText(context, fontSize: 32).copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          if (displayMeanings.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              displayMeanings.first,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-                          Expanded(
-                            child: KanjiDrawingPad(character: kanji.character),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              showPracticeWritingDialog(
+                context,
+                character: kanji.character,
+                reading: kanji.primaryReading,
+                meaning: displayMeanings.isNotEmpty ? displayMeanings.first : null,
               );
             },
             icon: const Icon(Icons.draw_rounded),

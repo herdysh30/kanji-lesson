@@ -5,7 +5,7 @@ import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
-import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
 
 class VocabDetailScreen extends ConsumerWidget {
   const VocabDetailScreen({
@@ -79,66 +79,11 @@ class VocabDetailScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                     FilledButton.tonalIcon(
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => Dialog(
-                            insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: MediaQuery.of(context).size.height * 0.75,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.close_rounded),
-                                          onPressed: () => Navigator.pop(context),
-                                          tooltip: 'Close',
-                                        ),
-                                      ],
-                                    ),
-                                    if (vocab.furigana.isNotEmpty && vocab.furigana != vocab.word)
-                                      Text(
-                                        vocab.furigana,
-                                        style: AppTheme.japaneseReading(context, fontSize: 16).copyWith(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      vocab.word,
-                                      style: AppTheme.japaneseText(context, fontSize: 32).copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    if (vocab.meaning.isNotEmpty) ...[
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        vocab.meaning,
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                            ),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                    const SizedBox(height: 8),
-                                    Expanded(
-                                      child: KanjiDrawingPad(character: vocab.word),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                        showPracticeWritingDialog(
+                          context,
+                          character: vocab.word,
+                          reading: vocab.furigana,
+                          meaning: vocab.meaning,
                         );
                       },
                       icon: const Icon(Icons.draw_rounded),

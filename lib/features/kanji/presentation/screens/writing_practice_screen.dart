@@ -6,11 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart' as mlkit;
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
-import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 
 class WritingPracticeScreen extends ConsumerStatefulWidget {
@@ -130,45 +130,10 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
               }
             }
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Column(
-                children: [
-                  // Reading/Furigana
-                  if (readingStr.isNotEmpty)
-                    Text(
-                      readingStr,
-                      style: AppTheme.japaneseReading(context, fontSize: 16).copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  const SizedBox(height: 2),
-
-                  // Kanji / Word Text
-                  Text(
-                    _currentItem!.text,
-                    style: AppTheme.japaneseText(context, fontSize: 32).copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 2),
-
-                  // Meaning
-                  if (meaningStr.isNotEmpty)
-                    Text(
-                      meaningStr,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
-              ),
+            return WritingPromptHeader(
+              text: _currentItem!.text,
+              reading: readingStr,
+              meaning: meaningStr,
             );
           }
 
