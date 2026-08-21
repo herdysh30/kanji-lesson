@@ -82,15 +82,25 @@ class VocabDetailScreen extends ConsumerWidget {
                         showDialog(
                           context: context,
                           builder: (context) => Dialog(
-                            insetPadding: const EdgeInsets.all(16),
+                            insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxHeight: 520),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: MediaQuery.of(context).size.height * 0.75,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                                 child: Column(
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.close_rounded),
+                                          onPressed: () => Navigator.pop(context),
+                                          tooltip: 'Close',
+                                        ),
+                                      ],
+                                    ),
                                     if (vocab.furigana.isNotEmpty && vocab.furigana != vocab.word)
                                       Text(
                                         vocab.furigana,
@@ -120,7 +130,7 @@ class VocabDetailScreen extends ConsumerWidget {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 8),
                                     Expanded(
                                       child: KanjiDrawingPad(character: vocab.word),
                                     ),
