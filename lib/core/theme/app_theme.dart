@@ -103,7 +103,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        labelStyle: GoogleFonts.outfit(fontSize: 13),
+        labelStyle: GoogleFonts.outfit(fontSize: 13, color: AppColors.textPrimaryLight),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       ),
       dividerTheme: DividerThemeData(
@@ -214,7 +214,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        labelStyle: GoogleFonts.outfit(fontSize: 13),
+        labelStyle: GoogleFonts.outfit(fontSize: 13, color: AppColors.textPrimaryDark),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       ),
       dividerTheme: DividerThemeData(
@@ -319,51 +319,46 @@ class AppTheme {
   // ─── Kanji Text Styles ────────────────────────────────────────
   /// Large kanji display (detail screen, flashcard)
   static TextStyle kanjiLarge(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GoogleFonts.notoSansJp(
       fontSize: 96,
       fontWeight: FontWeight.w400,
-      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      color: Theme.of(context).colorScheme.onSurface,
     );
   }
 
   /// Medium kanji display (list items, quiz)
   static TextStyle kanjiMedium(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GoogleFonts.notoSansJp(
       fontSize: 48,
       fontWeight: FontWeight.w400,
-      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      color: Theme.of(context).colorScheme.onSurface,
     );
   }
 
   /// Small kanji display (cards, chips)
   static TextStyle kanjiSmall(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GoogleFonts.notoSansJp(
       fontSize: 32,
       fontWeight: FontWeight.w400,
-      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      color: Theme.of(context).colorScheme.onSurface,
     );
   }
 
   /// Japanese reading text (hiragana/katakana)
   static TextStyle japaneseReading(BuildContext context, {double fontSize = 16}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GoogleFonts.notoSansJp(
       fontSize: fontSize,
       fontWeight: FontWeight.w400,
-      color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
   }
 
   /// Japanese text style
   static TextStyle japaneseText(BuildContext context, {double fontSize = 16}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GoogleFonts.notoSansJp(
       fontSize: fontSize,
       fontWeight: FontWeight.w400,
-      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      color: Theme.of(context).colorScheme.onSurface,
     );
   }
 }

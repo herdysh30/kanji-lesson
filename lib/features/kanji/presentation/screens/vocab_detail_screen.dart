@@ -72,7 +72,7 @@ class VocabDetailScreen extends ConsumerWidget {
                     Text(
                       vocab.romaji,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             letterSpacing: 1.2,
                           ),
                     ),

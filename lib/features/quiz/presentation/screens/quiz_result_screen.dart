@@ -40,14 +40,14 @@ class QuizResultScreen extends ConsumerWidget {
               isPerfect ? Icons.workspace_premium_rounded : 
               (isGood ? Icons.star_rounded : Icons.school_rounded),
               size: 100,
-              color: isPerfect ? Colors.amber : (isGood ? AppColors.primary : Colors.grey),
+              color: isPerfect ? Colors.amber.shade700 : (isGood ? AppColors.primary : Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             Text(
               isPerfect ? 'Perfect!' : (isGood ? 'Good Job!' : 'Keep Practicing!'),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isPerfect ? Colors.amber[700] : (isGood ? AppColors.primary : null),
+                color: isPerfect ? Colors.amber.shade800 : (isGood ? AppColors.primary : null),
               ),
             ),
             const SizedBox(height: 32),
@@ -86,7 +86,7 @@ class QuizResultScreen extends ConsumerWidget {
                       _ScoreItem(
                         label: 'Skipped',
                         value: '${result.skippedCount}',
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ],
                   ],

@@ -73,7 +73,15 @@ class KanjiListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
                       selected: isSelected,
-                      label: Text(label),
+                      label: Text(
+                        label,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Theme.of(context).colorScheme.onSurface,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
                       onSelected: (_) =>
                           ref.read(kanjiFilterProvider.notifier).state = f,
                       selectedColor: AppColors.primary.withValues(alpha: 0.15),

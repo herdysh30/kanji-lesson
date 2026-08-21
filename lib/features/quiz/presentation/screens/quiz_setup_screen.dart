@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
+import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
@@ -34,7 +35,9 @@ class QuizSetupScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               'Choose where the Kanji should be picked from:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -138,7 +141,7 @@ class QuizSetupScreen extends ConsumerWidget {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             '✓ Japanese Handwriting Model Ready',
-                            style: TextStyle(color: Colors.green[700], fontSize: 12),
+                            style: const TextStyle(color: AppColors.correct, fontSize: 12),
                           ),
                         );
                       }
@@ -185,7 +188,9 @@ class QuizSetupScreen extends ConsumerWidget {
                 maxItemsAsync.when(
                   data: (max) => Text(
                     'Max: $max items',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),

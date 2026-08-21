@@ -138,6 +138,8 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                             data: (svgStrings) {
                               return LayoutBuilder(
                                 builder: (context, constraints) {
+                                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                                  final hintColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: isDark ? 0.18 : 0.25);
                                   final cellWidth = constraints.maxWidth / columns;
                                   final cellHeight = constraints.maxHeight / rows;
                                   
@@ -156,7 +158,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                               char,
                                               style: TextStyle(
                                                 fontSize: cellHeight * 0.8,
-                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                                color: hintColor,
                                               ),
                                             ),
                                           ),
@@ -170,7 +172,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                           svgStr,
                                           fit: BoxFit.contain,
                                           colorFilter: ColorFilter.mode(
-                                            Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                            hintColor,
                                             BlendMode.srcIn,
                                           ),
                                         ),
@@ -183,6 +185,8 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                             loading: () => const Center(child: CircularProgressIndicator()),
                             error: (_, __) => LayoutBuilder(
                               builder: (context, constraints) {
+                                final isDark = Theme.of(context).brightness == Brightness.dark;
+                                final hintColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: isDark ? 0.18 : 0.25);
                                 final cellWidth = constraints.maxWidth / columns;
                                 final cellHeight = constraints.maxHeight / rows;
                                 
@@ -197,7 +201,7 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
                                           widget.character[index],
                                           style: TextStyle(
                                             fontSize: cellHeight * 0.8,
-                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                                            color: hintColor,
                                           ),
                                         ),
                                       ),
