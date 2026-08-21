@@ -286,20 +286,6 @@ class _Flashcard extends ConsumerWidget {
               ),
             ),
             
-            // Show sentence on the front of the card if available
-            sentencesAsync.when(
-              data: (sentences) {
-                if (sentences.isEmpty) return const SizedBox.shrink();
-                final sentence = sentences.first;
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-                  child: _buildSentenceText(context, sentence.japanese, entry.kanjiCharacter),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-
             if (isFlipped) ...[
               const SizedBox(height: 32),
               const Divider(indent: 32, endIndent: 32),
@@ -314,6 +300,8 @@ class _Flashcard extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: 24.0, left: 24, right: 24),
                     child: Column(
                       children: [
+                        _buildSentenceText(context, sentence.japanese, entry.kanjiCharacter),
+                        const SizedBox(height: 8),
                         Text(
                           sentence.english,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -353,7 +341,7 @@ class _Flashcard extends ConsumerWidget {
                               style: AppTheme.japaneseReading(context, fontSize: 28),
                             ),
                             const SizedBox(width: 8),
-                            KanjiAudioButton(character: entry.kanjiCharacter),
+                            KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -382,7 +370,7 @@ class _Flashcard extends ConsumerWidget {
                               style: AppTheme.japaneseReading(context, fontSize: 28),
                             ),
                             const SizedBox(width: 8),
-                            KanjiAudioButton(character: entry.kanjiCharacter),
+                            KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
                           ],
                         ),
                         const SizedBox(height: 8),

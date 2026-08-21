@@ -5,9 +5,11 @@ class KanjiAudioButton extends StatefulWidget {
   const KanjiAudioButton({
     super.key,
     required this.character,
+    this.autoPlay = false,
   });
 
   final String character;
+  final bool autoPlay;
 
   @override
   State<KanjiAudioButton> createState() => _KanjiAudioButtonState();
@@ -41,6 +43,10 @@ class _KanjiAudioButtonState extends State<KanjiAudioButton> {
     });
 
     _isInit = true;
+    
+    if (widget.autoPlay) {
+      _playAudio();
+    }
   }
 
   @override
