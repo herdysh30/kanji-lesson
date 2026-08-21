@@ -31,7 +31,6 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
   List<GridItem> _pool = [];
 
   Timer? _debounceTimer;
-  bool _isChecking = false;
   bool _isCorrect = false;
 
   @override
@@ -45,7 +44,6 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
     _debounceTimer?.cancel();
     setState(() {
       _isCorrect = false;
-      _isChecking = false;
       _currentItem = _pool[_random.nextInt(_pool.length)];
     });
   }
@@ -56,22 +54,15 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
 
     if (ink.strokes.isEmpty) return;
 
-    // Debounce recognition by 1.1s so user has time to draw without interruption
-    _debounceTimer = Timer(const Duration(milliseconds: 1100), () async {
+    // Debounce recognition by 1.2s after user pauses drawing
+    _debounceTimer = Timer(const Duration(milliseconds: 1200), () async {
       if (!mounted || _isCorrect || _currentItem == null) return;
 
-      setState(() {
-        _isChecking = true;
-      });
-
+      // Silent background recognition
       final mlkitService = ref.read(mlkitDigitalInkServiceProvider);
       final candidates = await mlkitService.recognizeKanji(ink);
 
-      if (!mounted) return;
-
-      setState(() {
-        _isChecking = false;
-      });
+      if (!mounted || _isCorrect || _currentItem == null) return;
 
       final target = _currentItem!.text;
       if (candidates.isNotEmpty) {
@@ -185,68 +176,59 @@ class _WritingPracticeScreenState extends ConsumerState<WritingPracticeScreen> {
             children: [
               buildHeader(),
 
-              // Status Banner (Correct / Checking)
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                height: _isCorrect || _isChecking ? 36 : 0,
-                curve: Curves.easeInOut,
-                margin: EdgeInsets.only(bottom: _isCorrect || _isChecking ? 8 : 0),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: _isCorrect
-                      ? AppColors.correct
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: _isCorrect
-                    ? const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-                          SizedBox(width: 6),
-                          Text(
-                            'Correct! Loading next...',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      )
-                    : _isChecking
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Checking handwriting...',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-              ),
-
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
-                  child: KanjiDrawingPad(
-                    key: ValueKey(_currentItem!.text), // Forces redraw when character changes
-                    character: _currentItem!.text,
-                    showBackground: true, // Always show hint in practice mode
-                    onInkChanged: _onInkChanged,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: KanjiDrawingPad(
+                          key: ValueKey(_currentItem!.text), // Forces redraw when character changes
+                          character: _currentItem!.text,
+                          showBackground: true, // Always show hint in practice mode
+                          onInkChanged: _onInkChanged,
+                        ),
+                      ),
+
+                      // Floating Success Banner (Zero layout shift)
+                      if (_isCorrect)
+                        Positioned(
+                          top: 12,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.correct,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Correct! Loading next...',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
