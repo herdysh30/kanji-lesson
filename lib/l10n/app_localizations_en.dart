@@ -51,7 +51,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mastered => 'Mastered';
 
   @override
-  String get strokes => 'strokes';
+  String get strokes => 'Strokes';
 
   @override
   String get meaning => 'Meaning';
@@ -375,4 +375,56 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unableToLoadData =>
       'Unable to load data.\nPlease check your internet connection.';
+
+  @override
+  String get onyomi => 'Onyomi';
+
+  @override
+  String get kunyomi => 'Kunyomi';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get grade => 'Grade';
+
+  @override
+  String get jlpt => 'JLPT';
+
+  @override
+  String get frequency => 'Frequency';
+
+  @override
+  String get action => 'Action';
+
+  @override
+  String get learnThisKanji =>
+      'Learn this Kanji to start tracking its progress.';
+
+  @override
+  String get practiceWriting => 'Practice Writing';
+
+  @override
+  String get nextReview => 'Next Review';
+
+  @override
+  String get stage => 'Stage';
+
+  @override
+  String get failedToLoadDetails => 'Failed to load details';
+
+  @override
+  String get vocabularyDetail => 'Vocabulary Detail';
+
+  @override
+  String get exampleSentences => 'Example Sentences';
+
+  @override
+  String get noExampleSentences => 'No example sentences available.';
+
+  @override
+  String get failedToLoadExamples => 'Failed to load examples.';
+
+  @override
+  String get failedToLoadVocabulary => 'Failed to load vocabulary';
 }

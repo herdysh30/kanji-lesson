@@ -51,7 +51,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get mastered => 'Dikuasai';
 
   @override
-  String get strokes => 'coretan';
+  String get strokes => 'Goresan';
 
   @override
   String get meaning => 'Arti';
@@ -195,7 +195,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get typing => 'Mengetik';
 
   @override
-  String get reading => 'Cara Baca';
+  String get reading => 'Bacaan';
 
   @override
   String get quiz => 'Kuis';
@@ -375,4 +375,56 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get unableToLoadData =>
       'Gagal memuat data.\nPeriksa koneksi internet Anda.';
+
+  @override
+  String get onyomi => 'Onyomi';
+
+  @override
+  String get kunyomi => 'Kunyomi';
+
+  @override
+  String get details => 'Detail';
+
+  @override
+  String get grade => 'Tingkat';
+
+  @override
+  String get jlpt => 'JLPT';
+
+  @override
+  String get frequency => 'Frekuensi';
+
+  @override
+  String get action => 'Aksi';
+
+  @override
+  String get learnThisKanji =>
+      'Pelajari Kanji ini untuk mulai melacak progresnya.';
+
+  @override
+  String get practiceWriting => 'Latihan Menulis';
+
+  @override
+  String get nextReview => 'Ulasan Berikutnya';
+
+  @override
+  String get stage => 'Tahap';
+
+  @override
+  String get failedToLoadDetails => 'Gagal memuat detail';
+
+  @override
+  String get vocabularyDetail => 'Detail Kosakata';
+
+  @override
+  String get exampleSentences => 'Contoh Kalimat';
+
+  @override
+  String get noExampleSentences => 'Tidak ada contoh kalimat yang tersedia.';
+
+  @override
+  String get failedToLoadExamples => 'Gagal memuat contoh.';
+
+  @override
+  String get failedToLoadVocabulary => 'Gagal memuat kosakata';
 }

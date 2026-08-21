@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @strokes.
   ///
   /// In en, this message translates to:
-  /// **'strokes'**
+  /// **'Strokes'**
   String get strokes;
 
   /// No description provided for @meaning.
@@ -775,6 +775,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to load data.\nPlease check your internet connection.'**
   String get unableToLoadData;
+
+  /// No description provided for @onyomi.
+  ///
+  /// In en, this message translates to:
+  /// **'Onyomi'**
+  String get onyomi;
+
+  /// No description provided for @kunyomi.
+  ///
+  /// In en, this message translates to:
+  /// **'Kunyomi'**
+  String get kunyomi;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @grade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get grade;
+
+  /// No description provided for @jlpt.
+  ///
+  /// In en, this message translates to:
+  /// **'JLPT'**
+  String get jlpt;
+
+  /// No description provided for @frequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get frequency;
+
+  /// No description provided for @action.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get action;
+
+  /// No description provided for @learnThisKanji.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn this Kanji to start tracking its progress.'**
+  String get learnThisKanji;
+
+  /// No description provided for @practiceWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice Writing'**
+  String get practiceWriting;
+
+  /// No description provided for @nextReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Review'**
+  String get nextReview;
+
+  /// No description provided for @stage.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get stage;
+
+  /// No description provided for @failedToLoadDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load details'**
+  String get failedToLoadDetails;
+
+  /// No description provided for @vocabularyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocabulary Detail'**
+  String get vocabularyDetail;
+
+  /// No description provided for @exampleSentences.
+  ///
+  /// In en, this message translates to:
+  /// **'Example Sentences'**
+  String get exampleSentences;
+
+  /// No description provided for @noExampleSentences.
+  ///
+  /// In en, this message translates to:
+  /// **'No example sentences available.'**
+  String get noExampleSentences;
+
+  /// No description provided for @failedToLoadExamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load examples.'**
+  String get failedToLoadExamples;
+
+  /// No description provided for @failedToLoadVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load vocabulary'**
+  String get failedToLoadVocabulary;
 }
 
 class _AppLocalizationsDelegate

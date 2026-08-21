@@ -8,6 +8,7 @@ import 'package:kanji_lesson/features/settings/presentation/providers/settings_p
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class VocabDetailScreen extends ConsumerWidget {
   const VocabDetailScreen({
@@ -21,12 +22,13 @@ class VocabDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // The vocab list provider is already cached locally, so we can fetch all and find the word
     final vocabListAsync = ref.watch(jlptVocabListProvider(jlptLevel));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vocabulary Detail'),
+        title: Text(l10n.vocabularyDetail),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
@@ -89,7 +91,7 @@ class VocabDetailScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.draw_rounded),
-                      label: const Text('Practice Writing'),
+                      label: Text(l10n.practiceWriting),
                     ),
                   ],
                 ),
@@ -98,7 +100,7 @@ class VocabDetailScreen extends ConsumerWidget {
 
               // ─── Meaning Section ───────────────────────────────
               Text(
-                'Meaning',
+                l10n.meaning,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -130,7 +132,7 @@ class VocabDetailScreen extends ConsumerWidget {
               // ─── Sentences Section ──────────────────────────────
               const SizedBox(height: 32),
               Text(
-                'Example Sentences',
+                l10n.exampleSentences,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -140,9 +142,9 @@ class VocabDetailScreen extends ConsumerWidget {
               ref.watch(vocabSentencesProvider(word)).when(
                     data: (sentences) {
                       if (sentences.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Text('No example sentences available.'),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(l10n.noExampleSentences),
                         );
                       }
                       
@@ -195,9 +197,9 @@ class VocabDetailScreen extends ConsumerWidget {
                         child: CircularProgressIndicator(),
                       ),
                     ),
-                    error: (_, __) => const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text('Failed to load examples.'),
+                    error: (_, __) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(l10n.failedToLoadExamples),
                     ),
                   ),
             ],
@@ -205,7 +207,7 @@ class VocabDetailScreen extends ConsumerWidget {
         },
         loading: () => const AppLoadingWidget(),
         error: (error, _) => AppErrorWidget(
-          message: 'Failed to load vocabulary',
+          message: l10n.failedToLoadVocabulary,
           onRetry: () => ref.invalidate(jlptVocabListProvider(jlptLevel)),
         ),
       ),

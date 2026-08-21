@@ -15,6 +15,7 @@ import 'package:kanji_lesson/features/review/presentation/providers/review_provi
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
+import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class KanjiDetailScreen extends ConsumerStatefulWidget {
   const KanjiDetailScreen({
@@ -65,7 +66,7 @@ class _KanjiDetailScreenState extends ConsumerState<KanjiDetailScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.quiz_rounded),
-                tooltip: 'Start Quiz',
+                tooltip: AppLocalizations.of(context)!.startQuiz,
                 onPressed: () => context.go('/quiz'),
               ),
             ],
@@ -152,9 +153,9 @@ class _KanjiPage extends ConsumerWidget {
         vocabularyAsync: vocabularyAsync,
         ref: ref,
       ),
-      loading: () => const AppLoadingWidget(message: 'Loading...'),
+      loading: () => AppLoadingWidget(message: AppLocalizations.of(context)!.loading),
       error: (e, _) => AppErrorWidget(
-        message: 'Unable to load.',
+        message: AppLocalizations.of(context)!.failedToLoadDetails,
         onRetry: () => ref.invalidate(kanjiDetailProvider(character)),
       ),
     );
@@ -174,6 +175,7 @@ class _KanjiDetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isId = ref.watch(localeProvider).languageCode == 'id';
     final displayMeanings = isId && kanji.meaningsId.isNotEmpty ? kanji.meaningsId : kanji.meanings;
 
@@ -219,7 +221,7 @@ class _KanjiDetailBody extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '${kanji.strokeCount} strokes',
+              '${kanji.strokeCount} ${l10n.strokes}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
@@ -237,7 +239,7 @@ class _KanjiDetailBody extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.draw_rounded),
-                label: Text(isId ? 'Latihan Menulis' : 'Practice Writing'),
+                label: Text(l10n.practiceWriting),
               ),
             ],
           ),
@@ -245,7 +247,7 @@ class _KanjiDetailBody extends StatelessWidget {
 
           // ─── Meanings ────────────────────────────────────
           _SectionCard(
-            title: 'Meaning',
+            title: l10n.meaning,
             icon: Icons.translate_rounded,
             child: Wrap(
               spacing: 8,
@@ -263,7 +265,7 @@ class _KanjiDetailBody extends StatelessWidget {
           // ─── Readings ────────────────────────────────────
           if (kanji.onyomi.isNotEmpty)
             _SectionCard(
-              title: "On'yomi",
+              title: l10n.onyomi,
               icon: Icons.volume_up_rounded,
               child: Wrap(
                 spacing: 8,
@@ -280,7 +282,7 @@ class _KanjiDetailBody extends StatelessWidget {
 
           if (kanji.kunyomi.isNotEmpty)
             _SectionCard(
-              title: "Kun'yomi",
+              title: l10n.kunyomi,
               icon: Icons.volume_up_rounded,
               child: Wrap(
                 spacing: 8,
@@ -297,7 +299,7 @@ class _KanjiDetailBody extends StatelessWidget {
 
           // ─── JLPT & Grade ───────────────────────────────
           _SectionCard(
-            title: 'Info',
+            title: l10n.details,
             icon: Icons.info_outline_rounded,
             child: Row(
               children: [
@@ -308,7 +310,7 @@ class _KanjiDetailBody extends StatelessWidget {
                   ),
                 if (kanji.grade != null)
                   _InfoChip(
-                    label: 'Grade ${kanji.grade}',
+                    label: '${l10n.grade} ${kanji.grade}',
                     color: AppColors.primary,
                   ),
                 if (kanji.frequency != null)
@@ -325,7 +327,7 @@ class _KanjiDetailBody extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Vocabulary',
+                l10n.vocabulary,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const Spacer(),
@@ -341,9 +343,9 @@ class _KanjiDetailBody extends StatelessWidget {
           vocabularyAsync.when(
             data: (vocabs) {
               if (vocabs.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text('No vocabulary data available.'),
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l10n.noItemsFound),
                 );
               }
               return Column(
@@ -354,10 +356,10 @@ class _KanjiDetailBody extends StatelessWidget {
               );
             },
             loading: () =>
-                const AppLoadingWidget(message: 'Loading vocabulary...'),
-            error: (_, __) => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Unable to load vocabulary.'),
+                AppLoadingWidget(message: l10n.loading),
+            error: (_, __) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.failedToLoadVocabulary),
             ),
           ),
           const SizedBox(height: 32),
