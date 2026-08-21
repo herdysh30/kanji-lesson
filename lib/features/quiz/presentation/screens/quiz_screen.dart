@@ -105,6 +105,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           final progress = sessionState.currentIndex / sessionState.questions.length;
 
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Progress Bar
               LinearProgressIndicator(
@@ -112,81 +113,92 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
                   'Question ${sessionState.currentIndex + 1} of ${sessionState.questions.length}',
                   style: Theme.of(context).textTheme.labelMedium,
+                  textAlign: TextAlign.center,
                 ),
               ),
               
-              // Prompt Area
+              // Prompt Area (Prominently Centered at Top)
               if (currentQuestion.type != QuizType.writing)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
-                  child: SizedBox(
-                    height: 72,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        currentQuestion.prompt,
-                        style: AppTheme.kanjiLarge(context).copyWith(
-                          fontSize: 72,
-                          fontWeight: FontWeight.bold,
-                          height: 1.1,
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    child: SizedBox(
+                      height: 84,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: Text(
+                          currentQuestion.prompt,
+                          style: AppTheme.kanjiLarge(context).copyWith(
+                            fontSize: 80,
+                            fontWeight: FontWeight.bold,
+                            height: 1.1,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                 ),
               if (currentQuestion.type == QuizType.writing)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-                  child: Text(
-                    currentQuestion.prompt,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    textAlign: TextAlign.center,
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+                    child: Text(
+                      currentQuestion.prompt,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
 
               // Hint for Meaning/Reading Quizzes
               if (currentQuestion.type != QuizType.writing && !_isAnswerRevealed)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4.0),
-                  child: AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    child: _showHint
-                        ? Text(
-                            currentQuestion.options[currentQuestion.correctIndex].explanation ?? '',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                            textAlign: TextAlign.center,
-                          )
-                        : TextButton.icon(
-                            onPressed: () => setState(() => _showHint = true),
-                            icon: const Icon(Icons.lightbulb_outline, size: 18),
-                            label: const Text('Show Hint'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
+                    child: AnimatedSize(
+                      duration: const Duration(milliseconds: 200),
+                      child: _showHint
+                          ? Text(
+                              currentQuestion.options[currentQuestion.correctIndex].explanation ?? '',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                              textAlign: TextAlign.center,
+                            )
+                          : TextButton.icon(
+                              onPressed: () => setState(() => _showHint = true),
+                              icon: const Icon(Icons.lightbulb_outline, size: 18),
+                              label: const Text('Show Hint'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                 ),
 
               // Question Instruction
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(
-                  _getInstructionText(currentQuestion.type),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    _getInstructionText(currentQuestion.type),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
