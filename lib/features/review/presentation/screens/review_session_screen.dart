@@ -101,14 +101,19 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
     );
     
     // Also record daily progress
-    await db.incrementDailyReviewed(rating != SrsRating.again);
+    final isCorrect = rating != SrsRating.again;
+    await db.incrementDailyReviewed(isCorrect);
+    
+    if (isCorrect) {
+      ref.read(dailyProgressProvider.notifier).addProgress(1);
+    }
 
     // Invalidate due reviews providers immediately so the home screen is always up to date
     ref.invalidate(dueReviewsProvider);
     ref.invalidate(dueReviewCountProvider);
 
     // Update state
-    final isCorrect = rating != SrsRating.again;
+    // Update state
     
     if (!isCorrect) {
       // Requeue incorrect items at the end
@@ -133,7 +138,6 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
       // Invalidate providers to refresh dashboards
       ref.invalidate(dueReviewCountProvider);
       ref.invalidate(dueReviewsProvider);
-      // ref.invalidate(dailyStatsProvider); // TODO: Uncomment when progress feature is implemented
     }
   }
 }
