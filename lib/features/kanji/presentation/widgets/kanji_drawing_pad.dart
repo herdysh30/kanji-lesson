@@ -85,24 +85,8 @@ class _KanjiDrawingPadState extends ConsumerState<KanjiDrawingPad> {
   Widget build(BuildContext context) {
     final svgAsync = ref.watch(wordSvgProvider(widget.character));
     final len = widget.character.length;
-    final int columns;
-    final int rows;
-    if (len <= 1) {
-      columns = 1;
-      rows = 1;
-    } else if (len == 2) {
-      columns = 2;
-      rows = 1;
-    } else if (len == 3) {
-      columns = 3;
-      rows = 1;
-    } else if (len == 4) {
-      columns = 2;
-      rows = 2;
-    } else {
-      columns = 3;
-      rows = (len / 3).ceil();
-    }
+    final columns = len <= 2 ? 1 : 2;
+    final rows = len == 0 ? 1 : (len / columns).ceil();
     final padAspectRatio = columns / rows;
 
     return Column(
