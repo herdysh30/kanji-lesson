@@ -5,6 +5,7 @@ import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
+import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_drawing_pad.dart';
 
 class VocabDetailScreen extends ConsumerWidget {
   const VocabDetailScreen({
@@ -74,6 +75,27 @@ class VocabDetailScreen extends ConsumerWidget {
                             color: Theme.of(context).textTheme.bodySmall?.color,
                             letterSpacing: 1.2,
                           ),
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => Dialog(
+                            insetPadding: const EdgeInsets.all(16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxHeight: 500),
+                                child: KanjiDrawingPad(character: vocab.word),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.draw_rounded),
+                      label: const Text('Practice Writing'),
                     ),
                   ],
                 ),
