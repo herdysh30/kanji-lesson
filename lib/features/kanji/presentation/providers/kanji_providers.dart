@@ -361,3 +361,10 @@ final kanjiAliveDetailProvider = FutureProvider.family<KanjiAliveData?, String>(
   final dataSource = ref.watch(kanjiAliveRemoteDataSourceProvider);
   return dataSource.getKanjiDetails(character);
 });
+
+// ─── Vocab Sentences Provider ───────────────────────────────────
+
+final vocabSentencesProvider = FutureProvider.family<List<Sentence>, String>((ref, word) async {
+  final dataSource = ref.watch(sentenceRemoteDataSourceProvider);
+  return dataSource.fetchSentences(word);
+});

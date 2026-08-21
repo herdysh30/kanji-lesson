@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_providers.dart';
+import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
@@ -124,6 +126,80 @@ class VocabDetailScreen extends ConsumerWidget {
                       ),
                 ),
               ),
+
+              // ─── Sentences Section ──────────────────────────────
+              const SizedBox(height: 32),
+              Text(
+                'Example Sentences',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              ref.watch(vocabSentencesProvider(word)).when(
+                    data: (sentences) {
+                      if (sentences.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text('No example sentences available.'),
+                        );
+                      }
+                      
+                      final isId = ref.watch(localeProvider).languageCode == 'id';
+
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: sentences.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final sentence = sentences[index];
+                          final meaning = isId && sentence.indonesian.isNotEmpty
+                              ? sentence.indonesian
+                              : sentence.english;
+                          
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
+                                width: 0.5,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  sentence.japanese,
+                                  style: AppTheme.japaneseReading(context, fontSize: 16),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  meaning,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    error: (_, __) => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text('Failed to load examples.'),
+                    ),
+                  ),
             ],
           );
         },
