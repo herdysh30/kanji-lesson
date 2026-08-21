@@ -96,12 +96,12 @@ class QuizResultScreen extends ConsumerWidget {
             
             const SizedBox(height: 48),
 
-            // Mistakes section
-            if (result.incorrectQuestions.isNotEmpty) ...[
+            // Answers review section
+            if (result.questions.isNotEmpty) ...[
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Mistakes to review:',
+                  'Review your answers:',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -109,18 +109,45 @@ class QuizResultScreen extends ConsumerWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: result.incorrectQuestions.length,
+                itemCount: result.questions.length,
                 itemBuilder: (context, index) {
-                  final q = result.incorrectQuestions[index];
+                  final q = result.questions[index];
                   // Find the answer they picked
-                  final questionIndex = state.resolvedQuestions.indexOf(q);
-                  final selectedAnswerIndex = state.answers[questionIndex];
+                  final selectedAnswerIndex = state.answers[index];
                   final selectedAnswer = (selectedAnswerIndex >= 0 && selectedAnswerIndex < q.options.length)
                       ? q.options[selectedAnswerIndex].text
                       : (q.type == QuizType.writing ? '(Incorrect Drawing)' : 'Skipped');
 
+                  final correctOption = (q.correctIndex >= 0 && q.correctIndex < q.options.length) 
+                        ? q.options[q.correctIndex] 
+                        : null;
+                  
+                  String topText = q.prompt;
+                  String bottomText = '';
+                  String rightText = '';
+
+                  if (q.type == QuizType.meaning) {
+                    bottomText = correctOption?.explanation ?? '';
+                    rightText = q.correctAnswer;
+                  } else if (q.type == QuizType.reading) {
+                    bottomText = q.correctAnswer;
+                    rightText = correctOption?.explanation ?? '';
+                  } else {
+                    bottomText = '';
+                    rightText = q.correctAnswer;
+                  }
+
+                  final isCorrect = q.correctIndex == selectedAnswerIndex;
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: isCorrect ? AppColors.correct.withValues(alpha: 0.3) : AppColors.incorrect.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
@@ -130,19 +157,29 @@ class QuizResultScreen extends ConsumerWidget {
                             children: [
                               Expanded(
                                 flex: 3,
-                                child: Text(
-                                  q.prompt,
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: q.sentenceObj != null ? 18 : 24, // Smaller font for sentences
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      topText,
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: q.sentenceObj != null ? 18 : 24,
+                                      ),
+                                    ),
+                                    if (bottomText.isNotEmpty)
+                                      Text(
+                                        bottomText,
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 flex: 2,
                                 child: Text(
-                                  q.correctAnswer,
+                                  rightText,
                                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     color: AppColors.correct,
                                     fontWeight: FontWeight.bold,
@@ -152,11 +189,24 @@ class QuizResultScreen extends ConsumerWidget {
                             ],
                           ),
                           const Divider(),
-                          Text(
-                            'You answered: $selectedAnswer',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.incorrect,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                isCorrect ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                                color: isCorrect ? AppColors.correct : AppColors.incorrect,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'You answered: $selectedAnswer',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: isCorrect ? AppColors.correct : AppColors.incorrect,
+                                    fontWeight: isCorrect ? FontWeight.w500 : null,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

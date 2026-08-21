@@ -214,6 +214,12 @@ class QuizGenerator {
             .where((k) => k.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
             
+        distractorKanji.sort((a, b) {
+          int scoreA = a.strokeCount == kanji.strokeCount ? 2 : 0;
+          int scoreB = b.strokeCount == kanji.strokeCount ? 2 : 0;
+          return scoreB.compareTo(scoreA);
+        });
+            
         final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
           text: k.primaryMeaning(isId),
           kanjiCharacter: k.character,
@@ -254,6 +260,15 @@ class QuizGenerator {
             .where((v) => v.word != vocab.word)
             .where((v) => v.primaryMeaning(isId) != correctAnswer)
             .toList()..shuffle(_random);
+            
+        distractorVocab.sort((a, b) {
+          int scoreA = 0; int scoreB = 0;
+          if (a.word.length == vocab.word.length) scoreA += 3;
+          if (b.word.length == vocab.word.length) scoreB += 3;
+          if (a.word.isNotEmpty && vocab.word.isNotEmpty && a.word.characters.first == vocab.word.characters.first) scoreA += 2;
+          if (b.word.isNotEmpty && vocab.word.isNotEmpty && b.word.characters.first == vocab.word.characters.first) scoreB += 2;
+          return scoreB.compareTo(scoreA);
+        });
             
         final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
           text: v.primaryMeaning(isId),
@@ -298,6 +313,17 @@ class QuizGenerator {
             .where((k) => k.primaryReading != correctAnswer)
             .toList()..shuffle(_random);
             
+        distractorKanji.sort((a, b) {
+          int scoreA = 0; int scoreB = 0;
+          if (a.strokeCount == kanji.strokeCount) scoreA += 1;
+          if (b.strokeCount == kanji.strokeCount) scoreB += 1;
+          if (a.primaryReading.length == kanji.primaryReading.length) scoreA += 2;
+          if (b.primaryReading.length == kanji.primaryReading.length) scoreB += 2;
+          if (a.primaryReading.isNotEmpty && kanji.primaryReading.isNotEmpty && a.primaryReading.characters.last == kanji.primaryReading.characters.last) scoreA += 3;
+          if (b.primaryReading.isNotEmpty && kanji.primaryReading.isNotEmpty && b.primaryReading.characters.last == kanji.primaryReading.characters.last) scoreB += 3;
+          return scoreB.compareTo(scoreA);
+        });
+            
         final distractorOptions = distractorKanji.take(3).map((k) => QuizOption(
           text: k.primaryReading,
           kanjiCharacter: k.character,
@@ -336,6 +362,17 @@ class QuizGenerator {
             .where((v) => v.word != vocab.word && v.furigana.isNotEmpty)
             .where((v) => v.furigana != correctAnswer)
             .toList()..shuffle(_random);
+            
+        distractorVocab.sort((a, b) {
+          int scoreA = 0; int scoreB = 0;
+          if (a.word.length == vocab.word.length) scoreA += 2;
+          if (b.word.length == vocab.word.length) scoreB += 2;
+          if (a.furigana.length == vocab.furigana.length) scoreA += 2;
+          if (b.furigana.length == vocab.furigana.length) scoreB += 2;
+          if (a.furigana.isNotEmpty && vocab.furigana.isNotEmpty && a.furigana.characters.last == vocab.furigana.characters.last) scoreA += 5;
+          if (b.furigana.isNotEmpty && vocab.furigana.isNotEmpty && b.furigana.characters.last == vocab.furigana.characters.last) scoreB += 5;
+          return scoreB.compareTo(scoreA);
+        });
             
         final distractorOptions = distractorVocab.take(3).map((v) => QuizOption(
           text: v.furigana,
