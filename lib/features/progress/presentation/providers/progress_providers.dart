@@ -24,40 +24,18 @@ final weakKanjiCountProvider = FutureProvider<int>((ref) async {
 
 final overallProgressProvider = FutureProvider<OverallProgress>((ref) async {
   final db = ref.watch(databaseProvider);
-  
-  final allProgress = await db.getAllProgress();
-  
-  int learned = 0;
-  int mastered = 0;
-  int reviewing = 0;
-  
-  for (var p in allProgress) {
-    if (p.status == 'mastered') {
-      mastered++;
-      learned++;
-    } else if (p.status == 'reviewing' || p.status == 'learning') {
-      reviewing++;
-      learned++;
-    }
-  }
-  
+
+  final summary = await db.getProgressSummary();
+
+  final total = summary.totalCorrect + summary.totalWrong;
+
   return OverallProgress(
-    totalLearned: learned,
-    mastered: mastered,
-    reviewing: reviewing,
-    accuracy: _calculateOverallAccuracy(allProgress),
+    totalLearned: summary.learned,
+    mastered: summary.mastered,
+    reviewing: summary.reviewing,
+    accuracy: total > 0 ? summary.totalCorrect / total : 0.0,
   );
 });
-
-double _calculateOverallAccuracy(List<UserKanjiProgressEntry> progress) {
-  int correct = 0;
-  int total = 0;
-  for (var p in progress) {
-    correct += p.correctCount;
-    total += p.correctCount + p.wrongCount;
-  }
-  return total > 0 ? correct / total : 0.0;
-}
 
 class OverallProgress {
   const OverallProgress({
@@ -167,36 +145,47 @@ final progressListProvider = FutureProvider.family<List<UserKanjiProgressEntry>,
 final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {
   final db = ref.watch(databaseProvider);
   final allWeak = await db.getWeakKanji();
-  
+
+  final weakProgress = allWeak.where((p) {
+    final total = p.correctCount + p.wrongCount;
+    if (total == 0) return false;
+    return (p.correctCount / total) < 0.60;
+  }).toList();
+
+  if (weakProgress.isEmpty) return [];
+
+  final characters = weakProgress.map((p) => p.kanjiCharacter).toList();
+  final kanjiMap = {
+    for (final k in await db.getKanjiByCharacters(characters)) k.character: k,
+  };
+  final vocabGroups = <String, List<VocabularyEntry>>{};
+  for (final v in await db.getVocabularyForCharacters(characters)) {
+    vocabGroups.putIfAbsent(v.kanjiCharacter, () => []).add(v);
+  }
+
   final result = <WeakItem>[];
-  for (final progress in allWeak) {
+  for (final progress in weakProgress) {
     final total = progress.correctCount + progress.wrongCount;
-    if (total == 0) continue;
     final accuracy = progress.correctCount / total;
-    if (accuracy >= 0.60) continue;
-    
-    // Try to find kanji data first
-    final kanjiData = await db.getKanjiByCharacter(progress.kanjiCharacter);
+
     String? meaning;
     String? reading;
     bool isVocab = false;
-    
+
+    final kanjiData = kanjiMap[progress.kanjiCharacter];
     if (kanjiData != null) {
-      // It's a kanji
       final meanings = kanjiData.meanings;
       meaning = meanings.isNotEmpty ? meanings.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim() : null;
       reading = kanjiData.onyomi.isNotEmpty ? kanjiData.onyomi.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim() : null;
     } else {
-      // It's possibly a vocab word
       isVocab = true;
-      // Try jlpt vocab table
-      final vocabEntries = await db.getVocabularyForKanji(progress.kanjiCharacter);
-      if (vocabEntries.isNotEmpty) {
+      final vocabEntries = vocabGroups[progress.kanjiCharacter];
+      if (vocabEntries != null && vocabEntries.isNotEmpty) {
         meaning = vocabEntries.first.meanings.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim();
         reading = vocabEntries.first.reading;
       }
     }
-    
+
     result.add(WeakItem(
       character: progress.kanjiCharacter,
       correctCount: progress.correctCount,
@@ -209,10 +198,9 @@ final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {
       lastReviewedAt: progress.lastReviewedAt,
     ));
   }
-  
-  // Sort by accuracy ascending (weakest first)
+
   result.sort((a, b) => a.accuracy.compareTo(b.accuracy));
-  
+
   return result;
 });
 

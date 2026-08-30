@@ -1414,6 +1414,21 @@ class $UserKanjiProgressEntriesTable extends UserKanjiProgressEntries
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _isBookmarkedMeta = const VerificationMeta(
+    'isBookmarked',
+  );
+  @override
+  late final GeneratedColumn<bool> isBookmarked = GeneratedColumn<bool>(
+    'is_bookmarked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_bookmarked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     kanjiCharacter,
@@ -1427,6 +1442,7 @@ class $UserKanjiProgressEntriesTable extends UserKanjiProgressEntries
     nextReviewAt,
     firstLearnedAt,
     updatedAt,
+    isBookmarked,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1529,6 +1545,15 @@ class $UserKanjiProgressEntriesTable extends UserKanjiProgressEntries
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('is_bookmarked')) {
+      context.handle(
+        _isBookmarkedMeta,
+        isBookmarked.isAcceptableOrUnknown(
+          data['is_bookmarked']!,
+          _isBookmarkedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1582,6 +1607,10 @@ class $UserKanjiProgressEntriesTable extends UserKanjiProgressEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      isBookmarked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_bookmarked'],
+      )!,
     );
   }
 
@@ -1604,6 +1633,7 @@ class UserKanjiProgressEntry extends DataClass
   final DateTime? nextReviewAt;
   final DateTime? firstLearnedAt;
   final DateTime updatedAt;
+  final bool isBookmarked;
   const UserKanjiProgressEntry({
     required this.kanjiCharacter,
     required this.status,
@@ -1616,6 +1646,7 @@ class UserKanjiProgressEntry extends DataClass
     this.nextReviewAt,
     this.firstLearnedAt,
     required this.updatedAt,
+    required this.isBookmarked,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1637,6 +1668,7 @@ class UserKanjiProgressEntry extends DataClass
       map['first_learned_at'] = Variable<DateTime>(firstLearnedAt);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_bookmarked'] = Variable<bool>(isBookmarked);
     return map;
   }
 
@@ -1659,6 +1691,7 @@ class UserKanjiProgressEntry extends DataClass
           ? const Value.absent()
           : Value(firstLearnedAt),
       updatedAt: Value(updatedAt),
+      isBookmarked: Value(isBookmarked),
     );
   }
 
@@ -1679,6 +1712,7 @@ class UserKanjiProgressEntry extends DataClass
       nextReviewAt: serializer.fromJson<DateTime?>(json['nextReviewAt']),
       firstLearnedAt: serializer.fromJson<DateTime?>(json['firstLearnedAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isBookmarked: serializer.fromJson<bool>(json['isBookmarked']),
     );
   }
   @override
@@ -1696,6 +1730,7 @@ class UserKanjiProgressEntry extends DataClass
       'nextReviewAt': serializer.toJson<DateTime?>(nextReviewAt),
       'firstLearnedAt': serializer.toJson<DateTime?>(firstLearnedAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isBookmarked': serializer.toJson<bool>(isBookmarked),
     };
   }
 
@@ -1711,6 +1746,7 @@ class UserKanjiProgressEntry extends DataClass
     Value<DateTime?> nextReviewAt = const Value.absent(),
     Value<DateTime?> firstLearnedAt = const Value.absent(),
     DateTime? updatedAt,
+    bool? isBookmarked,
   }) => UserKanjiProgressEntry(
     kanjiCharacter: kanjiCharacter ?? this.kanjiCharacter,
     status: status ?? this.status,
@@ -1727,6 +1763,7 @@ class UserKanjiProgressEntry extends DataClass
         ? firstLearnedAt.value
         : this.firstLearnedAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    isBookmarked: isBookmarked ?? this.isBookmarked,
   );
   UserKanjiProgressEntry copyWithCompanion(
     UserKanjiProgressEntriesCompanion data,
@@ -1759,6 +1796,9 @@ class UserKanjiProgressEntry extends DataClass
           ? data.firstLearnedAt.value
           : this.firstLearnedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isBookmarked: data.isBookmarked.present
+          ? data.isBookmarked.value
+          : this.isBookmarked,
     );
   }
 
@@ -1775,7 +1815,8 @@ class UserKanjiProgressEntry extends DataClass
           ..write('lastReviewedAt: $lastReviewedAt, ')
           ..write('nextReviewAt: $nextReviewAt, ')
           ..write('firstLearnedAt: $firstLearnedAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isBookmarked: $isBookmarked')
           ..write(')'))
         .toString();
   }
@@ -1793,6 +1834,7 @@ class UserKanjiProgressEntry extends DataClass
     nextReviewAt,
     firstLearnedAt,
     updatedAt,
+    isBookmarked,
   );
   @override
   bool operator ==(Object other) =>
@@ -1808,7 +1850,8 @@ class UserKanjiProgressEntry extends DataClass
           other.lastReviewedAt == this.lastReviewedAt &&
           other.nextReviewAt == this.nextReviewAt &&
           other.firstLearnedAt == this.firstLearnedAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.isBookmarked == this.isBookmarked);
 }
 
 class UserKanjiProgressEntriesCompanion
@@ -1824,6 +1867,7 @@ class UserKanjiProgressEntriesCompanion
   final Value<DateTime?> nextReviewAt;
   final Value<DateTime?> firstLearnedAt;
   final Value<DateTime> updatedAt;
+  final Value<bool> isBookmarked;
   final Value<int> rowid;
   const UserKanjiProgressEntriesCompanion({
     this.kanjiCharacter = const Value.absent(),
@@ -1837,6 +1881,7 @@ class UserKanjiProgressEntriesCompanion
     this.nextReviewAt = const Value.absent(),
     this.firstLearnedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.isBookmarked = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserKanjiProgressEntriesCompanion.insert({
@@ -1851,6 +1896,7 @@ class UserKanjiProgressEntriesCompanion
     this.nextReviewAt = const Value.absent(),
     this.firstLearnedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.isBookmarked = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : kanjiCharacter = Value(kanjiCharacter);
   static Insertable<UserKanjiProgressEntry> custom({
@@ -1865,6 +1911,7 @@ class UserKanjiProgressEntriesCompanion
     Expression<DateTime>? nextReviewAt,
     Expression<DateTime>? firstLearnedAt,
     Expression<DateTime>? updatedAt,
+    Expression<bool>? isBookmarked,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1879,6 +1926,7 @@ class UserKanjiProgressEntriesCompanion
       if (nextReviewAt != null) 'next_review_at': nextReviewAt,
       if (firstLearnedAt != null) 'first_learned_at': firstLearnedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (isBookmarked != null) 'is_bookmarked': isBookmarked,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1895,6 +1943,7 @@ class UserKanjiProgressEntriesCompanion
     Value<DateTime?>? nextReviewAt,
     Value<DateTime?>? firstLearnedAt,
     Value<DateTime>? updatedAt,
+    Value<bool>? isBookmarked,
     Value<int>? rowid,
   }) {
     return UserKanjiProgressEntriesCompanion(
@@ -1909,6 +1958,7 @@ class UserKanjiProgressEntriesCompanion
       nextReviewAt: nextReviewAt ?? this.nextReviewAt,
       firstLearnedAt: firstLearnedAt ?? this.firstLearnedAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1949,6 +1999,9 @@ class UserKanjiProgressEntriesCompanion
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (isBookmarked.present) {
+      map['is_bookmarked'] = Variable<bool>(isBookmarked.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1969,6 +2022,7 @@ class UserKanjiProgressEntriesCompanion
           ..write('nextReviewAt: $nextReviewAt, ')
           ..write('firstLearnedAt: $firstLearnedAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('isBookmarked: $isBookmarked, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4361,6 +4415,7 @@ typedef $$UserKanjiProgressEntriesTableCreateCompanionBuilder =
       Value<DateTime?> nextReviewAt,
       Value<DateTime?> firstLearnedAt,
       Value<DateTime> updatedAt,
+      Value<bool> isBookmarked,
       Value<int> rowid,
     });
 typedef $$UserKanjiProgressEntriesTableUpdateCompanionBuilder =
@@ -4376,6 +4431,7 @@ typedef $$UserKanjiProgressEntriesTableUpdateCompanionBuilder =
       Value<DateTime?> nextReviewAt,
       Value<DateTime?> firstLearnedAt,
       Value<DateTime> updatedAt,
+      Value<bool> isBookmarked,
       Value<int> rowid,
     });
 
@@ -4440,6 +4496,11 @@ class $$UserKanjiProgressEntriesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isBookmarked => $composableBuilder(
+    column: $table.isBookmarked,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4507,6 +4568,11 @@ class $$UserKanjiProgressEntriesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isBookmarked => $composableBuilder(
+    column: $table.isBookmarked,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserKanjiProgressEntriesTableAnnotationComposer
@@ -4566,6 +4632,11 @@ class $$UserKanjiProgressEntriesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBookmarked => $composableBuilder(
+    column: $table.isBookmarked,
+    builder: (column) => column,
+  );
 }
 
 class $$UserKanjiProgressEntriesTableTableManager
@@ -4625,6 +4696,7 @@ class $$UserKanjiProgressEntriesTableTableManager
                 Value<DateTime?> nextReviewAt = const Value.absent(),
                 Value<DateTime?> firstLearnedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isBookmarked = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserKanjiProgressEntriesCompanion(
                 kanjiCharacter: kanjiCharacter,
@@ -4638,6 +4710,7 @@ class $$UserKanjiProgressEntriesTableTableManager
                 nextReviewAt: nextReviewAt,
                 firstLearnedAt: firstLearnedAt,
                 updatedAt: updatedAt,
+                isBookmarked: isBookmarked,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4653,6 +4726,7 @@ class $$UserKanjiProgressEntriesTableTableManager
                 Value<DateTime?> nextReviewAt = const Value.absent(),
                 Value<DateTime?> firstLearnedAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isBookmarked = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserKanjiProgressEntriesCompanion.insert(
                 kanjiCharacter: kanjiCharacter,
@@ -4666,6 +4740,7 @@ class $$UserKanjiProgressEntriesTableTableManager
                 nextReviewAt: nextReviewAt,
                 firstLearnedAt: firstLearnedAt,
                 updatedAt: updatedAt,
+                isBookmarked: isBookmarked,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

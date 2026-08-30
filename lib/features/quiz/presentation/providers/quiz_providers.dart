@@ -10,7 +10,9 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/jlpt_vocab_pr
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:equatable/equatable.dart';
+import 'package:kanji_lesson/core/constants/srs_constants.dart';
 import 'package:kanji_lesson/features/quiz/domain/models/quiz_attempt.dart';
+import 'package:kanji_lesson/features/review/domain/services/srs_engine.dart';
 
 enum QuizItemType {
   kanji,
@@ -194,13 +196,16 @@ final quizInitDataProvider = FutureProvider.autoDispose<QuizSessionInitData>((re
       final poolSize = (setup.questionCount + 5).clamp(10, chars.length);
       
       final sortedChars = List.of(chars)..sort((a, b) => getPriorityScore(b).compareTo(getPriorityScore(a)));
-      
-      for (final char in sortedChars) {
+      final candidates = sortedChars.take(poolSize).toList();
+
+      final results = await Future.wait(candidates.map((char) async {
         try {
-          kanjiPool.add(await repo.getKanjiDetail(char));
-        } catch (_) {}
-        if (kanjiPool.length >= poolSize) break;
-      }
+          return await repo.getKanjiDetail(char);
+        } catch (_) {
+          return null;
+        }
+      }));
+      kanjiPool.addAll(results.whereType<Kanji>());
     }
     if (setup.selectedItemTypes.contains(QuizItemType.vocab) || setup.selectedItemTypes.contains(QuizItemType.sentence)) {
       final vocabs = await vocabRepo.getVocabByLevel(setup.selectedJlptLevel!);
@@ -390,9 +395,13 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     }
   }
 
-  Future<void> _generateNext() async {
+  Future<void> _generateNext({int failedAttempts = 0}) async {
     if (state.isGeneratingNext || _initData == null) return;
     if (state.resolvedQuestions.length >= state.tasks.length) return;
+    if (failedAttempts >= state.tasks.length) {
+      state = state.copyWith(isGeneratingNext: false, isFinished: true);
+      return;
+    }
 
     state = state.copyWith(isGeneratingNext: true);
 
@@ -496,7 +505,7 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
           isGeneratingNext: false,
         );
         if (!state.isFinished) {
-          _generateNext();
+          _generateNext(failedAttempts: failedAttempts + 1);
         }
       }
     } catch (e) {
@@ -534,38 +543,31 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
   
   Future<void> _updateProgress(String item, bool isCorrect, {bool isHintUsed = false}) async {
     final effectiveCorrect = isCorrect && !isHintUsed;
-    
-    final progress = await _db.getProgress(item);
-    if (progress == null) {
-      final now = DateTime.now();
-      await _db.upsertProgress(UserKanjiProgressEntriesCompanion.insert(
-        kanjiCharacter: item,
-        status: const drift.Value('learning'),
-        correctCount: drift.Value(effectiveCorrect ? 1 : 0),
-        wrongCount: drift.Value(effectiveCorrect ? 0 : 1),
-        firstLearnedAt: drift.Value(now),
-        nextReviewAt: drift.Value(now),
-      ));
-    } else {
-      final total = progress.correctCount + progress.wrongCount + 1;
-      final correct = progress.correctCount + (effectiveCorrect ? 1 : 0);
-      final accuracy = correct / total;
-      
-      String newStatus = progress.status;
-      if (progress.status != 'mastered' && total >= 5 && accuracy >= 0.8) {
-        newStatus = 'mastered';
-      } else if (progress.status == 'mastered' && accuracy < 0.8) {
-        newStatus = 'reviewing';
-      }
 
-      await _db.upsertProgress(UserKanjiProgressEntriesCompanion(
-        kanjiCharacter: drift.Value(progress.kanjiCharacter),
-        status: drift.Value(newStatus),
-        correctCount: drift.Value(progress.correctCount + (effectiveCorrect ? 1 : 0)),
-        wrongCount: drift.Value(progress.wrongCount + (effectiveCorrect ? 0 : 1)),
-        updatedAt: drift.Value(DateTime.now()),
-      ));
-    }
+    final progress = await _db.getProgress(item);
+    final now = DateTime.now();
+    final rating = effectiveCorrect ? SrsRating.good : SrsRating.again;
+    final result = const SrsEngine().calculate(
+      rating: rating,
+      currentEase: progress?.ease ?? SrsConstants.defaultEase,
+      currentIntervalDays: progress?.intervalDays ?? SrsConstants.defaultInterval,
+      repetitions: progress?.repetitions ?? SrsConstants.defaultRepetitions,
+      correctCount: progress?.correctCount ?? 0,
+      wrongCount: progress?.wrongCount ?? 0,
+    );
+
+    await _db.upsertProgress(UserKanjiProgressEntriesCompanion(
+      kanjiCharacter: drift.Value(item),
+      status: drift.Value(result.newStatus),
+      correctCount: drift.Value((progress?.correctCount ?? 0) + (effectiveCorrect ? 1 : 0)),
+      wrongCount: drift.Value((progress?.wrongCount ?? 0) + (effectiveCorrect ? 0 : 1)),
+      ease: drift.Value(result.newEase),
+      intervalDays: drift.Value(result.newIntervalDays),
+      repetitions: drift.Value(result.newRepetitions),
+      nextReviewAt: drift.Value(result.nextReviewAt),
+      firstLearnedAt: drift.Value(progress?.firstLearnedAt ?? now),
+      updatedAt: drift.Value(now),
+    ));
   }
   
   void nextQuestion() {

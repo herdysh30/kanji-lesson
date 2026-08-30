@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'Meaning'**
   String get meaning;
 
+  /// No description provided for @radical.
+  ///
+  /// In en, this message translates to:
+  /// **'Radical'**
+  String get radical;
+
   /// No description provided for @info.
   ///
   /// In en, this message translates to:
@@ -727,6 +733,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search kanji, reading, or meaning...'**
   String get searchKanjiHint;
+
+  /// No description provided for @searchKanjiVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Search kanji or vocabulary...'**
+  String get searchKanjiVocabulary;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by kanji, reading, meaning, or romaji\nacross all JLPT levels'**
+  String get searchHint;
 
   /// No description provided for @filterAll.
   ///

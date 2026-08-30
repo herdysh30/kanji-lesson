@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kanji_lesson/core/constants/srs_constants.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/features/review/presentation/screens/review_session_screen.dart';
 
 class ReviewResultScreen extends StatelessWidget {
   const ReviewResultScreen({
@@ -8,11 +10,13 @@ class ReviewResultScreen extends StatelessWidget {
     required this.correctCount,
     required this.wrongCount,
     required this.totalCount,
+    this.srsChanges = const [],
   });
 
   final int correctCount;
   final int wrongCount;
   final int totalCount;
+  final List<SrsChange> srsChanges;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,7 @@ class ReviewResultScreen extends StatelessWidget {
                 'You have completed $totalCount reviews.',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
               
               // Stats Cards
               Row(
@@ -68,6 +72,55 @@ class ReviewResultScreen extends StatelessWidget {
                 color: AppColors.primary,
                 isFullWidth: true,
               ),
+              const SizedBox(height: 24),
+
+              // SRS Changes
+              if (srsChanges.isNotEmpty) ...[
+                Text(
+                  'SRS Changes',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: srsChanges.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 4),
+                    itemBuilder: (context, index) {
+                      final change = srsChanges[index];
+                      final ratingIcon = switch (change.rating) {
+                        SrsRating.again => '❌',
+                        SrsRating.hard => '⚠️',
+                        SrsRating.good => '✅',
+                        SrsRating.easy => '⭐',
+                      };
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(ratingIcon, style: const TextStyle(fontSize: 16)),
+                            const SizedBox(width: 8),
+                            Text(
+                              change.character,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const Spacer(),
+                            Text(
+                              '${change.oldStatus} → ${change.newStatus}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
               
               const Spacer(),
               SizedBox(

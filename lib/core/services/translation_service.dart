@@ -36,11 +36,18 @@ class TranslationService {
         }
 
         // Split back by '|' and trim
-        return translatedText
+        final result = translatedText
             .toString()
             .split('|')
             .map((e) => e.trim())
             .toList();
+
+        // If segment count mismatches (text contained '|' or API mangled it),
+        // fall back to translating each meaning individually.
+        if (result.length != meanings.length) {
+          return _translateIndividually(meanings);
+        }
+        return result;
       }
     } catch (e) {
       // If translation fails, silently return empty or throw
@@ -48,6 +55,15 @@ class TranslationService {
     }
     
     return [];
+  }
+
+  Future<List<String>> _translateIndividually(List<String> meanings) async {
+    final results = <String>[];
+    for (final meaning in meanings) {
+      final translated = await translateMeanings([meaning]);
+      results.add(translated.isNotEmpty ? translated.first : meaning);
+    }
+    return results;
   }
 
   /// Retrieves romaji for a list of Japanese texts

@@ -64,6 +64,24 @@ class _KanjiDetailScreenState extends ConsumerState<KanjiDetailScreen> {
           appBar: AppBar(
             title: Text(currentKanji),
             actions: [
+              Consumer(
+                builder: (context, ref, child) {
+                  final progress = ref.watch(kanjiProgressProvider(currentKanji)).valueOrNull;
+                  final isBookmarked = progress?.isBookmarked ?? false;
+                  return IconButton(
+                    icon: Icon(
+                      isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                      color: isBookmarked ? AppColors.warning : null,
+                    ),
+                    tooltip: isBookmarked ? 'Remove Bookmark' : 'Bookmark',
+                    onPressed: () async {
+                      final db = ref.read(databaseProvider);
+                      await db.toggleBookmark(currentKanji, !isBookmarked);
+                      ref.invalidate(kanjiProgressProvider(currentKanji));
+                    },
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.quiz_rounded),
                 tooltip: AppLocalizations.of(context)!.startQuiz,
@@ -296,6 +314,14 @@ class _KanjiDetailBody extends StatelessWidget {
               ),
             ),
           if (kanji.kunyomi.isNotEmpty) const SizedBox(height: 12),
+
+          // ─── Radical Breakdown ─────────────────────────
+          _RadicalSection(character: kanji.character),
+          const SizedBox(height: 12),
+
+          // ─── SRS Progress ───────────────────────────────
+          _SrsProgressCard(character: kanji.character),
+          const SizedBox(height: 12),
 
           // ─── JLPT & Grade ───────────────────────────────
           _SectionCard(
@@ -591,5 +617,227 @@ class _ActionBar extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+// ─── SRS Progress Card ──────────────────────────────────────────
+
+class _SrsProgressCard extends ConsumerWidget {
+  const _SrsProgressCard({required this.character});
+
+  final String character;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progressAsync = ref.watch(kanjiProgressProvider(character));
+
+    return progressAsync.when(
+      data: (progress) {
+        if (progress == null) return const SizedBox.shrink();
+
+        final (statusColor, statusLabel) = switch (progress.status) {
+          'mastered' => (AppColors.correct, 'Mastered'),
+          'reviewing' => (AppColors.primary, 'Reviewing'),
+          'learning' => (AppColors.warning, 'Learning'),
+          _ => (Theme.of(context).colorScheme.onSurfaceVariant, 'New'),
+        };
+
+        final nextReviewIn = progress.nextReviewAt
+            ?.difference(DateTime.now());
+
+        return _SectionCard(
+          title: 'SRS Progress',
+          icon: Icons.insights_rounded,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status + Ease row
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      statusLabel,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Ease ${progress.ease.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Stats row
+              Row(
+                children: [
+                  _SrsStat(
+                    label: 'Correct',
+                    value: '${progress.correctCount}',
+                    color: AppColors.correct,
+                  ),
+                  const SizedBox(width: 12),
+                  _SrsStat(
+                    label: 'Wrong',
+                    value: '${progress.wrongCount}',
+                    color: AppColors.incorrect,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _SrsStat(
+                      label: 'Interval',
+                      value: progress.intervalDays > 0
+                          ? '${progress.intervalDays}d'
+                          : '—',
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Last reviewed / next review
+              Text(
+                [
+                  if (progress.lastReviewedAt != null)
+                    'Last reviewed: ${_formatDate(progress.lastReviewedAt!)}',
+                  if (nextReviewIn != null)
+                    'Next: ${nextReviewIn.inHours >= 24 ? '${nextReviewIn.inDays}d' : '${nextReviewIn.inHours}h'}',
+                ].join('  •  '),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inDays == 0) return 'today';
+    if (diff.inDays == 1) return 'yesterday';
+    if (diff.inDays < 30) return '${diff.inDays}d ago';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+class _SrsStat extends StatelessWidget {
+  const _SrsStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Radical Breakdown Section ──────────────────────────────────
+
+class _RadicalSection extends ConsumerWidget {
+  const _RadicalSection({required this.character});
+
+  final String character;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final aliveAsync = ref.watch(kanjiAliveDetailProvider(character));
+
+    return aliveAsync.when(
+      data: (data) {
+        final radical = data?.radical;
+        if (radical == null) return const SizedBox.shrink();
+        return _SectionCard(
+          title: l10n.radical,
+          icon: Icons.grid_view_rounded,
+          child: Row(
+            children: [
+              // Radical character badge
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  radical.character,
+                  style: AppTheme.kanjiLarge(context),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      radical.hiraganaName,
+                      style: AppTheme.japaneseReading(context, fontSize: 18),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      radical.englishMeaning,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
   }
 }

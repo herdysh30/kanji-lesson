@@ -77,7 +77,22 @@ class SettingsRepository {
   // ─── Daily Progress & Streak ─────────────────────────────────
 
   String get lastActiveDate => _prefs.getString(_keyLastActiveDate) ?? '';
-  int get currentStreak => _prefs.getInt(_keyCurrentStreak) ?? 0;
+  int get currentStreak {
+    final lastActive = lastActiveDate;
+    if (lastActive.isEmpty) return 0;
+
+    final lastDate = DateTime.tryParse(lastActive);
+    if (lastDate == null) return 0;
+
+    final today = DateTime.now();
+    final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+    final todayDay = DateTime(today.year, today.month, today.day);
+    final diff = todayDay.difference(lastDay).inDays;
+
+    // Streak expired if last active was more than 1 day ago
+    if (diff > 1) return 0;
+    return _prefs.getInt(_keyCurrentStreak) ?? 0;
+  }
   int get bestStreak => _prefs.getInt(_keyBestStreak) ?? 0;
   String get todayProgressDate => _prefs.getString(_keyTodayProgressDate) ?? '';
   int get todayProgressCount => _prefs.getInt(_keyTodayProgressCount) ?? 0;
@@ -98,12 +113,10 @@ class SettingsRepository {
     final newCount = currentCount + correctCount;
     await _prefs.setInt(_keyTodayProgressCount, newCount);
 
-    // Check if goal reached
+    // Update last active date on ANY activity (not just goal reached)
     final goal = dailyGoal;
-    final lastActive = lastActiveDate;
     
-    if (newCount >= goal && lastActive != todayStr) {
-      // Goal reached for today and streak not yet updated!
+    if (newCount >= goal) {
       await _updateStreak(todayStr);
       
       if (reminderEnabled) {

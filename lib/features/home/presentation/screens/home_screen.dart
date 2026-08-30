@@ -58,8 +58,8 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     Consumer(
                       builder: (context, ref, child) {
-                        final progress = ref.watch(dailyProgressProvider);
-                        final hasStreak = progress.currentStreak > 0;
+                        final streak = ref.watch(studyStreakProvider).valueOrNull ?? 0;
+                        final hasStreak = streak > 0;
                         
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -74,7 +74,7 @@ class HomeScreen extends ConsumerWidget {
                               Text(hasStreak ? '🔥' : '📓', style: const TextStyle(fontSize: 20)),
                               const SizedBox(width: 6),
                               Text(
-                                '${progress.currentStreak}',
+                                '$streak',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -87,6 +87,24 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         );
                       },
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => context.push('/search'),
+                      icon: const Icon(Icons.search_rounded),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      ),
+                      tooltip: 'Search',
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => context.push('/vocab'),
+                      icon: const Icon(Icons.menu_book_rounded),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      ),
+                      tooltip: 'Vocabulary',
                     ),
                   ],
                 ),
@@ -116,6 +134,12 @@ class HomeScreen extends ConsumerWidget {
                       label: l10n.progress,
                       icon: Icons.bar_chart_rounded,
                       onTap: () => context.push('/progress'),
+                    )),
+                    const SizedBox(width: 12),
+                    Expanded(child: _QuickActionCard(
+                      label: 'Bookmarks',
+                      icon: Icons.bookmark_rounded,
+                      onTap: () => context.push('/bookmarks'),
                     )),
                   ],
                 ),

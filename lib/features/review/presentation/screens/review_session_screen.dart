@@ -26,6 +26,7 @@ class ReviewSessionState {
     required this.correctCount,
     required this.wrongCount,
     required this.isFinished,
+    this.srsChanges = const [],
   });
 
   final List<UserKanjiProgressEntry> queue;
@@ -34,6 +35,7 @@ class ReviewSessionState {
   final int correctCount;
   final int wrongCount;
   final bool isFinished;
+  final List<SrsChange> srsChanges;
 
   UserKanjiProgressEntry? get currentItem => 
       currentIndex < queue.length ? queue[currentIndex] : null;
@@ -45,6 +47,7 @@ class ReviewSessionState {
     int? correctCount,
     int? wrongCount,
     bool? isFinished,
+    List<SrsChange>? srsChanges,
   }) {
     return ReviewSessionState(
       queue: queue ?? this.queue,
@@ -53,8 +56,23 @@ class ReviewSessionState {
       correctCount: correctCount ?? this.correctCount,
       wrongCount: wrongCount ?? this.wrongCount,
       isFinished: isFinished ?? this.isFinished,
+      srsChanges: srsChanges ?? this.srsChanges,
     );
   }
+}
+
+class SrsChange {
+  const SrsChange({
+    required this.character,
+    required this.oldStatus,
+    required this.newStatus,
+    required this.rating,
+  });
+
+  final String character;
+  final String oldStatus;
+  final String newStatus;
+  final SrsRating rating;
 }
 
 class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
@@ -114,7 +132,17 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
     ref.invalidate(dueReviewCountProvider);
 
     // Update state
-    // Update state
+    state = state.copyWith(
+      srsChanges: [
+        ...state.srsChanges,
+        SrsChange(
+          character: item.kanjiCharacter,
+          oldStatus: item.status,
+          newStatus: result.newStatus,
+          rating: rating,
+        ),
+      ],
+    );
     
     if (!isCorrect) {
       // Requeue incorrect items at the end
@@ -143,25 +171,39 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
   }
 }
 
-class ReviewSessionScreen extends ConsumerWidget {
+class ReviewSessionScreen extends ConsumerStatefulWidget {
   const ReviewSessionScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(reviewSessionProvider);
+  ConsumerState<ReviewSessionScreen> createState() => _ReviewSessionScreenState();
+}
 
-    // Navigate to result if finished
-    if (state.isFinished) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.pushReplacement('/review/result', extra: {
-          'correct': state.correctCount,
-          'wrong': state.wrongCount,
-          'total': state.queue.length,
+class _ReviewSessionScreenState extends ConsumerState<ReviewSessionScreen> {
+  bool _navigated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listen(reviewSessionProvider, (previous, next) {
+      if (next.isFinished && !_navigated) {
+        _navigated = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.pushReplacement('/review/result', extra: {
+              'correct': next.correctCount,
+              'wrong': next.wrongCount,
+              'total': next.queue.length,
+              'srsChanges': next.srsChanges,
+            });
+          }
         });
-      });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+      }
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(reviewSessionProvider);
     final currentItem = state.currentItem;
     if (currentItem == null) {
       return const Scaffold(body: Center(child: Text('No items to review')));
@@ -330,146 +372,149 @@ class _Flashcard extends ConsumerWidget {
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  entry.kanjiCharacter,
-                  style: AppTheme.kanjiLarge(context).copyWith(fontSize: 100),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    entry.kanjiCharacter,
+                    style: AppTheme.kanjiLarge(context).copyWith(fontSize: 100),
+                  ),
                 ),
               ),
-            ),
-            
-            if (isFlipped) ...[
-              const SizedBox(height: 32),
-              const Divider(indent: 32, endIndent: 32),
-              const SizedBox(height: 24),
               
-              // Show sentence translation on the back
-              sentencesAsync.when(
-                data: (sentences) {
-                  if (sentences.isEmpty) return const SizedBox.shrink();
-                  final sentence = sentences.first;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 24.0, left: 24, right: 24),
-                    child: Column(
-                      children: [
-                        _buildSentenceText(context, sentence.japanese, entry.kanjiCharacter),
-                        const SizedBox(height: 8),
-                        Text(
-                          sentence.english,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontStyle: FontStyle.italic,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (isId && sentence.indonesian.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+              if (isFlipped) ...[
+                const SizedBox(height: 32),
+                const Divider(indent: 32, endIndent: 32),
+                const SizedBox(height: 24),
+                
+                // Show sentence translation on the back
+                sentencesAsync.when(
+                  data: (sentences) {
+                    if (sentences.isEmpty) return const SizedBox.shrink();
+                    final sentence = sentences.first;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0, left: 24, right: 24),
+                      child: Column(
+                        children: [
+                          _buildSentenceText(context, sentence.japanese, entry.kanjiCharacter),
+                          const SizedBox(height: 8),
                           Text(
-                            sentence.indonesian,
+                            sentence.english,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontStyle: FontStyle.italic,
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                        ]
-                      ],
-                    ),
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              ),
-              detailAsync.when(
-                data: (detail) => Column(
-                  children: [
-                    if (detail.isVocab) ...[
-                      if (detail.furigana != null && detail.furigana!.isNotEmpty) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
+                          if (isId && sentence.indonesian.isNotEmpty) ...[
+                            const SizedBox(height: 4),
                             Text(
-                              detail.furigana!,
-                              style: AppTheme.japaneseReading(context, fontSize: 28),
+                              sentence.indonesian,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontStyle: FontStyle.italic,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(width: 8),
-                            KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      if (detail.romaji != null && detail.romaji!.isNotEmpty) ...[
-                        Text(
-                          detail.romaji!,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ]
+                        ],
+                      ),
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+                detailAsync.when(
+                  data: (detail) => Column(
+                    children: [
+                      if (detail.isVocab) ...[
+                        if (detail.furigana != null && detail.furigana!.isNotEmpty) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                detail.furigana!,
+                                style: AppTheme.japaneseReading(context, fontSize: 28),
+                              ),
+                              const SizedBox(width: 8),
+                              KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      Text(
-                        detail.primaryMeaning ?? '',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ] else ...[
-                      if (detail.primaryReading != null && detail.primaryReading!.isNotEmpty) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              detail.primaryReading!,
-                              style: AppTheme.japaneseReading(context, fontSize: 28),
+                          const SizedBox(height: 8),
+                        ],
+                        if (detail.romaji != null && detail.romaji!.isNotEmpty) ...[
+                          Text(
+                            detail.romaji!,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
-                            const SizedBox(width: 8),
-                            KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
-                          ],
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        Text(
+                          detail.primaryMeaning ?? '',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
+                      ] else ...[
+                        if (detail.primaryReading != null && detail.primaryReading!.isNotEmpty) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                detail.primaryReading!,
+                                style: AppTheme.japaneseReading(context, fontSize: 28),
+                              ),
+                              const SizedBox(width: 8),
+                              KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                        Text(
+                          detail.primaryMeaning ?? '',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        if (detail.onyomi != null && detail.onyomi!.isNotEmpty)
+                          Text(
+                            "ON: ${detail.onyomi!.join(', ')}",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        if (detail.kunyomi != null && detail.kunyomi!.isNotEmpty)
+                          Text(
+                            "KUN: ${detail.kunyomi!.join(', ')}",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        const SizedBox(height: 16),
+                        _VocabularySlider(character: entry.kanjiCharacter, isId: isId),
                       ],
-                      Text(
-                        detail.primaryMeaning ?? '',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      if (detail.onyomi != null && detail.onyomi!.isNotEmpty)
-                        Text(
-                          "ON: ${detail.onyomi!.join(', ')}",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      if (detail.kunyomi != null && detail.kunyomi!.isNotEmpty)
-                        Text(
-                          "KUN: ${detail.kunyomi!.join(', ')}",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      const SizedBox(height: 16),
-                      _VocabularySlider(character: entry.kanjiCharacter, isId: isId),
                     ],
-                  ],
+                  ),
+                  loading: () => const CircularProgressIndicator(),
+                  error: (err, stack) => Text(
+                    'Failed to load details',
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
                 ),
-                loading: () => const CircularProgressIndicator(),
-                error: (err, stack) => Text(
-                  'Failed to load details',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ] else ...[
+                const SizedBox(height: 64),
+                Text(
+                  'Tap to reveal',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ] else ...[
-              const SizedBox(height: 64),
-              Text(
-                'Tap to reveal',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

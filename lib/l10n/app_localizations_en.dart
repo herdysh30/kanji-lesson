@@ -57,6 +57,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get meaning => 'Meaning';
 
   @override
+  String get radical => 'Radical';
+
+  @override
   String get info => 'Info';
 
   @override
@@ -350,6 +353,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchKanjiHint => 'Search kanji, reading, or meaning...';
+
+  @override
+  String get searchKanjiVocabulary => 'Search kanji or vocabulary...';
+
+  @override
+  String get searchHint =>
+      'Search by kanji, reading, meaning, or romaji\nacross all JLPT levels';
 
   @override
   String get filterAll => 'All';

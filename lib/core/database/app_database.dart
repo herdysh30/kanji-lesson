@@ -55,6 +55,7 @@ class UserKanjiProgressEntries extends Table {
   DateTimeColumn get nextReviewAt => dateTime().nullable()();
   DateTimeColumn get firstLearnedAt => dateTime().nullable()();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isBookmarked => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {kanjiCharacter};
@@ -115,7 +116,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -137,6 +138,9 @@ class AppDatabase extends _$AppDatabase {
         if (from < 5) {
           await m.addColumn(quizResultEntries, quizResultEntries.questionsJson);
         }
+        if (from < 6) {
+          await m.addColumn(userKanjiProgressEntries, userKanjiProgressEntries.isBookmarked);
+        }
       },
     );
   }
@@ -151,9 +155,18 @@ class AppDatabase extends _$AppDatabase {
     return (select(kanjiEntries)..where((t) => t.jlptLevel.equals(level))).get();
   }
 
+  Future<List<KanjiEntry>> getAllKanjiEntries() {
+    return (select(kanjiEntries)..orderBy([(t) => OrderingTerm.asc(t.jlptLevel)])).get();
+  }
+
   Future<KanjiEntry?> getKanjiByCharacter(String character) {
     return (select(kanjiEntries)..where((t) => t.character.equals(character)))
         .getSingleOrNull();
+  }
+
+  Future<List<KanjiEntry>> getKanjiByCharacters(List<String> characters) {
+    return (select(kanjiEntries)..where((t) => t.character.isIn(characters)))
+        .get();
   }
 
   Future<void> upsertManyKanji(List<KanjiEntriesCompanion> entries) async {
@@ -173,6 +186,12 @@ class AppDatabase extends _$AppDatabase {
   Future<List<VocabularyEntry>> getVocabularyForKanji(String character) {
     return (select(vocabularyEntries)
           ..where((t) => t.kanjiCharacter.equals(character)))
+        .get();
+  }
+
+  Future<List<VocabularyEntry>> getVocabularyForCharacters(List<String> characters) {
+    return (select(vocabularyEntries)
+          ..where((t) => t.kanjiCharacter.isIn(characters)))
         .get();
   }
 
@@ -229,8 +248,71 @@ class AppDatabase extends _$AppDatabase {
         .getSingleOrNull();
   }
 
+  Future<void> toggleBookmark(String character, bool isBookmarked) async {
+    await (update(userKanjiProgressEntries)
+          ..where((t) => t.kanjiCharacter.equals(character)))
+        .write(UserKanjiProgressEntriesCompanion(
+          isBookmarked: Value(isBookmarked),
+          updatedAt: Value(DateTime.now()),
+        ));
+  }
+
+  Future<List<UserKanjiProgressEntry>> getBookmarkedItems() {
+    return (select(userKanjiProgressEntries)
+          ..where((t) => t.isBookmarked.equals(true))
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
+        .get();
+  }
+
   Future<List<UserKanjiProgressEntry>> getAllProgress() {
     return select(userKanjiProgressEntries).get();
+  }
+
+  /// Aggregated progress counts/sums — avoids loading every row.
+  Future<({int learned, int mastered, int reviewing, int totalCorrect, int totalWrong})>
+      getProgressSummary() async {
+    int learned = 0;
+    int mastered = 0;
+    int reviewing = 0;
+
+    final rows = await (selectOnly(userKanjiProgressEntries)
+          ..addColumns([
+            userKanjiProgressEntries.status,
+            userKanjiProgressEntries.status.count(),
+          ])
+          ..groupBy([userKanjiProgressEntries.status]))
+        .get();
+
+    for (final row in rows) {
+      final status = row.read(userKanjiProgressEntries.status);
+      final count = row.read(userKanjiProgressEntries.status.count()) ?? 0;
+      if (status == 'mastered') {
+        mastered += count;
+        learned += count;
+      } else if (status == 'reviewing' || status == 'learning') {
+        reviewing += count;
+        learned += count;
+      }
+    }
+
+    final sums = await (selectOnly(userKanjiProgressEntries)
+          ..addColumns([
+            userKanjiProgressEntries.correctCount.sum(),
+            userKanjiProgressEntries.wrongCount.sum(),
+          ]))
+        .getSingle();
+    final totalCorrect =
+        sums.read(userKanjiProgressEntries.correctCount.sum()) ?? 0;
+    final totalWrong =
+        sums.read(userKanjiProgressEntries.wrongCount.sum()) ?? 0;
+
+    return (
+      learned: learned,
+      mastered: mastered,
+      reviewing: reviewing,
+      totalCorrect: totalCorrect,
+      totalWrong: totalWrong,
+    );
   }
 
   Future<List<UserKanjiProgressEntry>> getProgressByStatus(String status) {
@@ -410,6 +492,10 @@ class AppDatabase extends _$AppDatabase {
     }
     final results = await query.get();
     return results.length;
+  }
+
+  Future<List<JlptVocabEntry>> getAllJlptVocabEntries() {
+    return (select(jlptVocabEntries)..orderBy([(t) => OrderingTerm.asc(t.level)])).get();
   }
 
   // ─── Daily Progress Operations ──────────────────────────────

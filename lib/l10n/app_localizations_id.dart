@@ -57,6 +57,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get meaning => 'Arti';
 
   @override
+  String get radical => 'Radikal';
+
+  @override
   String get info => 'Info';
 
   @override
@@ -350,6 +353,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get searchKanjiHint => 'Cari kanji, bacaan, atau arti...';
+
+  @override
+  String get searchKanjiVocabulary => 'Cari kanji atau kosakata...';
+
+  @override
+  String get searchHint =>
+      'Cari berdasarkan kanji, bacaan, arti, atau romaji\ndi semua level JLPT';
 
   @override
   String get filterAll => 'Semua';

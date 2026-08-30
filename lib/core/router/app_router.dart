@@ -6,7 +6,10 @@ import 'package:kanji_lesson/features/home/presentation/screens/home_screen.dart
 import 'package:kanji_lesson/features/kanji/presentation/screens/jlpt_selection_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/kanji_list_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/kanji_detail_screen.dart';
+import 'package:kanji_lesson/features/kanji/presentation/screens/global_search_screen.dart';
+import 'package:kanji_lesson/features/kanji/presentation/screens/bookmark_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/vocab_detail_screen.dart';
+import 'package:kanji_lesson/features/kanji/presentation/screens/vocabulary_browser_screen.dart';
 import 'package:kanji_lesson/features/review/presentation/screens/review_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/progress_screen.dart';
 import 'package:kanji_lesson/features/progress/presentation/screens/weak_kanji_screen.dart';
@@ -139,6 +142,7 @@ final appRouter = GoRouter(
           correctCount: extras['correct'] as int? ?? 0,
           wrongCount: extras['wrong'] as int? ?? 0,
           totalCount: extras['total'] as int? ?? 0,
+          srsChanges: (extras['srsChanges'] as List<SrsChange>?) ?? const [],
         );
       },
     ),
@@ -166,6 +170,25 @@ final appRouter = GoRouter(
           },
         ),
       ],
+    ),
+    GoRoute(
+      path: '/search',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const GlobalSearchScreen(),
+    ),
+    GoRoute(
+      path: '/bookmarks',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const BookmarkScreen(),
+    ),
+    GoRoute(
+      path: '/vocab',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => VocabularyBrowserScreen(
+        initialLevel: state.uri.queryParameters['level'] != null
+            ? int.tryParse(state.uri.queryParameters['level']!)
+            : null,
+      ),
     ),
   ],
 );
