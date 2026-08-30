@@ -9,6 +9,7 @@ A modern, beautifully designed offline-first Flutter application to help users m
 This app integrates multiple APIs and robust local architecture to provide a rich, offline-capable learning experience:
 
 - **KanjiAPI.dev** ([github.com/onlyskin/kanjiapi.dev](https://github.com/onlyskin/kanjiapi.dev)): Serves as the core database for Kanji metadata, JLPT character lists, readings (On'yomi & Kun'yomi), and English meanings.
+- **KanjiAlive API**: Provides radical breakdown data for each Kanji character.
 - **JLPT Vocab API** ([github.com/wkei/jlpt-vocab-api](https://github.com/wkei/jlpt-vocab-api)): Provides comprehensive JLPT vocabulary lists along with readings and meanings.
 - **Tatoeba API** ([tatoeba.org](https://tatoeba.org)): Used to fetch real-world Japanese example sentences for Kanji and Vocabulary contextual learning.
 - **Google Translate API**: Used internally to translate English meanings into Indonesian (Bahasa Indonesia) on-the-fly, allowing native dual-language support, and generating Romaji for Sentences.
@@ -22,7 +23,10 @@ This app integrates multiple APIs and robust local architecture to provide a ric
 
 ### 🎓 Curriculum & Learning
 - **JLPT-Based Breakdown**: Organized progression from JLPT N5 (Beginner) to N1 (Advanced) with clear mastery percentages.
-- **Detailed Dictionary**: Explore Kanji details including On'yomi, Kun'yomi, Stroke Orders, Meanings, and Example Sentences.
+- **Detailed Dictionary**: Explore Kanji details including On'yomi, Kun'yomi, Stroke Orders, Meanings, Radical breakdown, and Example Sentences.
+- **Vocabulary Browser**: Browse and search JLPT vocabulary across all levels (N5–N1) with furigana readings.
+- **Global Search**: Unified search across Kanji and vocabulary from any screen.
+- **Bookmarks**: Save favorite Kanji and access them instantly from a dedicated bookmark screen.
 - **Dual Language Support**: Study meanings in both English and Indonesian natively across the entire app.
 
 ### 🧠 Smart Quizzes & SRS
@@ -31,16 +35,18 @@ This app integrates multiple APIs and robust local architecture to provide a ric
 - **Writing Quiz**: Draw Kanji directly on the screen and have an AI check your stroke accuracy.
 - **Sentence Quiz**: Read real Japanese sentences and identify the meaning/reading of specific Kanji in context.
 - **Penalty-Aware Hints**: Use semantic hints (revealing readings or romaji) to avoid getting stuck, which factor into your mastery progress.
+- **Spaced Repetition System (SRS)**: The app remembers what you struggle with and schedules weak items automatically. Review results show detailed status transitions per card.
 
 ### 📊 Progress Tracking & Gamification
 - **Dashboard Analytics**: Track your Daily Goals, Weak Kanji, and recently Learned items.
 - **Calendar & Streaks**: Visualize your learning consistency with an interactive monthly calendar and streak counter.
 - **Weekly Activity Chart**: A beautiful bar chart tracking the number of reviews and items learned over the past week.
 - **Quiz History & Retakes**: Review detailed logs of your past quizzes (correct/incorrect answers) and easily retake specific quiz sessions to score 100%.
-- **Spaced Repetition System (SRS)**: The app remembers what you struggle with and schedules weak items automatically.
+- **Android Home Widget**: A native widget that displays the Kanji of the Day, rotating automatically daily even when the app is closed.
 
 ### 🎨 Beautiful UI/UX
 - **Modern Aesthetics**: Built with premium UI design, glassmorphism elements, dynamic color themes, and smooth micro-animations.
+- **Radical Breakdown**: Visual radical component display with character badge, hiragana name, and English meaning.
 
 ---
 
