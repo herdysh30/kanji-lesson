@@ -7,6 +7,9 @@ import 'package:kanji_lesson/features/settings/presentation/providers/settings_p
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 import 'package:kanji_lesson/core/services/notification_service.dart';
+import 'package:kanji_lesson/features/auth/presentation/providers/auth_providers.dart';
+import 'package:kanji_lesson/features/sync/data/sync_providers.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -27,6 +30,8 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         children: [
+          _buildAccountSection(context, ref),
+          const SizedBox(height: 24),
           _buildSectionHeader(context, l10n.settingsAppearance),
           _buildSettingsGroup(
             context,
@@ -255,6 +260,73 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 100), // Extra padding for CurvedNavigationBar
         ],
       ),
+    );
+  }
+
+  Widget _buildAccountSection(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final authState = ref.watch(authStateProvider);
+    final isSyncing = ref.watch(isSyncingProvider);
+    final user = authState.valueOrNull;
+
+    if (user == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(context, l10n.account),
+          _buildSettingsGroup(
+            context,
+            children: [
+              _buildListTile(
+                context: context,
+                icon: Icons.login_rounded,
+                title: l10n.signInToSync,
+                subtitle: l10n.syncProgressSubtitle,
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => context.push('/login'),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, l10n.account),
+        _buildSettingsGroup(
+          context,
+          children: [
+            _buildListTile(
+              context: context,
+              icon: Icons.account_circle_rounded,
+              title: user.email ?? l10n.signedIn,
+              subtitle: l10n.syncEnabled,
+            ),
+            const Divider(height: 1, indent: 56),
+            _buildListTile(
+              context: context,
+              icon: Icons.sync_rounded,
+              title: l10n.syncNow,
+              subtitle: isSyncing ? l10n.syncing : null,
+              trailing: isSyncing
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.chevron_right_rounded),
+              onTap: isSyncing ? null : () => ref.read(manualSyncProvider)(),
+            ),
+            const Divider(height: 1, indent: 56),
+            _buildListTile(
+              context: context,
+              icon: Icons.logout_rounded,
+              iconColor: Colors.red,
+              title: l10n.signOut,
+              titleColor: Colors.red,
+              onTap: () => ref.read(authRepositoryProvider).signOut(),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

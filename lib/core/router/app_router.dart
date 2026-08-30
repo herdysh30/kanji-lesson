@@ -23,6 +23,7 @@ import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_setup_scree
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_screen.dart';
 import 'package:kanji_lesson/features/quiz/presentation/screens/quiz_result_screen.dart';
 import 'package:kanji_lesson/features/splash/presentation/screens/splash_screen.dart';
+import 'package:kanji_lesson/features/auth/presentation/screens/login_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -33,6 +34,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const LoginScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

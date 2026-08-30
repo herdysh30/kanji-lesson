@@ -710,4 +710,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get download => 'Download';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get signInToSync => 'Sign In / Create Account';
+
+  @override
+  String get syncProgressSubtitle =>
+      'Save your progress and sync across devices';
+
+  @override
+  String get signedIn => 'Signed in';
+
+  @override
+  String get syncEnabled => 'Progress sync enabled';
+
+  @override
+  String get syncNow => 'Sync Now';
+
+  @override
+  String get syncing => 'Syncing...';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get createAccount => 'Create Account';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get welcomeBack => 'Welcome Back';
+
+  @override
+  String get createAccountSubtitle =>
+      'Create a new account to save your progress';
+
+  @override
+  String get signInSubtitle => 'Sign in to sync your progress across devices';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get requiredField => 'This field is required';
+
+  @override
+  String get invalidEmail => 'Enter a valid email';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Sign In';
+
+  @override
+  String get noAccountYet => 'Don\'t have an account? Create One';
 }

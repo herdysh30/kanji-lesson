@@ -712,4 +712,70 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get download => 'Unduh';
+
+  @override
+  String get account => 'Akun';
+
+  @override
+  String get signInToSync => 'Masuk / Buat Akun';
+
+  @override
+  String get syncProgressSubtitle =>
+      'Simpan progres Anda dan sinkronkan antar perangkat';
+
+  @override
+  String get signedIn => 'Sudah masuk';
+
+  @override
+  String get syncEnabled => 'Sinkronisasi progres aktif';
+
+  @override
+  String get syncNow => 'Sinkronkan Sekarang';
+
+  @override
+  String get syncing => 'Menyinkronkan...';
+
+  @override
+  String get signOut => 'Keluar';
+
+  @override
+  String get createAccount => 'Buat Akun';
+
+  @override
+  String get signIn => 'Masuk';
+
+  @override
+  String get welcomeBack => 'Selamat Datang Kembali';
+
+  @override
+  String get createAccountSubtitle =>
+      'Buat akun baru untuk menyimpan progres Anda';
+
+  @override
+  String get signInSubtitle =>
+      'Masuk untuk menyinkronkan progres antar perangkat';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Kata Sandi';
+
+  @override
+  String get requiredField => 'Kolom ini wajib diisi';
+
+  @override
+  String get invalidEmail => 'Masukkan email yang valid';
+
+  @override
+  String get passwordTooShort => 'Kata sandi minimal 6 karakter';
+
+  @override
+  String get signInWithGoogle => 'Masuk dengan Google';
+
+  @override
+  String get alreadyHaveAccount => 'Sudah punya akun? Masuk';
+
+  @override
+  String get noAccountYet => 'Belum punya akun? Buat Sekarang';
 }

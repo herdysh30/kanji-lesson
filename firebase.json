@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"kanji-lesson","appId":"1:1026315702702:android:315433254b1b088ce3f83f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"kanji-lesson","configurations":{"android":"1:1026315702702:android:315433254b1b088ce3f83f","ios":"1:1026315702702:ios:a449f7655a133a15e3f83f"}}}}}}

@@ -16,6 +16,7 @@ import 'package:kanji_lesson/features/settings/presentation/providers/settings_p
 import 'package:kanji_lesson/features/kanji/presentation/widgets/practice_writing_dialog.dart';
 import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_button.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
+import 'package:kanji_lesson/features/sync/data/sync_providers.dart';
 
 class KanjiDetailScreen extends ConsumerStatefulWidget {
   const KanjiDetailScreen({
@@ -581,6 +582,7 @@ class _ActionBar extends ConsumerWidget {
       nextReviewAt: drift.Value(DateTime.now()), // Immediately due
       updatedAt: drift.Value(DateTime.now()),
     ));
+    ref.read(syncSchedulerProvider)();
     ref.invalidate(kanjiProgressProvider(kanji.character));
     ref.invalidate(dueReviewCountProvider);
     ref.invalidate(dueReviewsProvider);
@@ -607,6 +609,7 @@ class _ActionBar extends ConsumerWidget {
       repetitions: const drift.Value(1),
       updatedAt: drift.Value(DateTime.now()),
     ));
+    ref.read(syncSchedulerProvider)();
     ref.invalidate(kanjiProgressProvider(kanji.character));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

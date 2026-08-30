@@ -11,6 +11,7 @@ import 'package:kanji_lesson/features/kanji/presentation/widgets/kanji_audio_but
 import 'package:kanji_lesson/features/review/domain/services/srs_engine.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
+import 'package:kanji_lesson/features/sync/data/sync_providers.dart';
 
 // We need a StateNotifier to manage the current review session
 final reviewSessionProvider = StateNotifierProvider.autoDispose<ReviewSessionNotifier, ReviewSessionState>((ref) {
@@ -130,6 +131,9 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
     // Invalidate due reviews providers immediately so the home screen is always up to date
     ref.invalidate(dueReviewsProvider);
     ref.invalidate(dueReviewCountProvider);
+
+    // Trigger sync
+    ref.read(syncSchedulerProvider)();
 
     // Update state
     state = state.copyWith(

@@ -13,6 +13,7 @@ import 'package:equatable/equatable.dart';
 import 'package:kanji_lesson/core/constants/srs_constants.dart';
 import 'package:kanji_lesson/features/quiz/domain/models/quiz_attempt.dart';
 import 'package:kanji_lesson/features/review/domain/services/srs_engine.dart';
+import 'package:kanji_lesson/features/sync/data/sync_providers.dart';
 
 enum QuizItemType {
   kanji,
@@ -568,6 +569,8 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
       firstLearnedAt: drift.Value(progress?.firstLearnedAt ?? now),
       updatedAt: drift.Value(now),
     ));
+
+    _ref.read(syncSchedulerProvider)();
   }
   
   void nextQuestion() {
@@ -614,6 +617,8 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     
     // Add Daily Progress
     _ref.read(dailyProgressProvider.notifier).addProgress(correctCount);
+
+    _ref.read(syncSchedulerProvider)();
   }
 }
 
