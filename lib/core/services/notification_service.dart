@@ -89,6 +89,12 @@ class NotificationService {
     bool playSound = true,
     bool enableVibration = true,
   }) async {
+    // Delete and recreate Android channel so sound/vibration toggles take effect
+    final androidPlugin = _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.deleteNotificationChannel(channelId: 'daily_reminder_channel');
+
     await cancelReminder(); // Clear existing
 
     var now = tz.TZDateTime.now(tz.local);

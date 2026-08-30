@@ -6,8 +6,32 @@ import 'package:kanji_lesson/core/theme/app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  // ─── Light Theme ──────────────────────────────────────────────
+  // ─── Cached theme instances (rebuilt only on accent change) ──
+  static ThemeData? _light;
+  static ThemeData? _dark;
+  static int? _accentKey;
+
   static ThemeData get lightTheme {
+    _ensureCache();
+    return _light!;
+  }
+
+  static ThemeData get darkTheme {
+    _ensureCache();
+    return _dark!;
+  }
+
+  static void _ensureCache() {
+    final key = AppColors.primary.toARGB32();
+    if (_light == null || key != _accentKey) {
+      _light = _buildLight();
+      _dark = _buildDark();
+      _accentKey = key;
+    }
+  }
+
+  // ─── Light Theme ──────────────────────────────────────────────
+  static ThemeData _buildLight() {
     final colorScheme = ColorScheme(
       brightness: Brightness.light,
       primary: AppColors.primary,
@@ -189,7 +213,7 @@ class AppTheme {
   }
 
   // ─── Dark Theme ───────────────────────────────────────────────
-  static ThemeData get darkTheme {
+  static ThemeData _buildDark() {
     final colorScheme = ColorScheme(
       brightness: Brightness.dark,
       primary: AppColors.primaryLight,
