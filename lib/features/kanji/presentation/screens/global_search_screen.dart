@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 // ─── Global Search Provider ─────────────────────────────────────
@@ -13,6 +14,7 @@ final globalSearchProvider = FutureProvider.family<List<SearchResultItem>, Strin
   if (q.isEmpty) return [];
 
   final db = ref.watch(databaseProvider);
+  final isId = ref.watch(localeProvider).languageCode == 'id';
 
   // Fetch all kanji
   final kanjiList = await db.getAllKanjiEntries();
@@ -42,7 +44,7 @@ final globalSearchProvider = FutureProvider.family<List<SearchResultItem>, Strin
         isVocab: false,
         jlptLevel: k.jlptLevel,
         reading: onyomi.isNotEmpty ? onyomi.first.trim() : '',
-        meaning: meanings.isNotEmpty ? meanings.first.trim() : '',
+        meaning: isId && meaningsId.isNotEmpty ? meaningsId.first.trim() : (meanings.isNotEmpty ? meanings.first.trim() : ''),
       ));
     }
   }
@@ -61,7 +63,7 @@ final globalSearchProvider = FutureProvider.family<List<SearchResultItem>, Strin
         isVocab: true,
         jlptLevel: v.level,
         reading: v.furigana,
-        meaning: v.meaning,
+        meaning: isId && (v.meaningId?.isNotEmpty ?? false) ? v.meaningId! : v.meaning,
       ));
     }
   }

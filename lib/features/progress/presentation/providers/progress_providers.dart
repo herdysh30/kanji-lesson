@@ -196,6 +196,8 @@ final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {
       isVocab: isVocab,
       status: progress.status,
       lastReviewedAt: progress.lastReviewedAt,
+      jlptLevel: kanjiData?.jlptLevel,
+      vocabWord: isVocab ? vocabGroups[progress.kanjiCharacter]?.first.word : null,
     ));
   }
 
@@ -215,6 +217,8 @@ class WeakItem {
     this.isVocab = false,
     required this.status,
     this.lastReviewedAt,
+    this.jlptLevel,
+    this.vocabWord,
   });
   
   final String character;
@@ -226,6 +230,8 @@ class WeakItem {
   final bool isVocab;
   final String status;
   final DateTime? lastReviewedAt;
+  final int? jlptLevel;
+  final String? vocabWord;
   
   int get totalAttempts => correctCount + wrongCount;
   String get accuracyPercent => '${(accuracy * 100).round()}%';

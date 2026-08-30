@@ -126,10 +126,11 @@ class _WeakItemTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          if (item.isVocab) {
-            context.push('/learn/vocab/${Uri.encodeComponent(item.character)}');
+          final level = item.jlptLevel ?? 5;
+          if (item.isVocab && item.vocabWord != null) {
+            context.push('/learn/$level/vocab/${Uri.encodeComponent(item.vocabWord!)}');
           } else {
-            context.push('/learn/kanji/${item.character}');
+            context.push('/learn/$level/${item.character}');
           }
         },
         child: Padding(
