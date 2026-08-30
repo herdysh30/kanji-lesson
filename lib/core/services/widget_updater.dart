@@ -32,9 +32,10 @@ void _updateWidget(Ref ref) async {
   );
 
   // Pre-generate 7 days so native widget can rotate without the app running.
-  final weekAsync = ref.read(weeklyItemsProvider);
-  final week = weekAsync.value;
-  if (week != null && week.isNotEmpty) {
+  final week = await ref.read(weeklyItemsProvider.future).catchError(
+    (Object _) => <ItemOfTheDay>[],
+  );
+  if (week.isNotEmpty) {
     await WidgetService.preGenerateWeek(
       week.map((w) => WidgetServiceItem(
         text: w.text,

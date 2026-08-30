@@ -620,6 +620,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get kanjiOfTheDay => 'Kanji of the Day';
 
   @override
+  String get vocabOfTheDay => 'Vocab of the Day';
+
+  @override
+  String get itemOfTheDay => 'Item of the Day';
+
+  @override
+  String get showOnHomeScreen => 'Display on Home Screen';
+
+  @override
   String get settingsAppearance => 'Appearance';
 
   @override

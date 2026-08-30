@@ -24,6 +24,7 @@ class VocabDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final isId = ref.watch(localeProvider).languageCode == 'id';
     // The vocab list provider is already cached locally, so we can fetch all and find the word
     final vocabListAsync = ref.watch(jlptVocabListProvider(jlptLevel));
 
@@ -105,7 +106,7 @@ class VocabDetailScreen extends ConsumerWidget {
                           context,
                           character: vocab.word,
                           reading: vocab.furigana,
-                          meaning: vocab.meaning,
+                          meaning: vocab.primaryMeaning(isId),
                         );
                       },
                       icon: const Icon(Icons.draw_rounded),
@@ -140,7 +141,7 @@ class VocabDetailScreen extends ConsumerWidget {
                   ],
                 ),
                 child: Text(
-                  vocab.meaning,
+                  vocab.primaryMeaning(isId),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         height: 1.5,
                       ),

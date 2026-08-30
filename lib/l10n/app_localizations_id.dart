@@ -621,6 +621,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get kanjiOfTheDay => 'Kanji Hari Ini';
 
   @override
+  String get vocabOfTheDay => 'Kosakata Hari Ini';
+
+  @override
+  String get itemOfTheDay => 'Item Hari Ini';
+
+  @override
+  String get showOnHomeScreen => 'Tampilkan di Beranda';
+
+  @override
   String get settingsAppearance => 'Tampilan';
 
   @override

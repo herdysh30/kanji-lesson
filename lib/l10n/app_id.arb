@@ -227,6 +227,9 @@
     }
   },
   "kanjiOfTheDay": "Kanji Hari Ini",
+  "vocabOfTheDay": "Kosakata Hari Ini",
+  "itemOfTheDay": "Item Hari Ini",
+  "showOnHomeScreen": "Tampilkan di Beranda",
   "settingsAppearance": "Tampilan",
   "settingsPreferences": "Preferensi",
   "settingsStudyReminders": "Belajar & Pengingat",

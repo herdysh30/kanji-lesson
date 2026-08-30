@@ -36,7 +36,7 @@ class _VocabularyBrowserScreenState extends ConsumerState<VocabularyBrowserScree
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Vocabulary'),
+        title: Text(l10n.vocabulary),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(
@@ -44,7 +44,7 @@ class _VocabularyBrowserScreenState extends ConsumerState<VocabularyBrowserScree
             child: TextField(
               onChanged: (value) => setState(() => _query = value.trim().toLowerCase()),
               decoration: InputDecoration(
-                hintText: 'Search vocabulary...',
+                hintText: l10n.searchKanjiVocabulary,
                 prefixIcon: const Icon(Icons.search_rounded, size: 20),
                 isDense: true,
                 filled: true,

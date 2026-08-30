@@ -35,6 +35,7 @@ class JlptVocabLocalDataSource {
         .map((e) => JlptVocab(
               word: e.word,
               meaning: e.meaning,
+              meaningId: e.meaningId,
               furigana: e.furigana,
               romaji: e.romaji,
               level: e.level,

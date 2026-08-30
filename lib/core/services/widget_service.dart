@@ -39,6 +39,7 @@ class WidgetService {
       );
 
       if (kanjiPath.isNotEmpty && streakPath.isNotEmpty) {
+        await HomeWidget.saveWidgetData<String>('kanji_image', kanjiPath);
         await HomeWidget.saveWidgetData<String>('streak_image_path', streakPath);
         await HomeWidget.saveWidgetData<int>('current_view', 0);
 

@@ -1226,6 +1226,24 @@ abstract class AppLocalizations {
   /// **'Kanji of the Day'**
   String get kanjiOfTheDay;
 
+  /// No description provided for @vocabOfTheDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocab of the Day'**
+  String get vocabOfTheDay;
+
+  /// No description provided for @itemOfTheDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Item of the Day'**
+  String get itemOfTheDay;
+
+  /// No description provided for @showOnHomeScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Display on Home Screen'**
+  String get showOnHomeScreen;
+
   /// No description provided for @settingsAppearance.
   ///
   /// In en, this message translates to:

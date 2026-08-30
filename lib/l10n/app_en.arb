@@ -287,6 +287,9 @@
     }
   },
   "kanjiOfTheDay": "Kanji of the Day",
+  "vocabOfTheDay": "Vocab of the Day",
+  "itemOfTheDay": "Item of the Day",
+  "showOnHomeScreen": "Display on Home Screen",
   "settingsAppearance": "Appearance",
   "settingsPreferences": "Preferences",
   "settingsStudyReminders": "Study & Reminders",

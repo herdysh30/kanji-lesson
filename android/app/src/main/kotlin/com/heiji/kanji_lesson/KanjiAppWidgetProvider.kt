@@ -134,6 +134,11 @@ class KanjiAppWidgetProvider : AppWidgetProvider() {
 
     private fun pickKanjiImagePath(widgetData: SharedPreferences?): String? {
         if (widgetData == null) return null
+
+        // Current day image (saved on every app open)
+        val current = widgetData.getString("kanji_image", null)
+        if (current != null && File(current).exists()) return current
+
         val startDateStr = widgetData.getString("kanji_start_date", null)
         val startDate = try {
             SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(startDateStr ?: return null)

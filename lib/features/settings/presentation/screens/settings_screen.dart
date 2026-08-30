@@ -114,8 +114,8 @@ class SettingsScreen extends ConsumerWidget {
               SwitchListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 secondary: Icon(Icons.star_rounded, color: Theme.of(context).colorScheme.primary),
-                title: Text('Item of the Day', style: Theme.of(context).textTheme.titleSmall),
-                subtitle: Text('Display on Home Screen', style: Theme.of(context).textTheme.bodySmall),
+                title: Text(l10n.itemOfTheDay, style: Theme.of(context).textTheme.titleSmall),
+                subtitle: Text(l10n.showOnHomeScreen, style: Theme.of(context).textTheme.bodySmall),
                 value: ref.watch(showKanjiOfTheDayProvider),
                 onChanged: (val) {
                   ref.read(showKanjiOfTheDayProvider.notifier).setShowKanjiOfTheDay(val);
@@ -333,12 +333,13 @@ class SettingsScreen extends ConsumerWidget {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -349,7 +350,7 @@ class SettingsScreen extends ConsumerWidget {
                 ...options.map((option) {
                   final isSelected = option == currentGoal;
                   return ListTile(
-                    title: Text('$option correct answers'),
+                    title: Text(l10n.currentGoal(option)),
                     trailing: isSelected
                         ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary)
                         : null,
@@ -398,7 +399,7 @@ class SettingsScreen extends ConsumerWidget {
                         if (snapshot.hasData) {
                           return Text('${snapshot.data!.learned} ${l10n.learned}, ${snapshot.data!.mastered} ${l10n.mastered}');
                         }
-                        return const Text('Loading...');
+                        return Text(l10n.loading);
                       },
                     ),
                   )),

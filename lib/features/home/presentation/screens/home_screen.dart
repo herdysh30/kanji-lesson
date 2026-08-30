@@ -386,7 +386,7 @@ class _JlptProgressRow extends ConsumerWidget {
 class _KanjiOfTheDayCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final itemAsync = ref.watch(itemOfTheDayProvider);
 
     return itemAsync.when(
@@ -434,7 +434,7 @@ class _KanjiOfTheDayCard extends ConsumerWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            item.isVocab ? "Vocab of the Day" : ((l10n as dynamic).kanjiOfTheDay as String),
+                            item.isVocab ? l10n.vocabOfTheDay : l10n.kanjiOfTheDay,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontSize: 12,

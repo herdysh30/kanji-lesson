@@ -406,7 +406,6 @@ class ItemOfTheDayNotifier extends AsyncNotifier<ItemOfTheDay?> {
 
   Future<ItemOfTheDay?> _pickItem() async {
     final prefs = ref.read(sharedPreferencesProvider);
-    final kanjiRepo = ref.read(kanjiRepositoryProvider);
     final vocabRepo = ref.read(jlptVocabRepositoryProvider);
 
     final today = DateTime.now();
@@ -433,7 +432,7 @@ class ItemOfTheDayNotifier extends AsyncNotifier<ItemOfTheDay?> {
             );
           }
         } else {
-          final kanji = await kanjiRepo.getKanjiDetail(cachedText);
+          final kanji = await ref.read(kanjiDetailProvider(cachedText).future);
           return ItemOfTheDay(
             text: kanji.character,
             meaning: (isId && kanji.meaningsId.isNotEmpty) ? kanji.meaningsId.first : (kanji.meanings.isNotEmpty ? kanji.meanings.first : ''),
@@ -499,39 +498,43 @@ Future<ItemOfTheDay?> _pickRandomItem(
   final pickVocab = random.nextBool();
 
   for (final level in jlptLevels) {
-    if (pickVocab) {
-      final vocabList = await vocabRepo.getVocabByLevel(level);
-      if (vocabList.isNotEmpty) {
-        final candidates = seen == null
-            ? vocabList
-            : vocabList.where((v) => !seen.contains(v.word)).toList();
-        if (candidates.isEmpty) continue;
-        final selected = candidates[random.nextInt(candidates.length)];
-        return ItemOfTheDay(
-          text: selected.word,
-          meaning: selected.primaryMeaning(isId),
-          reading: selected.furigana,
-          isVocab: true,
-          jlptLevel: level,
-        );
+    try {
+      if (pickVocab) {
+        final vocabList = await vocabRepo.getVocabByLevel(level);
+        if (vocabList.isNotEmpty) {
+          final candidates = seen == null
+              ? vocabList
+              : vocabList.where((v) => !seen.contains(v.word)).toList();
+          if (candidates.isEmpty) continue;
+          final selected = candidates[random.nextInt(candidates.length)];
+          return ItemOfTheDay(
+            text: selected.word,
+            meaning: selected.primaryMeaning(isId),
+            reading: selected.furigana,
+            isVocab: true,
+            jlptLevel: level,
+          );
+        }
+      } else {
+        final kanjiList = await kanjiRepo.getKanjiListByJlpt(level);
+        if (kanjiList.isNotEmpty) {
+          final candidates = seen == null
+              ? kanjiList
+              : kanjiList.where((c) => !seen.contains(c)).toList();
+          if (candidates.isEmpty) continue;
+          final selectedChar = candidates[random.nextInt(candidates.length)];
+          final kanji = await ref.read(kanjiDetailProvider(selectedChar).future);
+          return ItemOfTheDay(
+            text: kanji.character,
+            meaning: (isId && kanji.meaningsId.isNotEmpty) ? kanji.meaningsId.first : (kanji.meanings.isNotEmpty ? kanji.meanings.first : ''),
+            reading: kanji.kunyomi.isNotEmpty ? kanji.kunyomi.first : kanji.onyomi.isNotEmpty ? kanji.onyomi.first : '',
+            isVocab: false,
+            jlptLevel: kanji.jlptLevel ?? 1,
+          );
+        }
       }
-    } else {
-      final kanjiList = await kanjiRepo.getKanjiListByJlpt(level);
-      if (kanjiList.isNotEmpty) {
-        final candidates = seen == null
-            ? kanjiList
-            : kanjiList.where((c) => !seen.contains(c)).toList();
-        if (candidates.isEmpty) continue;
-        final selectedChar = candidates[random.nextInt(candidates.length)];
-        final kanji = await kanjiRepo.getKanjiDetail(selectedChar);
-        return ItemOfTheDay(
-          text: kanji.character,
-          meaning: (isId && kanji.meaningsId.isNotEmpty) ? kanji.meaningsId.first : (kanji.meanings.isNotEmpty ? kanji.meanings.first : ''),
-          reading: kanji.kunyomi.isNotEmpty ? kanji.kunyomi.first : kanji.onyomi.isNotEmpty ? kanji.onyomi.first : '',
-          isVocab: false,
-          jlptLevel: kanji.jlptLevel ?? 1,
-        );
-      }
+    } catch (_) {
+      // Skip level on failure (e.g. network error in translation)
     }
   }
   return null;
