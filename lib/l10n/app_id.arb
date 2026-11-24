@@ -263,6 +263,8 @@
   "syncEnabled": "Sinkronisasi progres aktif",
   "syncNow": "Sinkronkan Sekarang",
   "syncing": "Menyinkronkan...",
+  "syncComplete": "Sinkronisasi selesai",
+  "syncFailed": "Sinkronisasi gagal",
   "signOut": "Keluar",
   "createAccount": "Buat Akun",
   "signIn": "Masuk",
@@ -276,5 +278,31 @@
   "passwordTooShort": "Kata sandi minimal 6 karakter",
   "signInWithGoogle": "Masuk dengan Google",
   "alreadyHaveAccount": "Sudah punya akun? Masuk",
-  "noAccountYet": "Belum punya akun? Buat Sekarang"
+  "noAccountYet": "Belum punya akun? Buat Sekarang",
+  "reviewComplete": "Ulasan Selesai!",
+  "reviewSummary": "Anda telah menyelesaikan {count} ulasan.",
+  "@reviewSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "srsChanges": "Perubahan SRS",
+  "oldStatus": "Lama",
+  "newStatus": "Baru",
+  "setStatus": "Ubah Status",
+  "statusUnseen": "Belum Dilihat (hapus dari ulasan)",
+  "statusLearning": "Belajar",
+  "statusReviewing": "Diulas",
+  "statusMastered": "Dikuasai",
+  "deleteProgress": "Hapus Progres",
+  "deleteProgressConfirm": "Hapus progres untuk {item}? Tindakan ini tidak bisa dibatalkan.",
+  "@deleteProgressConfirm": {
+    "placeholders": {
+      "item": { "type": "String" }
+    }
+  },
+  "cancel": "Batal",
+  "delete": "Hapus",
+  "reviewQueue": "Antrian Review",
+  "reviewQueueEmpty": "Tidak ada review terjadwal."
 }

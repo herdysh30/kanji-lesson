@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/features/home/presentation/screens/home_screen.dart';
 import 'package:kanji_lesson/features/kanji/presentation/screens/jlpt_selection_screen.dart';
@@ -208,14 +209,14 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).scaffoldBackgroundColor;
-    // Use primary color for the bar to make the curve clearly visible
-    final navColor = Theme.of(context).colorScheme.primary;
-    // Use scaffold background color for the floating button to match the gap
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final bgColor = theme.scaffoldBackgroundColor;
+    final navColor = theme.colorScheme.primary;
     final activeBtnColor = bgColor;
-    // Unselected icons are white with some transparency
     final unselectedIconColor = Colors.white.withValues(alpha: 0.7);
     final currentIndex = navigationShell.currentIndex;
+    final shadowColor = isDark ? AppColors.shadowDark.withValues(alpha: 0.3) : AppColors.shadowLight.withValues(alpha: 0.15);
 
     return PopScope(
       canPop: currentIndex == 0,
@@ -227,23 +228,34 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
       child: Scaffold(
         extendBody: true,
         body: navigationShell,
-        bottomNavigationBar: CurvedNavigationBar(
-          index: currentIndex,
-          color: navColor,
-          backgroundColor: Colors.transparent, // Background of the gap
-          buttonBackgroundColor: activeBtnColor, // Color of the active floating circle
-          animationCurve: Curves.easeOutBack,
-          animationDuration: const Duration(milliseconds: 350),
-          onTap: _go,
-          items: <Widget>[
-            Icon(Icons.home_rounded, color: currentIndex == 0 ? navColor : unselectedIconColor, size: 28),
-            Icon(Icons.menu_book_rounded, color: currentIndex == 1 ? navColor : unselectedIconColor, size: 28),
-            // Review: Card stack icon
-            Icon(Icons.style_rounded, color: currentIndex == 2 ? navColor : unselectedIconColor, size: 28),
-            // Quiz: Original quiz icon
-            Icon(Icons.quiz_rounded, color: currentIndex == 3 ? navColor : unselectedIconColor, size: 28),
-            Icon(Icons.settings_rounded, color: currentIndex == 4 ? navColor : unselectedIconColor, size: 28),
-          ],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: shadowColor,
+                blurRadius: 16,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: CurvedNavigationBar(
+            index: currentIndex,
+            color: navColor,
+            backgroundColor: Colors.transparent, // Background of the gap
+            buttonBackgroundColor: activeBtnColor, // Color of the active floating circle
+            animationCurve: Curves.easeOutBack,
+            animationDuration: const Duration(milliseconds: 350),
+            onTap: _go,
+            items: <Widget>[
+              Icon(Icons.home_rounded, color: currentIndex == 0 ? navColor : unselectedIconColor, size: 28),
+              Icon(Icons.menu_book_rounded, color: currentIndex == 1 ? navColor : unselectedIconColor, size: 28),
+              // Review: Card stack icon
+              Icon(Icons.style_rounded, color: currentIndex == 2 ? navColor : unselectedIconColor, size: 28),
+              // Quiz: Original quiz icon
+              Icon(Icons.quiz_rounded, color: currentIndex == 3 ? navColor : unselectedIconColor, size: 28),
+              Icon(Icons.settings_rounded, color: currentIndex == 4 ? navColor : unselectedIconColor, size: 28),
+            ],
+          ),
         ),
       ),
     );

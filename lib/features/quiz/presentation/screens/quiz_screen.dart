@@ -574,8 +574,15 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                                                     ),
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
-                                                      BorderRadius.circular(12),
+                                                      BorderRadius.circular(16),
                                                 ),
+                                                elevation: !_isAnswerRevealed
+                                                    ? 1
+                                                    : 0,
+                                                shadowColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .shadow
+                                                    .withValues(alpha: 0.08),
                                               ),
                                               onPressed: () =>
                                                   _handleOptionSelected(

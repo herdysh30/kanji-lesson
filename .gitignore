@@ -48,3 +48,5 @@ app.*.map.json
 # Firebase secrets — do not commit
 android/app/google-services.json
 lib/firebase_options.dart
+
+.agents/

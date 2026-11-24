@@ -1442,6 +1442,18 @@ abstract class AppLocalizations {
   /// **'Syncing...'**
   String get syncing;
 
+  /// No description provided for @syncComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync complete'**
+  String get syncComplete;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncFailed;
+
   /// No description provided for @signOut.
   ///
   /// In en, this message translates to:
@@ -1525,6 +1537,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Don\'t have an account? Create One'**
   String get noAccountYet;
+
+  /// No description provided for @reviewComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Complete!'**
+  String get reviewComplete;
+
+  /// No description provided for @reviewSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'You have completed {count} reviews.'**
+  String reviewSummary(int count);
+
+  /// No description provided for @srsChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'SRS Changes'**
+  String get srsChanges;
+
+  /// No description provided for @oldStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Old'**
+  String get oldStatus;
+
+  /// No description provided for @newStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newStatus;
+
+  /// No description provided for @setStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Status'**
+  String get setStatus;
+
+  /// No description provided for @statusUnseen.
+  ///
+  /// In en, this message translates to:
+  /// **'Unseen (remove from review)'**
+  String get statusUnseen;
+
+  /// No description provided for @statusLearning.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning'**
+  String get statusLearning;
+
+  /// No description provided for @statusReviewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewing'**
+  String get statusReviewing;
+
+  /// No description provided for @statusMastered.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastered'**
+  String get statusMastered;
+
+  /// No description provided for @deleteProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Progress'**
+  String get deleteProgress;
+
+  /// No description provided for @deleteProgressConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete progress for {item}? This cannot be undone.'**
+  String deleteProgressConfirm(String item);
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @reviewQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Queue'**
+  String get reviewQueue;
+
+  /// No description provided for @reviewQueueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews scheduled.'**
+  String get reviewQueueEmpty;
 }
 
 class _AppLocalizationsDelegate

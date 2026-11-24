@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/core/utils/date_utils.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
+import 'package:kanji_lesson/features/progress/presentation/widgets/progress_item_menu.dart';
 import 'package:kanji_lesson/features/progress/presentation/widgets/streak_calendar_widget.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
@@ -212,11 +214,11 @@ class _StatCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: iconColor, size: 22),
             ),
@@ -394,7 +396,10 @@ class _WeeklyActivityChart extends ConsumerWidget {
                                       .colorScheme
                                       .surfaceContainerHighest
                                   : null,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: day.reviewed > 0
+                                  ? AppTheme.clayShadowLight(blur: 8, offset: 3)
+                                  : null,
                             ),
                           ),
                         ),
@@ -738,7 +743,14 @@ class _ProgressListBottomSheetState extends ConsumerState<_ProgressListBottomShe
           child: Column(
             children: [
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2))),
+              Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
               const SizedBox(height: 16),
               Text(
                 widget.title,
@@ -762,15 +774,21 @@ class _ProgressListBottomSheetState extends ConsumerState<_ProgressListBottomShe
                         return ListTile(
                           title: Text(item.kanjiCharacter, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           subtitle: Text(l10n.statusLabel(item.status)),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('${(accuracy * 100).round()}%', style: TextStyle(
-                                color: accuracy >= 0.8 ? AppColors.correct : (accuracy >= 0.5 ? AppColors.warning : Theme.of(context).colorScheme.error),
-                                fontWeight: FontWeight.bold,
-                              )),
-                              Text('${item.correctCount}/$total', style: Theme.of(context).textTheme.bodySmall),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('${(accuracy * 100).round()}%', style: TextStyle(
+                                    color: accuracy >= 0.8 ? AppColors.correct : (accuracy >= 0.5 ? AppColors.warning : Theme.of(context).colorScheme.error),
+                                    fontWeight: FontWeight.bold,
+                                  )),
+                                  Text('${item.correctCount}/$total', style: Theme.of(context).textTheme.bodySmall),
+                                ],
+                              ),
+                              ProgressItemMenu(character: item.kanjiCharacter),
                             ],
                           ),
                         );

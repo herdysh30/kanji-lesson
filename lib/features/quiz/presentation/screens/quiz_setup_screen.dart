@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/core/services/mlkit_digital_ink_service.dart';
@@ -277,6 +278,7 @@ class QuizSetupScreen extends ConsumerWidget {
                                 color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
                                 width: 0.5,
                               ),
+                              boxShadow: AppTheme.clayShadowLight(blur: 10, offset: 3),
                             ),
                             child: Row(
                               children: [
@@ -323,10 +325,10 @@ class QuizSetupScreen extends ConsumerWidget {
             const SizedBox(height: 32),
             
             SizedBox(
-              height: 56,
+              height: 60,
               child: FilledButton.icon(
                 style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 onPressed: () async {
                   if (setup.selectedQuizTypes.contains(QuizType.writing)) {
@@ -393,13 +395,7 @@ class QuizSetupScreen extends ConsumerWidget {
           color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
           width: 0.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppTheme.clayShadowLight(blur: 12, offset: 4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

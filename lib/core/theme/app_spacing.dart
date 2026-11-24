@@ -1,4 +1,4 @@
-/// Design spacing tokens (8pt grid)
+/// Design spacing tokens (8pt grid) + claymorphism radii
 class AppSpacing {
   AppSpacing._();
 
@@ -16,8 +16,9 @@ class AppSpacing {
   // Section gap
   static const double sectionGap = 32;
 
-  // Border radius
-  static const double radiusSm = 8;
-  static const double radiusMd = 12;
-  static const double radiusLg = 16;
+  // Claymorphism border radius
+  static const double radiusSm = 12;
+  static const double radiusMd = 20;
+  static const double radiusLg = 24;
+  static const double radiusXl = 28;
 }

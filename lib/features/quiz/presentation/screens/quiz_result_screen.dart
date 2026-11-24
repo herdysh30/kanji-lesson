@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/quiz/domain/services/quiz_generator.dart';
 import 'package:kanji_lesson/features/quiz/presentation/providers/quiz_providers.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
@@ -38,11 +39,23 @@ class QuizResultScreen extends ConsumerWidget {
           children: [
             const SizedBox(height: 24),
             // Header Image/Icon
-            Icon(
-              isPerfect ? Icons.workspace_premium_rounded : 
-              (isGood ? Icons.star_rounded : Icons.school_rounded),
-              size: 100,
-              color: isPerfect ? Colors.amber.shade700 : (isGood ? AppColors.primary : Theme.of(context).colorScheme.onSurfaceVariant),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isPerfect
+                    ? Colors.amber.withValues(alpha: 0.15)
+                    : isGood
+                        ? AppColors.primary.withValues(alpha: 0.12)
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
+                boxShadow: AppTheme.clayShadowLight(blur: 24, offset: 8),
+              ),
+              child: Icon(
+                isPerfect ? Icons.workspace_premium_rounded : 
+                (isGood ? Icons.star_rounded : Icons.school_rounded),
+                size: 64,
+                color: isPerfect ? Colors.amber.shade700 : (isGood ? AppColors.primary : Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -58,8 +71,13 @@ class QuizResultScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
+                  width: 0.5,
+                ),
+                boxShadow: AppTheme.clayShadowLight(blur: 16, offset: 5),
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,

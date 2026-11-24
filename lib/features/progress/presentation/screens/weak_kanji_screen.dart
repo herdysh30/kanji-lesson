@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_spacing.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/core/utils/date_utils.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
+import 'package:kanji_lesson/features/progress/presentation/widgets/progress_item_menu.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class WeakKanjiScreen extends ConsumerWidget {
@@ -143,7 +145,8 @@ class _WeakItemTile extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  boxShadow: AppTheme.clayShadowLight(blur: 8, offset: 2),
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -156,7 +159,6 @@ class _WeakItemTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-
               // Info
               Expanded(
                 child: Column(
@@ -232,7 +234,6 @@ class _WeakItemTile extends StatelessWidget {
                   ],
                 ),
               ),
-
               // Accuracy Badge
               Container(
                 padding:
@@ -250,6 +251,8 @@ class _WeakItemTile extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 4),
+              ProgressItemMenu(character: item.character),
             ],
           ),
         ),

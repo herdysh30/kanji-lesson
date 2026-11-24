@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_spacing.dart';
 import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 
@@ -70,7 +71,8 @@ class BookmarkScreen extends ConsumerWidget {
                         height: 48,
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                          boxShadow: AppTheme.clayShadowLight(blur: 8, offset: 2),
                         ),
                         alignment: Alignment.center,
                         child: Text(

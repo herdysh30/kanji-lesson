@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_spacing.dart';
 
-/// Japanese minimalist theme — Noto Sans JP throughout
+/// Japanese minimalist × claymorphism theme — Noto Sans JP throughout
 class AppTheme {
   AppTheme._();
 
@@ -28,6 +29,37 @@ class AppTheme {
       _dark = _buildDark();
       _accentKey = key;
     }
+  }
+
+  // ─── Claymorphism helpers ────────────────────────────────────
+  static List<BoxShadow> clayShadowLight({double blur = 12, double offset = 4}) {
+    return [
+      BoxShadow(
+        color: AppColors.shadowLight,
+        blurRadius: blur,
+        offset: Offset(offset, offset),
+      ),
+      BoxShadow(
+        color: AppColors.highlightLight,
+        blurRadius: blur - 2,
+        offset: Offset(-offset / 2, -offset / 2),
+      ),
+    ];
+  }
+
+  static List<BoxShadow> clayShadowDark({double blur = 12, double offset = 4}) {
+    return [
+      BoxShadow(
+        color: AppColors.shadowDark,
+        blurRadius: blur,
+        offset: Offset(offset, offset),
+      ),
+      BoxShadow(
+        color: AppColors.highlightDark,
+        blurRadius: blur - 2,
+        offset: Offset(-offset / 2, -offset / 2),
+      ),
+    ];
   }
 
   // ─── Light Theme ──────────────────────────────────────────────
@@ -60,7 +92,7 @@ class AppTheme {
         backgroundColor: AppColors.backgroundLight,
         foregroundColor: AppColors.textPrimaryLight,
         elevation: 0,
-        scrolledUnderElevation: 0,
+        scrolledUnderElevation: 0.5,
         centerTitle: true,
         titleTextStyle: _notoSans(
           fontSize: 17,
@@ -70,12 +102,14 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.cardLight,
-        elevation: 0,
+        elevation: 2,
+        shadowColor: AppColors.shadowLight,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.dividerLight, width: 0.5),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          side: BorderSide(color: AppColors.dividerLight, width: 0.5),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        surfaceTintColor: Colors.transparent,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardLight,
@@ -98,9 +132,10 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           textStyle: _notoSans(
             fontSize: 15,
@@ -111,9 +146,9 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           side: const BorderSide(color: AppColors.dividerLight),
           textStyle: _notoSans(
@@ -127,9 +162,10 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           textStyle: _notoSans(
             fontSize: 15,
@@ -150,18 +186,18 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceLight,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         hintStyle: _notoSans(
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -173,7 +209,7 @@ class AppTheme {
         selectedColor: AppColors.primary,
         checkmarkColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           side: const BorderSide(color: AppColors.dividerLight, width: 0.5),
         ),
         labelStyle: _notoSans(
@@ -186,7 +222,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         side: BorderSide.none,
       ),
       dividerTheme: const DividerThemeData(
@@ -197,7 +233,7 @@ class AppTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: AppColors.primary,
         linearTrackColor: AppColors.dividerLight,
-        linearMinHeight: 6,
+        linearMinHeight: 8,
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.textPrimaryLight,
@@ -206,7 +242,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusSm)),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -242,7 +278,7 @@ class AppTheme {
         backgroundColor: AppColors.backgroundDark,
         foregroundColor: AppColors.textPrimaryDark,
         elevation: 0,
-        scrolledUnderElevation: 0,
+        scrolledUnderElevation: 0.5,
         centerTitle: true,
         titleTextStyle: _notoSans(
           fontSize: 17,
@@ -252,15 +288,17 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.cardDark,
-        elevation: 0,
+        elevation: 2,
+        shadowColor: AppColors.shadowDark,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           side: BorderSide(
             color: Colors.white.withValues(alpha: 0.06),
             width: 0.5,
           ),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        surfaceTintColor: Colors.transparent,
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.cardDark,
@@ -283,9 +321,10 @@ class AppTheme {
           backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           textStyle: _notoSans(
             fontSize: 15,
@@ -296,9 +335,9 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primaryLight,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           side: BorderSide(
             color: Colors.white.withValues(alpha: 0.12),
@@ -314,9 +353,10 @@ class AppTheme {
           backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shadowColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           textStyle: _notoSans(
             fontSize: 15,
@@ -337,18 +377,18 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceDark,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           borderSide: BorderSide(color: AppColors.primaryLight, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         hintStyle: _notoSans(
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -360,7 +400,7 @@ class AppTheme {
         selectedColor: AppColors.primaryLight,
         checkmarkColor: Colors.white,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           side: BorderSide(
             color: Colors.white.withValues(alpha: 0.06),
             width: 0.5,
@@ -376,7 +416,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: Colors.white,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         side: BorderSide.none,
       ),
       dividerTheme: DividerThemeData(
@@ -387,7 +427,7 @@ class AppTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: AppColors.primaryLight,
         linearTrackColor: Colors.white.withValues(alpha: 0.06),
-        linearMinHeight: 6,
+        linearMinHeight: 8,
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surfaceDark,
@@ -396,7 +436,7 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryDark,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusSm)),
         behavior: SnackBarBehavior.floating,
       ),
     );

@@ -211,7 +211,15 @@ class _KanjiDetailBody extends StatelessWidget {
               const SizedBox(width: 40), // Balance out the trailing button
               Text(
                 kanji.character,
-                style: AppTheme.kanjiLarge(context),
+                style: AppTheme.kanjiLarge(context).copyWith(
+                  shadows: [
+                    Shadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 32,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 width: 40,

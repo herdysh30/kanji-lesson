@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/features/auth/presentation/providers/auth_providers.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -75,6 +76,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 8),
+                // ─── Hero Visual ───────────────────────────
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                          Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: AppTheme.clayShadowLight(blur: 24, offset: 8),
+                    ),
+                    child: Text(
+                      '漢',
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 32),
                 Text(
                   _isSignUp ? l10n.createAccount : l10n.welcomeBack,
@@ -84,6 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   _isSignUp ? l10n.createAccountSubtitle : l10n.signInSubtitle,
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
                 if (error != null)

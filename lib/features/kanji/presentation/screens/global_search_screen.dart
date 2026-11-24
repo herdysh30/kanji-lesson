@@ -164,6 +164,7 @@ class _GlobalSearchScreenState extends ConsumerState<GlobalSearchScreen> {
                         decoration: BoxDecoration(
                           color: (item.isVocab ? AppColors.primary : AppColors.warning).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
+                          boxShadow: AppTheme.clayShadowLight(blur: 8, offset: 2),
                         ),
                         alignment: Alignment.center,
                         child: Text(

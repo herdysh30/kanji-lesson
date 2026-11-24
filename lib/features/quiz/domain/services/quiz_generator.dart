@@ -124,6 +124,56 @@ class QuizGenerator {
 
   final Random _random;
 
+  /// When a word has alternative forms separated by "/" (e.g. "いい / よい"),
+  /// writing tasks should only target one form — the first one.
+  String _firstForm(String word) {
+    final idx = word.indexOf('/');
+    return idx == -1 ? word : word.substring(0, idx).trim();
+  }
+
+  /// Prefer distractors whose reading shares a suffix (2 kana, then 1 kana)
+  /// with [correctReading]; then same-length; then any remaining. Max 3.
+  List<JlptVocab> _pickReadingDistractors(
+    List<JlptVocab> pool,
+    String correctReading,
+  ) {
+    final selected = <JlptVocab>[];
+    final used = <String>{correctReading};
+
+    final correctChars = correctReading.characters.toList();
+    for (var len = 2; len >= 1; len--) {
+      if (correctChars.length < len) continue;
+      final suffix = correctChars.sublist(correctChars.length - len).join();
+      for (final v in pool) {
+        if (selected.length >= 3) break;
+        final r = v.furigana;
+        if (!used.contains(r) && r.endsWith(suffix)) {
+          selected.add(v);
+          used.add(r);
+        }
+      }
+    }
+
+    for (final v in pool) {
+      if (selected.length >= 3) break;
+      final r = v.furigana;
+      if (!used.contains(r) && r.characters.length == correctChars.length) {
+        selected.add(v);
+        used.add(r);
+      }
+    }
+
+    for (final v in pool) {
+      if (selected.length >= 3) break;
+      final r = v.furigana;
+      if (!used.contains(r)) {
+        selected.add(v);
+        used.add(r);
+      }
+    }
+    return selected;
+  }
+
   /// Lazily generate a single question from a QuizTask
   Future<QuizQuestion?> generateSingleQuestion(
     QuizTask task, {
@@ -165,20 +215,15 @@ class QuizGenerator {
             .where((v) => (type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana) != correctAnswer)
             .toList()..shuffle(_random);
             
-        final Set<String> usedTexts = {correctAnswer};
-        final distractorOptions = <QuizOption>[];
-        for (var v in distractorVocab) {
-          if (distractorOptions.length >= 3) break;
-          final text = type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana;
-          if (!usedTexts.contains(text)) {
-            usedTexts.add(text);
-            distractorOptions.add(QuizOption(
-              text: text,
-              kanjiCharacter: v.word,
-              explanation: type == QuizType.meaning ? v.furigana : v.primaryMeaning(isId),
-            ));
-          }
-        }
+        final usedTexts = <String>{correctAnswer};
+        final selected = type == QuizType.reading
+            ? _pickReadingDistractors(distractorVocab, correctAnswer)
+            : distractorVocab.take(3).toList();
+        final distractorOptions = selected.map((v) => QuizOption(
+          text: type == QuizType.meaning ? v.primaryMeaning(isId) : v.furigana,
+          kanjiCharacter: v.word,
+          explanation: type == QuizType.meaning ? v.furigana : v.primaryMeaning(isId),
+        )).toList();
         
         final dummyOptions = type == QuizType.meaning 
             ? (isId ? ['air', 'api', 'tanah', 'angin', 'langit', 'bulan', 'matahari', 'bintang'] : ['water', 'fire', 'earth', 'wind', 'sky', 'moon', 'sun', 'star'])
@@ -430,33 +475,9 @@ class QuizGenerator {
             .where((v) => v.furigana != correctAnswer)
             .toList()..shuffle(_random);
             
-        final List<JlptVocab> selected = [];
-        final Set<String> usedTexts = {correctAnswer};
-        
-        final sameEnding = distractorVocab.where((v) => v.furigana.isNotEmpty && vocab.furigana.isNotEmpty && v.furigana.characters.last == vocab.furigana.characters.last).toList();
-        for (var v in sameEnding) {
-          if (selected.length >= 2) break;
-          if (!usedTexts.contains(v.furigana)) {
-            selected.add(v);
-            usedTexts.add(v.furigana);
-          }
-        }
-        
-        for (var v in distractorVocab) {
-          if (selected.length >= 3) break;
-          if (!selected.contains(v) && v.furigana.length == vocab.furigana.length && !usedTexts.contains(v.furigana)) {
-            selected.add(v);
-            usedTexts.add(v.furigana);
-          }
-        }
-        for (var v in distractorVocab) {
-          if (selected.length >= 3) break;
-          if (!selected.contains(v) && !usedTexts.contains(v.furigana)) {
-            selected.add(v);
-            usedTexts.add(v.furigana);
-          }
-        }
-            
+        final selected = _pickReadingDistractors(distractorVocab, correctAnswer);
+        final usedTexts = <String>{correctAnswer, ...selected.map((v) => v.furigana)};
+
         final distractorOptions = selected.map((v) => QuizOption(
           text: v.furigana,
           kanjiCharacter: v.word,
@@ -495,12 +516,13 @@ class QuizGenerator {
         );
       } else if (vocab != null) {
         if (vocab.meaning.isEmpty) return null;
+        final target = _firstForm(vocab.word);
         return QuizQuestion(
           type: QuizType.writing,
           prompt: vocab.primaryMeaning(isId),
-          correctAnswer: vocab.word,
+          correctAnswer: target,
           options: [],
-          kanjiCharacter: vocab.word,
+          kanjiCharacter: target,
         );
       }
     }
@@ -776,12 +798,13 @@ class QuizGenerator {
 
       for (final vocab in selected) {
         if (vocab.meaning.isEmpty) continue;
+        final target = _firstForm(vocab.word);
         questions.add(QuizQuestion(
           type: QuizType.writing,
           prompt: vocab.primaryMeaning(isId),
-          correctAnswer: vocab.word,
+          correctAnswer: target,
           options: [],
-          kanjiCharacter: vocab.word,
+          kanjiCharacter: target,
         ));
       }
     }

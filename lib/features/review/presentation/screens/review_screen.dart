@@ -6,8 +6,10 @@ import 'package:kanji_lesson/features/review/presentation/providers/review_provi
 import 'package:kanji_lesson/core/widgets/error_widget.dart';
 import 'package:kanji_lesson/core/widgets/loading_widget.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
+import 'package:kanji_lesson/features/review/presentation/widgets/review_queue_sheet.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
 class ReviewScreen extends ConsumerWidget {
@@ -19,7 +21,16 @@ class ReviewScreen extends ConsumerWidget {
     final dueReviewsAsync = ref.watch(dueReviewsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.reviewDashboard)),
+      appBar: AppBar(
+        title: Text(l10n.reviewDashboard),
+        actions: [
+          IconButton(
+            tooltip: l10n.reviewQueue,
+            icon: const Icon(Icons.playlist_play_rounded),
+            onPressed: () => showReviewQueueSheet(context),
+          ),
+        ],
+      ),
       body: dueReviewsAsync.when(
         data: (dueReviews) {
           final count = dueReviews.length;
@@ -31,12 +42,13 @@ class ReviewScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(36),
                     decoration: BoxDecoration(
                       color: count > 0 
                           ? AppColors.primary.withValues(alpha: 0.1)
                           : Theme.of(context).colorScheme.surfaceContainer,
                       shape: BoxShape.circle,
+                      boxShadow: AppTheme.clayShadowLight(blur: 24, offset: 8),
                     ),
                     child: Icon(
                       Icons.replay_rounded,
@@ -64,7 +76,7 @@ class ReviewScreen extends ConsumerWidget {
                   const SizedBox(height: 48),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 60,
                     child: FilledButton.icon(
                       onPressed: count > 0 
                           ? () => context.push('/review/session') 
@@ -79,7 +91,7 @@ class ReviewScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 60,
                     child: OutlinedButton.icon(
                       onPressed: () => _showLearnNewKanjiDialog(context, ref),
                       icon: const Icon(Icons.add_rounded),

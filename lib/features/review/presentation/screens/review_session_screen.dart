@@ -14,10 +14,14 @@ import 'package:kanji_lesson/features/settings/presentation/providers/settings_p
 import 'package:kanji_lesson/features/sync/data/sync_providers.dart';
 
 // We need a StateNotifier to manage the current review session
-final reviewSessionProvider = StateNotifierProvider.autoDispose<ReviewSessionNotifier, ReviewSessionState>((ref) {
-  final dueReviews = ref.read(dueReviewsProvider).valueOrNull ?? [];
-  return ReviewSessionNotifier(dueReviews, ref);
-});
+final reviewSessionProvider =
+    StateNotifierProvider.autoDispose<
+      ReviewSessionNotifier,
+      ReviewSessionState
+    >((ref) {
+      final dueReviews = ref.read(dueReviewsProvider).valueOrNull ?? [];
+      return ReviewSessionNotifier(dueReviews, ref);
+    });
 
 class ReviewSessionState {
   const ReviewSessionState({
@@ -38,7 +42,7 @@ class ReviewSessionState {
   final bool isFinished;
   final List<SrsChange> srsChanges;
 
-  UserKanjiProgressEntry? get currentItem => 
+  UserKanjiProgressEntry? get currentItem =>
       currentIndex < queue.length ? queue[currentIndex] : null;
 
   ReviewSessionState copyWith({
@@ -77,16 +81,18 @@ class SrsChange {
 }
 
 class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
-  ReviewSessionNotifier(List<UserKanjiProgressEntry> initialQueue, this.ref) 
-      : super(ReviewSessionState(
+  ReviewSessionNotifier(List<UserKanjiProgressEntry> initialQueue, this.ref)
+    : super(
+        ReviewSessionState(
           queue: List.from(initialQueue)..shuffle(),
           currentIndex: 0,
           isFlipped: false,
           correctCount: 0,
           wrongCount: 0,
           isFinished: initialQueue.isEmpty,
-        ));
-        
+        ),
+      );
+
   final Ref ref;
   final SrsEngine _engine = const SrsEngine();
 
@@ -119,11 +125,11 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
       nextReviewAt: result.nextReviewAt,
       isCorrect: rating != SrsRating.again,
     );
-    
+
     // Also record daily progress
     final isCorrect = rating != SrsRating.again;
     await db.incrementDailyReviewed(isCorrect);
-    
+
     if (isCorrect) {
       ref.read(dailyProgressProvider.notifier).addProgress(1);
     }
@@ -147,10 +153,11 @@ class ReviewSessionNotifier extends StateNotifier<ReviewSessionState> {
         ),
       ],
     );
-    
+
     if (!isCorrect) {
       // Requeue incorrect items at the end
-      final newQueue = List<UserKanjiProgressEntry>.from(state.queue)..add(item);
+      final newQueue = List<UserKanjiProgressEntry>.from(state.queue)
+        ..add(item);
       state = state.copyWith(
         queue: newQueue,
         wrongCount: state.wrongCount + 1,
@@ -179,34 +186,35 @@ class ReviewSessionScreen extends ConsumerStatefulWidget {
   const ReviewSessionScreen({super.key});
 
   @override
-  ConsumerState<ReviewSessionScreen> createState() => _ReviewSessionScreenState();
+  ConsumerState<ReviewSessionScreen> createState() =>
+      _ReviewSessionScreenState();
 }
 
 class _ReviewSessionScreenState extends ConsumerState<ReviewSessionScreen> {
   bool _navigated = false;
 
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
+    // WidgetRef.listen must be called from within build (flutter_riverpod 2.x).
     ref.listen(reviewSessionProvider, (previous, next) {
       if (next.isFinished && !_navigated) {
         _navigated = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            context.pushReplacement('/review/result', extra: {
-              'correct': next.correctCount,
-              'wrong': next.wrongCount,
-              'total': next.queue.length,
-              'srsChanges': next.srsChanges,
-            });
+            context.pushReplacement(
+              '/review/result',
+              extra: {
+                'correct': next.correctCount,
+                'wrong': next.wrongCount,
+                'total': next.queue.length,
+                'srsChanges': next.srsChanges,
+              },
+            );
           }
         });
       }
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     final state = ref.watch(reviewSessionProvider);
     final currentItem = state.currentItem;
     if (currentItem == null) {
@@ -220,95 +228,126 @@ class _ReviewSessionScreenState extends ConsumerState<ReviewSessionScreen> {
         _confirmExit(context);
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Text('${state.currentIndex + 1} / ${state.queue.length}'),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => _confirmExit(context),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(
-            value: state.queue.isNotEmpty ? state.currentIndex / state.queue.length : 0,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        appBar: AppBar(
+          title: Text('${state.currentIndex + 1} / ${state.queue.length}'),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.close_rounded),
+            onPressed: () => _confirmExit(context),
+          ),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: LinearProgressIndicator(
+              value: state.queue.isNotEmpty
+                  ? state.currentIndex / state.queue.length
+                  : 0,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final queue = state.queue;
-                    final currentIndex = state.currentIndex;
-                    const maxBackgrounds = 3;
-                    
-                    // Render items from currentIndex - 1 (the one just answered, sliding off)
-                    // up to currentIndex + maxBackgrounds (the deepest visible background card).
-                    final startIndex = math.max(0, currentIndex - 1);
-                    final endIndex = math.min(currentIndex + maxBackgrounds + 1, queue.length);
-                    
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Render from back to front (highest index to lowest)
-                        for (int i = endIndex - 1; i >= startIndex; i--)
-                          Builder(
-                            key: ValueKey('review_card_$i'),
-                            builder: (context) {
-                              final item = queue[i];
-                              final d = i - currentIndex; // -1 (discarded), 0 (front), 1+ (background)
-                              
-                              final isDiscarded = d < 0;
-                              final isFront = d == 0;
-                              
-                              // Clamped distance for background visual sizing
-                              final clampedD = math.max(0, d);
-                              
-                              final screenWidth = MediaQuery.of(context).size.width;
-                              
-                              // Discarded cards fly out to the left
-                              final double top = isDiscarded ? 0 : clampedD * 14.0;
-                              final double bottom = isDiscarded ? maxBackgrounds * 14.0 : (maxBackgrounds - clampedD) * 14.0;
-                              final double left = isDiscarded ? -screenWidth : clampedD * 16.0;
-                              final double right = isDiscarded ? screenWidth : clampedD * 16.0;
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final queue = state.queue;
+                      final currentIndex = state.currentIndex;
+                      const maxBackgrounds = 3;
 
-                              return AnimatedPositioned(
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeOutCubic,
-                                top: top,
-                                bottom: bottom,
-                                left: left,
-                                right: right,
-                                child: AnimatedOpacity(
-                                  duration: const Duration(milliseconds: 300),
-                                  opacity: isDiscarded ? 0.0 : 1.0 - (clampedD * 0.2),
-                                  child: IgnorePointer(
-                                    ignoring: !isFront, // Only the front card can be tapped
-                                    child: _Flashcard(
-                                      entry: item,
-                                      isFlipped: isFront ? state.isFlipped : false,
-                                      onFlip: isFront ? () => ref.read(reviewSessionProvider.notifier).flipCard() : () {},
+                      // Render items from currentIndex - 1 (the one just answered, sliding off)
+                      // up to currentIndex + maxBackgrounds (the deepest visible background card).
+                      final startIndex = math.max(0, currentIndex - 1);
+                      final endIndex = math.min(
+                        currentIndex + maxBackgrounds + 1,
+                        queue.length,
+                      );
+
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Render from back to front (highest index to lowest)
+                          for (int i = endIndex - 1; i >= startIndex; i--)
+                            Builder(
+                              key: ValueKey('review_card_$i'),
+                              builder: (context) {
+                                final item = queue[i];
+                                final d =
+                                    i -
+                                    currentIndex; // -1 (discarded), 0 (front), 1+ (background)
+
+                                final isDiscarded = d < 0;
+                                final isFront = d == 0;
+
+                                // Clamped distance for background visual sizing
+                                final clampedD = math.max(0, d);
+
+                                final screenWidth = MediaQuery.of(
+                                  context,
+                                ).size.width;
+
+                                // Discarded cards fly out to the left
+                                final double top = isDiscarded
+                                    ? 0
+                                    : clampedD * 14.0;
+                                final double bottom = isDiscarded
+                                    ? maxBackgrounds * 14.0
+                                    : (maxBackgrounds - clampedD) * 14.0;
+                                final double left = isDiscarded
+                                    ? -screenWidth
+                                    : clampedD * 16.0;
+                                final double right = isDiscarded
+                                    ? screenWidth
+                                    : clampedD * 16.0;
+
+                                return AnimatedPositioned(
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeOutCubic,
+                                  top: top,
+                                  bottom: bottom,
+                                  left: left,
+                                  right: right,
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 300),
+                                    opacity: isDiscarded
+                                        ? 0.0
+                                        : 1.0 - (clampedD * 0.2),
+                                    child: IgnorePointer(
+                                      ignoring:
+                                          !isFront, // Only the front card can be tapped
+                                      child: _Flashcard(
+                                        entry: item,
+                                        isFlipped: isFront
+                                            ? state.isFlipped
+                                            : false,
+                                        onFlip: isFront
+                                            ? () => ref
+                                                  .read(
+                                                    reviewSessionProvider
+                                                        .notifier,
+                                                  )
+                                                  .flipCard()
+                                            : () {},
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            }
-                          ),
-                      ],
-                    );
-                  }
+                                );
+                              },
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              _ActionArea(isFlipped: state.isFlipped),
-            ],
+                const SizedBox(height: 24),
+                _ActionArea(isFlipped: state.isFlipped),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -319,7 +358,9 @@ class _ReviewSessionScreenState extends ConsumerState<ReviewSessionScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('End Review?'),
-        content: const Text('Your progress so far has been saved, but the session is not complete.'),
+        content: const Text(
+          'Your progress so far has been saved, but the session is not complete.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -353,8 +394,12 @@ class _Flashcard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Fetch full details for the back of the card
-    final detailAsync = ref.watch(reviewItemDetailProvider(entry.kanjiCharacter));
-    final sentencesAsync = ref.watch(kanjiSentencesProvider(entry.kanjiCharacter));
+    final detailAsync = ref.watch(
+      reviewItemDetailProvider(entry.kanjiCharacter),
+    );
+    final sentencesAsync = ref.watch(
+      kanjiSentencesProvider(entry.kanjiCharacter),
+    );
     final isId = ref.watch(localeProvider).languageCode == 'id';
 
     return GestureDetector(
@@ -366,7 +411,9 @@ class _Flashcard extends ConsumerWidget {
           color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
           boxShadow: [
             BoxShadow(
@@ -376,163 +423,209 @@ class _Flashcard extends ConsumerWidget {
             ),
           ],
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    entry.kanjiCharacter,
-                    style: AppTheme.kanjiLarge(context).copyWith(fontSize: 100),
-                  ),
-                ),
-              ),
-              
-              if (isFlipped) ...[
-                const SizedBox(height: 32),
-                const Divider(indent: 32, endIndent: 32),
-                const SizedBox(height: 24),
-                
-                // Show sentence translation on the back
-                sentencesAsync.when(
-                  data: (sentences) {
-                    if (sentences.isEmpty) return const SizedBox.shrink();
-                    final sentence = sentences.first;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 24.0, left: 24, right: 24),
-                      child: Column(
-                        children: [
-                          _buildSentenceText(context, sentence.japanese, entry.kanjiCharacter),
-                          const SizedBox(height: 8),
-                          Text(
-                            sentence.english,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontStyle: FontStyle.italic,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
+        child: isFlipped
+            ? SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _KanjiDisplay(
+                        character: entry.kanjiCharacter,
+                        fontSize: 100,
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+                    const Divider(indent: 32, endIndent: 32),
+                    const SizedBox(height: 24),
+
+                    // Show sentence translation on the back
+                    sentencesAsync.when(
+                      data: (sentences) {
+                        if (sentences.isEmpty) return const SizedBox.shrink();
+                        final sentence = sentences.first;
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 24.0,
+                            left: 24,
+                            right: 24,
                           ),
-                          if (isId && sentence.indonesian.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              sentence.indonesian,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontStyle: FontStyle.italic,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          child: Column(
+                            children: [
+                              _buildSentenceText(
+                                context,
+                                sentence.japanese,
+                                entry.kanjiCharacter,
                               ),
+                              const SizedBox(height: 8),
+                              Text(
+                                sentence.english,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      fontStyle: FontStyle.italic,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              if (isId && sentence.indonesian.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  sentence.indonesian,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        fontStyle: FontStyle.italic,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                    detailAsync.when(
+                      data: (detail) => Column(
+                        children: [
+                          if (detail.isVocab) ...[
+                            if (detail.furigana != null &&
+                                detail.furigana!.isNotEmpty) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    detail.furigana!,
+                                    style: AppTheme.japaneseReading(
+                                      context,
+                                      fontSize: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  KanjiAudioButton(
+                                    character: entry.kanjiCharacter,
+                                    autoPlay: true,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            if (detail.romaji != null &&
+                                detail.romaji!.isNotEmpty) ...[
+                              Text(
+                                detail.romaji!,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            Text(
+                              detail.primaryMeaning ?? '',
+                              style: Theme.of(context).textTheme.headlineSmall,
                               textAlign: TextAlign.center,
                             ),
-                          ]
+                          ] else ...[
+                            if (detail.primaryReading != null &&
+                                detail.primaryReading!.isNotEmpty) ...[
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    detail.primaryReading!,
+                                    style: AppTheme.japaneseReading(
+                                      context,
+                                      fontSize: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  KanjiAudioButton(
+                                    character: entry.kanjiCharacter,
+                                    autoPlay: true,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            Text(
+                              detail.primaryMeaning ?? '',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            if (detail.onyomi != null &&
+                                detail.onyomi!.isNotEmpty)
+                              Text(
+                                "ON: ${detail.onyomi!.join(', ')}",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            if (detail.kunyomi != null &&
+                                detail.kunyomi!.isNotEmpty)
+                              Text(
+                                "KUN: ${detail.kunyomi!.join(', ')}",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            const SizedBox(height: 16),
+                            _VocabularySlider(
+                              character: entry.kanjiCharacter,
+                              isId: isId,
+                            ),
+                          ],
                         ],
                       ),
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-                detailAsync.when(
-                  data: (detail) => Column(
-                    children: [
-                      if (detail.isVocab) ...[
-                        if (detail.furigana != null && detail.furigana!.isNotEmpty) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                detail.furigana!,
-                                style: AppTheme.japaneseReading(context, fontSize: 28),
-                              ),
-                              const SizedBox(width: 8),
-                              KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        if (detail.romaji != null && detail.romaji!.isNotEmpty) ...[
-                          Text(
-                            detail.romaji!,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        Text(
-                          detail.primaryMeaning ?? '',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
+                      loading: () => const CircularProgressIndicator(),
+                      error: (err, stack) => Text(
+                        'Failed to load details',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
                         ),
-                      ] else ...[
-                        if (detail.primaryReading != null && detail.primaryReading!.isNotEmpty) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                detail.primaryReading!,
-                                style: AppTheme.japaneseReading(context, fontSize: 28),
-                              ),
-                              const SizedBox(width: 8),
-                              KanjiAudioButton(character: entry.kanjiCharacter, autoPlay: true),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        Text(
-                          detail.primaryMeaning ?? '',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        if (detail.onyomi != null && detail.onyomi!.isNotEmpty)
-                          Text(
-                            "ON: ${detail.onyomi!.join(', ')}",
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        if (detail.kunyomi != null && detail.kunyomi!.isNotEmpty)
-                          Text(
-                            "KUN: ${detail.kunyomi!.join(', ')}",
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        const SizedBox(height: 16),
-                        _VocabularySlider(character: entry.kanjiCharacter, isId: isId),
-                      ],
-                    ],
-                  ),
-                  loading: () => const CircularProgressIndicator(),
-                  error: (err, stack) => Text(
-                    'Failed to load details',
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ] else ...[
-                const SizedBox(height: 64),
-                Text(
-                  'Tap to reveal',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              )
+            : Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: _KanjiDisplay(character: entry.kanjiCharacter),
+                      ),
+                    ),
+                    Text(
+                      'Tap to reveal',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ],
-          ),
-        ),
+              ),
       ),
     );
   }
 
-  Widget _buildSentenceText(BuildContext context, String fullText, String target) {
+  Widget _buildSentenceText(
+    BuildContext context,
+    String fullText,
+    String target,
+  ) {
     final parts = fullText.split(target);
-    if (parts.length == 1) return Text(fullText, textAlign: TextAlign.center); 
-    
-    final baseStyle = AppTheme.kanjiLarge(context).copyWith(
-      fontSize: 24,
-      fontWeight: FontWeight.normal,
-      height: 1.2,
-    );
+    if (parts.length == 1) return Text(fullText, textAlign: TextAlign.center);
+
+    final baseStyle = AppTheme.kanjiLarge(
+      context,
+    ).copyWith(fontSize: 24, fontWeight: FontWeight.normal, height: 1.2);
     final boldStyle = baseStyle.copyWith(
       fontWeight: FontWeight.w900,
       color: Theme.of(context).colorScheme.primary,
@@ -545,10 +638,30 @@ class _Flashcard extends ConsumerWidget {
         children: [
           for (int i = 0; i < parts.length; i++) ...[
             TextSpan(text: parts[i]),
-            if (i < parts.length - 1)
-              TextSpan(text: target, style: boldStyle),
-          ]
+            if (i < parts.length - 1) TextSpan(text: target, style: boldStyle),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class _KanjiDisplay extends StatelessWidget {
+  const _KanjiDisplay({required this.character, this.fontSize = 160});
+
+  final String character;
+  final double fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    // scaleDown: single kanji renders large, long vocab/furigana shrinks to fit.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.center,
+      child: Text(
+        character,
+        maxLines: 1,
+        style: AppTheme.kanjiLarge(context).copyWith(fontSize: fontSize),
       ),
     );
   }
@@ -556,7 +669,7 @@ class _Flashcard extends ConsumerWidget {
 
 class _VocabularySlider extends ConsumerStatefulWidget {
   const _VocabularySlider({required this.character, required this.isId});
-  
+
   final String character;
   final bool isId;
 
@@ -587,9 +700,9 @@ class _VocabularySliderState extends ConsumerState<_VocabularySlider> {
     return vocabAsync.when(
       data: (vocabs) {
         if (vocabs.isEmpty) return const SizedBox.shrink();
-        
+
         final displayVocabs = vocabs.take(15).toList();
-        
+
         return SizedBox(
           height: 120, // Increased height to fit Column
           child: Stack(
@@ -605,33 +718,45 @@ class _VocabularySliderState extends ConsumerState<_VocabularySlider> {
                   final v = displayVocabs[index];
                   return Card(
                     elevation: 0,
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.4),
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 12.0,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             v.word,
-                            style: AppTheme.japaneseReading(context, fontSize: 22),
+                            style: AppTheme.japaneseReading(
+                              context,
+                              fontSize: 22,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             v.reading,
-                            style: AppTheme.japaneseReading(context, fontSize: 13).copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                            style:
+                                AppTheme.japaneseReading(
+                                  context,
+                                  fontSize: 13,
+                                ).copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
                           ),
                           const Spacer(),
                           Text(
                             v.primaryMeaning(widget.isId),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(fontWeight: FontWeight.w500),
                             maxLines: 2,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
@@ -649,7 +774,9 @@ class _VocabularySliderState extends ConsumerState<_VocabularySlider> {
                     left: -8,
                     child: IconButton(
                       icon: const Icon(Icons.chevron_left_rounded, size: 32),
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                       onPressed: () {
                         _pageController.previousPage(
                           duration: const Duration(milliseconds: 300),
@@ -663,7 +790,9 @@ class _VocabularySliderState extends ConsumerState<_VocabularySlider> {
                     right: -8,
                     child: IconButton(
                       icon: const Icon(Icons.chevron_right_rounded, size: 32),
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                       onPressed: () {
                         _pageController.nextPage(
                           duration: const Duration(milliseconds: 300),
@@ -678,7 +807,7 @@ class _VocabularySliderState extends ConsumerState<_VocabularySlider> {
         );
       },
       loading: () => const SizedBox(
-        height: 100, 
+        height: 100,
         child: Center(child: CircularProgressIndicator()),
       ),
       error: (_, __) => const SizedBox.shrink(),
@@ -699,7 +828,9 @@ class _ActionArea extends ConsumerWidget {
         child: FilledButton(
           onPressed: () => ref.read(reviewSessionProvider.notifier).flipCard(),
           style: FilledButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
           child: const Text('Show Answer', style: TextStyle(fontSize: 18)),
         ),
@@ -712,28 +843,36 @@ class _ActionArea extends ConsumerWidget {
           label: 'Again',
           subLabel: '< 10m',
           color: AppColors.incorrect,
-          onPressed: () => ref.read(reviewSessionProvider.notifier).submitRating(SrsRating.again),
+          onPressed: () => ref
+              .read(reviewSessionProvider.notifier)
+              .submitRating(SrsRating.again),
         ),
         const SizedBox(width: 8),
         _RatingButton(
           label: 'Hard',
           subLabel: '1d',
           color: AppColors.warning,
-          onPressed: () => ref.read(reviewSessionProvider.notifier).submitRating(SrsRating.hard),
+          onPressed: () => ref
+              .read(reviewSessionProvider.notifier)
+              .submitRating(SrsRating.hard),
         ),
         const SizedBox(width: 8),
         _RatingButton(
           label: 'Good',
           subLabel: '3d',
           color: AppColors.primary,
-          onPressed: () => ref.read(reviewSessionProvider.notifier).submitRating(SrsRating.good),
+          onPressed: () => ref
+              .read(reviewSessionProvider.notifier)
+              .submitRating(SrsRating.good),
         ),
         const SizedBox(width: 8),
         _RatingButton(
           label: 'Easy',
           subLabel: '7d',
           color: AppColors.correct,
-          onPressed: () => ref.read(reviewSessionProvider.notifier).submitRating(SrsRating.easy),
+          onPressed: () => ref
+              .read(reviewSessionProvider.notifier)
+              .submitRating(SrsRating.easy),
         ),
       ],
     );

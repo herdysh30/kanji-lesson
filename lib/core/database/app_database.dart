@@ -257,6 +257,21 @@ class AppDatabase extends _$AppDatabase {
         ));
   }
 
+  Future<void> deleteProgress(String character) {
+    return (delete(userKanjiProgressEntries)
+          ..where((t) => t.kanjiCharacter.equals(character)))
+        .go();
+  }
+
+  Future<void> setProgressStatus(String character, String newStatus) {
+    return (update(userKanjiProgressEntries)
+          ..where((t) => t.kanjiCharacter.equals(character)))
+        .write(UserKanjiProgressEntriesCompanion(
+          status: Value(newStatus),
+          updatedAt: Value(DateTime.now()),
+        ));
+  }
+
   Future<List<UserKanjiProgressEntry>> getBookmarkedItems() {
     return (select(userKanjiProgressEntries)
           ..where((t) => t.isBookmarked.equals(true))
@@ -266,6 +281,13 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<UserKanjiProgressEntry>> getAllProgress() {
     return select(userKanjiProgressEntries).get();
+  }
+
+  /// Rows changed since [since] — delta sync upload.
+  Future<List<UserKanjiProgressEntry>> getProgressSince(DateTime since) {
+    return (select(userKanjiProgressEntries)
+          ..where((t) => t.updatedAt.isBiggerThanValue(since)))
+        .get();
   }
 
   /// Aggregated progress counts/sums — avoids loading every row.
@@ -498,6 +520,13 @@ class AppDatabase extends _$AppDatabase {
     return (select(jlptVocabEntries)..orderBy([(t) => OrderingTerm.asc(t.level)])).get();
   }
 
+  Future<List<JlptVocabEntry>> getJlptVocabByWords(List<String> words) {
+    if (words.isEmpty) return Future.value([]);
+    return (select(jlptVocabEntries)
+          ..where((t) => t.word.isIn(words)))
+        .get();
+  }
+
   // ─── Daily Progress Operations ──────────────────────────────
 
   Future<void> upsertDailyProgress(DailyProgressEntriesCompanion entry) {
@@ -534,6 +563,13 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  /// Daily rows on/after [dateKey] (yyyy-MM-dd) — delta sync upload.
+  Future<List<DailyProgressEntry>> getDailyProgressSince(String dateKey) {
+    return (select(dailyProgressEntries)
+          ..where((t) => t.date.isBiggerOrEqualValue(dateKey)))
+        .get();
+  }
+
   // ─── Quiz Result Operations ─────────────────────────────────
 
   Future<void> insertQuizResult(QuizResultEntriesCompanion entry) {
@@ -545,6 +581,25 @@ class AppDatabase extends _$AppDatabase {
           ..orderBy([(t) => OrderingTerm.desc(t.date)])
           ..limit(count))
         .get();
+  }
+
+  /// Quiz rows with id > [minId] — delta sync upload (capped at 300 newest).
+  Future<List<QuizResultEntry>> getQuizResultsSince(int minId) {
+    return (select(quizResultEntries)
+          ..where((t) => t.id.isBiggerThanValue(minId))
+          ..orderBy([(t) => OrderingTerm.desc(t.id)])
+          ..limit(300))
+        .get();
+  }
+
+  /// Content keys of all quiz rows — sync dedup for append-only downloads.
+  Future<List<String>> getAllQuizResultKeys() async {
+    final rows = await select(quizResultEntries).get();
+    return [
+      for (final r in rows)
+        '${r.date.toIso8601String()}|${r.jlptLevel}|${r.quizType}|'
+            '${r.totalQuestions}|${r.correctAnswers}',
+    ];
   }
 
   // ─── Similar Kanji Operations ───────────────────────────────

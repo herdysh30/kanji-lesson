@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kanji_lesson/core/constants/app_constants.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
 import 'package:kanji_lesson/core/theme/app_spacing.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
@@ -20,19 +21,20 @@ class HomeScreen extends ConsumerWidget {
     // Keep widget updater alive
     ref.read(widgetUpdaterProvider);
     return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(dailyStatsProvider);
-            ref.invalidate(dueReviewCountProvider);
-            ref.invalidate(overallProgressProvider);
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenH,
-              vertical: AppSpacing.screenV,
-            ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(dailyStatsProvider);
+          ref.invalidate(dueReviewCountProvider);
+          ref.invalidate(overallProgressProvider);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.screenH,
+            AppSpacing.screenV + MediaQuery.of(context).padding.top,
+            AppSpacing.screenH,
+            AppSpacing.screenV,
+          ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -69,11 +71,16 @@ class HomeScreen extends ConsumerWidget {
                             color: hasStreak 
                                 ? Colors.orange.withValues(alpha: 0.15)
                                 : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                            boxShadow: AppTheme.clayShadowLight(blur: 8, offset: 2),
                           ),
                           child: Row(
                             children: [
-                              Text(hasStreak ? '🔥' : '📓', style: const TextStyle(fontSize: 20)),
+                              Icon(
+                                hasStreak ? Icons.local_fire_department_rounded : Icons.auto_stories_rounded,
+                                size: 20,
+                                color: hasStreak ? Colors.orange : Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 '$streak',
@@ -150,7 +157,6 @@ class HomeScreen extends ConsumerWidget {
                 // ─── Continue Learning ─────────────────────────
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
                   child: ElevatedButton(
                     onPressed: () => StatefulNavigationShell.of(context).goBranch(1),
                     child: Text(l10n.continueLearning),
@@ -177,7 +183,6 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
@@ -199,8 +204,16 @@ class _DailyGoalCard extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.85),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+        boxShadow: AppTheme.clayShadowLight(blur: 16, offset: 5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,11 +237,11 @@ class _DailyGoalCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 6,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              minHeight: 10,
+              backgroundColor: Colors.white.withValues(alpha: 0.25),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
@@ -277,6 +290,7 @@ class _QuickActionCard extends StatelessWidget {
             color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
             width: 0.5,
           ),
+          boxShadow: AppTheme.clayShadowLight(blur: 10, offset: 3),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,10 +368,10 @@ class _JlptProgressRow extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(5),
                       child: LinearProgressIndicator(
                         value: data.progress,
-                        minHeight: 5,
+                        minHeight: 8,
                         color: AppColors.primary,
                         backgroundColor: AppColors.primaryLight.withValues(alpha: 0.08),
                       ),

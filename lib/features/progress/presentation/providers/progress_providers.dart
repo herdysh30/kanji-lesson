@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/utils/date_utils.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
+import 'package:kanji_lesson/features/review/presentation/providers/review_providers.dart';
 
 // ─── Progress Providers ─────────────────────────────────────────
 
@@ -158,6 +159,9 @@ final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {
   final kanjiMap = {
     for (final k in await db.getKanjiByCharacters(characters)) k.character: k,
   };
+  final jlptVocabMap = <String, JlptVocabEntry>{
+    for (final v in await db.getJlptVocabByWords(characters)) v.word: v,
+  };
   final vocabGroups = <String, List<VocabularyEntry>>{};
   for (final v in await db.getVocabularyForCharacters(characters)) {
     vocabGroups.putIfAbsent(v.kanjiCharacter, () => []).add(v);
@@ -171,18 +175,29 @@ final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {
     String? meaning;
     String? reading;
     bool isVocab = false;
+    String? vocabWord;
 
-    final kanjiData = kanjiMap[progress.kanjiCharacter];
-    if (kanjiData != null) {
-      final meanings = kanjiData.meanings;
-      meaning = meanings.isNotEmpty ? meanings.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim() : null;
-      reading = kanjiData.onyomi.isNotEmpty ? kanjiData.onyomi.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim() : null;
-    } else {
+    final jlptEntry = jlptVocabMap[progress.kanjiCharacter];
+    if (jlptEntry != null) {
+      // Single-kanji JLPT vocab wins: it is a real vocab entry.
       isVocab = true;
-      final vocabEntries = vocabGroups[progress.kanjiCharacter];
-      if (vocabEntries != null && vocabEntries.isNotEmpty) {
-        meaning = vocabEntries.first.meanings.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim();
-        reading = vocabEntries.first.reading;
+      vocabWord = jlptEntry.word;
+      meaning = jlptEntry.meaning.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim();
+      reading = jlptEntry.furigana;
+    } else {
+      final kanjiData = kanjiMap[progress.kanjiCharacter];
+      if (kanjiData != null) {
+        final meanings = kanjiData.meanings;
+        meaning = meanings.isNotEmpty ? meanings.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim() : null;
+        reading = kanjiData.onyomi.isNotEmpty ? kanjiData.onyomi.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim() : null;
+      } else {
+        isVocab = true;
+        final vocabEntries = vocabGroups[progress.kanjiCharacter];
+        if (vocabEntries != null && vocabEntries.isNotEmpty) {
+          meaning = vocabEntries.first.meanings.replaceAll(RegExp(r'[\[\]"]'), '').split(',').first.trim();
+          reading = vocabEntries.first.reading;
+          vocabWord = vocabEntries.first.word;
+        }
       }
     }
 
@@ -196,8 +211,8 @@ final weakKanjiListProvider = FutureProvider<List<WeakItem>>((ref) async {
       isVocab: isVocab,
       status: progress.status,
       lastReviewedAt: progress.lastReviewedAt,
-      jlptLevel: kanjiData?.jlptLevel,
-      vocabWord: isVocab ? vocabGroups[progress.kanjiCharacter]?.first.word : null,
+      jlptLevel: jlptEntry?.level ?? kanjiMap[progress.kanjiCharacter]?.jlptLevel,
+      vocabWord: vocabWord,
     ));
   }
 
@@ -235,4 +250,26 @@ class WeakItem {
   
   int get totalAttempts => correctCount + wrongCount;
   String get accuracyPercent => '${(accuracy * 100).round()}%';
+}
+
+// ─── Progress Item Actions ───────────────────────────────────────
+
+/// Deletes an item's progress row, or updates its status.
+/// Pass [newStatus] = null to delete the row permanently.
+Future<void> manageProgressItem(
+  WidgetRef ref,
+  String character, {
+  String? newStatus,
+}) async {
+  final db = ref.read(databaseProvider);
+  if (newStatus != null) {
+    await db.setProgressStatus(character, newStatus);
+  } else {
+    await db.deleteProgress(character);
+  }
+  ref.invalidate(weakKanjiListProvider);
+  ref.invalidate(weakKanjiCountProvider);
+  ref.invalidate(overallProgressProvider);
+  ref.invalidate(progressListProvider);
+  ref.invalidate(dueReviewsProvider);
 }

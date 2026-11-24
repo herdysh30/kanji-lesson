@@ -736,6 +736,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get syncing => 'Menyinkronkan...';
 
   @override
+  String get syncComplete => 'Sinkronisasi selesai';
+
+  @override
+  String get syncFailed => 'Sinkronisasi gagal';
+
+  @override
   String get signOut => 'Keluar';
 
   @override
@@ -778,4 +784,53 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get noAccountYet => 'Belum punya akun? Buat Sekarang';
+
+  @override
+  String get reviewComplete => 'Ulasan Selesai!';
+
+  @override
+  String reviewSummary(int count) {
+    return 'Anda telah menyelesaikan $count ulasan.';
+  }
+
+  @override
+  String get srsChanges => 'Perubahan SRS';
+
+  @override
+  String get oldStatus => 'Lama';
+
+  @override
+  String get newStatus => 'Baru';
+
+  @override
+  String get setStatus => 'Ubah Status';
+
+  @override
+  String get statusUnseen => 'Belum Dilihat (hapus dari ulasan)';
+
+  @override
+  String get statusLearning => 'Belajar';
+
+  @override
+  String get statusReviewing => 'Diulas';
+
+  @override
+  String get statusMastered => 'Dikuasai';
+
+  @override
+  String get deleteProgress => 'Hapus Progres';
+
+  @override
+  String deleteProgressConfirm(String item) {
+    return 'Hapus progres untuk $item? Tindakan ini tidak bisa dibatalkan.';
+  }
+
+  @override
+  String get delete => 'Hapus';
+
+  @override
+  String get reviewQueue => 'Antrian Review';
+
+  @override
+  String get reviewQueueEmpty => 'Tidak ada review terjadwal.';
 }

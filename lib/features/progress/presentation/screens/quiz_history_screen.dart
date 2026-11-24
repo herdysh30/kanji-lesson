@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kanji_lesson/core/database/app_database.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_providers.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 
@@ -113,6 +114,7 @@ class _QuizHistoryScreenState extends ConsumerState<QuizHistoryScreen> {
                               decoration: BoxDecoration(
                                 color: (isPerfect ? AppColors.correct : (isGood ? AppColors.primary : AppColors.warning)).withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
+                                boxShadow: AppTheme.clayShadowLight(blur: 8, offset: 2),
                               ),
                               child: Icon(
                                 isPerfect ? Icons.workspace_premium_rounded : (isGood ? Icons.star_rounded : Icons.star_half_rounded),

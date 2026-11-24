@@ -336,6 +336,8 @@
   "syncEnabled": "Progress sync enabled",
   "syncNow": "Sync Now",
   "syncing": "Syncing...",
+  "syncComplete": "Sync complete",
+  "syncFailed": "Sync failed",
   "signOut": "Sign Out",
   "createAccount": "Create Account",
   "signIn": "Sign In",
@@ -349,5 +351,31 @@
   "passwordTooShort": "Password must be at least 6 characters",
   "signInWithGoogle": "Sign in with Google",
   "alreadyHaveAccount": "Already have an account? Sign In",
-  "noAccountYet": "Don't have an account? Create One"
+  "noAccountYet": "Don't have an account? Create One",
+  "reviewComplete": "Review Complete!",
+  "reviewSummary": "You have completed {count} reviews.",
+  "@reviewSummary": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "srsChanges": "SRS Changes",
+  "oldStatus": "Old",
+  "newStatus": "New",
+  "setStatus": "Set Status",
+  "statusUnseen": "Unseen (remove from review)",
+  "statusLearning": "Learning",
+  "statusReviewing": "Reviewing",
+  "statusMastered": "Mastered",
+  "deleteProgress": "Delete Progress",
+  "deleteProgressConfirm": "Delete progress for {item}? This cannot be undone.",
+  "@deleteProgressConfirm": {
+    "placeholders": {
+      "item": { "type": "String" }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "reviewQueue": "Review Queue",
+  "reviewQueueEmpty": "No reviews scheduled."
 }

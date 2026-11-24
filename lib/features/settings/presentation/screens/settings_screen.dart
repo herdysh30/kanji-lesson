@@ -5,6 +5,7 @@ import 'package:kanji_lesson/features/kanji/presentation/providers/kanji_provide
 import 'package:kanji_lesson/features/progress/presentation/providers/progress_providers.dart';
 import 'package:kanji_lesson/features/settings/presentation/providers/settings_providers.dart';
 import 'package:kanji_lesson/core/theme/app_colors.dart';
+import 'package:kanji_lesson/core/theme/app_theme.dart';
 import 'package:kanji_lesson/l10n/app_localizations.dart';
 import 'package:kanji_lesson/core/services/notification_service.dart';
 import 'package:kanji_lesson/features/auth/presentation/providers/auth_providers.dart';
@@ -313,7 +314,32 @@ class SettingsScreen extends ConsumerWidget {
               trailing: isSyncing
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.chevron_right_rounded),
-              onTap: isSyncing ? null : () => ref.read(manualSyncProvider)(),
+              onTap: isSyncing
+                  ? null
+                  : () async {
+                      try {
+                        await ref.read(manualSyncProvider)();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.syncComplete),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${l10n.syncFailed}: $e'),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          );
+                        }
+                      }
+                    },
             ),
             const Divider(height: 1, indent: 56),
             _buildListTile(
@@ -353,6 +379,7 @@ class SettingsScreen extends ConsumerWidget {
           color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
           width: 0.5,
         ),
+        boxShadow: AppTheme.clayShadowLight(blur: 12, offset: 4),
       ),
       child: Column(
         children: children,

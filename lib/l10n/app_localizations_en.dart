@@ -734,6 +734,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncing => 'Syncing...';
 
   @override
+  String get syncComplete => 'Sync complete';
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
   String get signOut => 'Sign Out';
 
   @override
@@ -775,4 +781,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAccountYet => 'Don\'t have an account? Create One';
+
+  @override
+  String get reviewComplete => 'Review Complete!';
+
+  @override
+  String reviewSummary(int count) {
+    return 'You have completed $count reviews.';
+  }
+
+  @override
+  String get srsChanges => 'SRS Changes';
+
+  @override
+  String get oldStatus => 'Old';
+
+  @override
+  String get newStatus => 'New';
+
+  @override
+  String get setStatus => 'Set Status';
+
+  @override
+  String get statusUnseen => 'Unseen (remove from review)';
+
+  @override
+  String get statusLearning => 'Learning';
+
+  @override
+  String get statusReviewing => 'Reviewing';
+
+  @override
+  String get statusMastered => 'Mastered';
+
+  @override
+  String get deleteProgress => 'Delete Progress';
+
+  @override
+  String deleteProgressConfirm(String item) {
+    return 'Delete progress for $item? This cannot be undone.';
+  }
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get reviewQueue => 'Review Queue';
+
+  @override
+  String get reviewQueueEmpty => 'No reviews scheduled.';
 }

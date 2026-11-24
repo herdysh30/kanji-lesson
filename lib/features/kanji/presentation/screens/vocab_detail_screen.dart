@@ -76,7 +76,15 @@ class VocabDetailScreen extends ConsumerWidget {
                         const SizedBox(width: 40),
                         Text(
                           vocab.word,
-                          style: AppTheme.kanjiLarge(context),
+                          style: AppTheme.kanjiLarge(context).copyWith(
+                            shadows: [
+                              Shadow(
+                                color: AppColors.primary.withValues(alpha: 0.25),
+                                blurRadius: 32,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(
@@ -132,13 +140,7 @@ class VocabDetailScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: AppTheme.clayShadowLight(blur: 10, offset: 3),
                 ),
                 child: Text(
                   vocab.primaryMeaning(isId),
@@ -189,6 +191,7 @@ class VocabDetailScreen extends ConsumerWidget {
                                 color: Theme.of(context).dividerTheme.color ?? const Color(0xFFE5E5E5),
                                 width: 0.5,
                               ),
+                              boxShadow: AppTheme.clayShadowLight(blur: 10, offset: 3),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

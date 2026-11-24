@@ -40,6 +40,13 @@ class AppColors {
   static const Color dividerLight = Color(0xFFE5E5E5);
   static const Color dividerDark = Color(0xFF2A2A2A);
 
+  // ─── Claymorphism shadows ────────────────────────────────
+  static const Color shadowLight = Color(0x1A3A3A3A); // soft outer
+  static const Color shadowLightStrong = Color(0x33222222);
+  static const Color highlightLight = Color(0xFFFFFFFF);
+  static const Color shadowDark = Color(0x99000000);
+  static const Color highlightDark = Color(0x14FFFFFF);
+
   // ─── JLPT Levels ─────────────────────────────────────────
   static const Color jlptN5 = Color(0xFFC62828);
   static const Color jlptN4 = Color(0xFFD32F2F);
